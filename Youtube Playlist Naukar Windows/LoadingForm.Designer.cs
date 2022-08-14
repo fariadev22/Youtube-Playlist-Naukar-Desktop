@@ -29,26 +29,29 @@ namespace Youtube_Playlist_Naukar_Windows
         /// </summary>
         private void InitializeComponent()
         {
-            this.label1 = new System.Windows.Forms.Label();
+            this.loadingLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
-            // label1
+            // loadingLabel
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(338, 198);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(100, 25);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Loading......";
+            this.loadingLabel.AutoSize = true;
+            this.loadingLabel.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.loadingLabel.Location = new System.Drawing.Point(235, 102);
+            this.loadingLabel.Name = "loadingLabel";
+            this.loadingLabel.Size = new System.Drawing.Size(207, 28);
+            this.loadingLabel.TabIndex = 0;
+            this.loadingLabel.Text = "Loading......please wait.";
             // 
             // LoadingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.label1);
+            this.ClientSize = new System.Drawing.Size(683, 227);
+            this.Controls.Add(this.loadingLabel);
+            this.MaximumSize = new System.Drawing.Size(705, 283);
+            this.MinimumSize = new System.Drawing.Size(705, 283);
             this.Name = "LoadingForm";
-            this.Text = "LoadingForm";
+            this.Text = "Loading...";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -56,6 +59,6 @@ namespace Youtube_Playlist_Naukar_Windows
 
         #endregion
 
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label loadingLabel;
     }
 }

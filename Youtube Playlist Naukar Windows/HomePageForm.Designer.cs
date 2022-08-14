@@ -31,229 +31,240 @@ namespace Youtube_Playlist_Naukar_Windows
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.Email = new System.Windows.Forms.Label();
+            this.email = new System.Windows.Forms.Label();
             this.playlistsTabs = new System.Windows.Forms.TabControl();
-            this.Owner = new System.Windows.Forms.TabPage();
+            this.ownerTab = new System.Windows.Forms.TabPage();
             this.ownerPlaylistsList = new System.Windows.Forms.ListView();
-            this.Contributor = new System.Windows.Forms.TabPage();
+            this.contributorTab = new System.Windows.Forms.TabPage();
             this.contributorPlaylistsList = new System.Windows.Forms.ListView();
-            this.RemoveContributorPlaylistButton = new System.Windows.Forms.Button();
-            this.AddContributorPlaylistButton = new System.Windows.Forms.Button();
-            this.imageList3 = new System.Windows.Forms.ImageList(this.components);
-            this.RefreshPlaylistsButton = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
+            this.removeContributorPlaylistButton = new System.Windows.Forms.Button();
+            this.addContributorPlaylistButton = new System.Windows.Forms.Button();
+            this.refreshPlaylistsButton = new System.Windows.Forms.Button();
+            this.choosePlaylistLabel = new System.Windows.Forms.Label();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.PlaylistsMenu = new System.Windows.Forms.ToolStripMenuItem();
-            this.RefreshPlaylistsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.AccountMenu = new System.Windows.Forms.ToolStripMenuItem();
-            this.SwitchAccount = new System.Windows.Forms.ToolStripMenuItem();
-            this.ForgetCurrentAccount = new System.Windows.Forms.ToolStripMenuItem();
-            this.AddNewAccountMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.AboutMenu = new System.Windows.Forms.ToolStripMenuItem();
-            this.ViewDetails = new System.Windows.Forms.ToolStripMenuItem();
-            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
-            this.imageList2 = new System.Windows.Forms.ImageList(this.components);
+            this.playlistsMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.refreshPlaylistsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.accountMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.switchAccountMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.forgetCurrentAccountMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addNewAccountMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewDetailsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.LoggerLabel = new System.Windows.Forms.Label();
+            this.playlistThumbnailPreview = new System.Windows.Forms.PictureBox();
+            this.createdOnLabel = new System.Windows.Forms.Label();
+            this.ownerLabel = new System.Windows.Forms.Label();
+            this.titleLabel = new System.Windows.Forms.Label();
+            this.urlLabel = new System.Windows.Forms.Label();
+            this.totalVideosLabel = new System.Windows.Forms.Label();
+            this.titleValue = new System.Windows.Forms.Label();
+            this.privacyStatusValue = new System.Windows.Forms.Label();
+            this.totalVideosValue = new System.Windows.Forms.Label();
+            this.playlistDetailsPanel = new System.Windows.Forms.Panel();
+            this.descriptionValue = new System.Windows.Forms.Label();
+            this.createdOnValue = new System.Windows.Forms.Label();
+            this.privacyStatusLabel = new System.Windows.Forms.Label();
+            this.descriptionLabel = new System.Windows.Forms.Label();
+            this.ownerValue = new System.Windows.Forms.LinkLabel();
+            this.urlValue = new System.Windows.Forms.LinkLabel();
             this.playlistsTabs.SuspendLayout();
-            this.Owner.SuspendLayout();
-            this.Contributor.SuspendLayout();
+            this.ownerTab.SuspendLayout();
+            this.contributorTab.SuspendLayout();
             this.menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.playlistThumbnailPreview)).BeginInit();
+            this.playlistDetailsPanel.SuspendLayout();
             this.SuspendLayout();
             // 
-            // Email
+            // email
             // 
-            this.Email.AutoSize = true;
-            this.Email.Location = new System.Drawing.Point(571, 43);
-            this.Email.Name = "Email";
-            this.Email.Size = new System.Drawing.Size(119, 25);
-            this.Email.TabIndex = 0;
-            this.Email.Text = "EmailAddress";
+            this.email.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.email.AutoSize = true;
+            this.email.Location = new System.Drawing.Point(1022, 46);
+            this.email.Name = "email";
+            this.email.Size = new System.Drawing.Size(19, 25);
+            this.email.TabIndex = 0;
+            this.email.Text = "-";
             // 
             // playlistsTabs
             // 
-            this.playlistsTabs.Controls.Add(this.Owner);
-            this.playlistsTabs.Controls.Add(this.Contributor);
-            this.playlistsTabs.Location = new System.Drawing.Point(12, 115);
+            this.playlistsTabs.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.playlistsTabs.Controls.Add(this.ownerTab);
+            this.playlistsTabs.Controls.Add(this.contributorTab);
+            this.playlistsTabs.Location = new System.Drawing.Point(16, 115);
             this.playlistsTabs.Name = "playlistsTabs";
             this.playlistsTabs.SelectedIndex = 0;
-            this.playlistsTabs.Size = new System.Drawing.Size(666, 323);
+            this.playlistsTabs.Size = new System.Drawing.Size(1040, 459);
             this.playlistsTabs.TabIndex = 1;
             // 
-            // Owner
+            // ownerTab
             // 
-            this.Owner.Controls.Add(this.ownerPlaylistsList);
-            this.Owner.Location = new System.Drawing.Point(4, 34);
-            this.Owner.Name = "Owner";
-            this.Owner.Padding = new System.Windows.Forms.Padding(3);
-            this.Owner.Size = new System.Drawing.Size(658, 285);
-            this.Owner.TabIndex = 0;
-            this.Owner.Text = "Owner Playlists";
-            this.Owner.UseVisualStyleBackColor = true;
+            this.ownerTab.Controls.Add(this.ownerPlaylistsList);
+            this.ownerTab.Location = new System.Drawing.Point(4, 34);
+            this.ownerTab.Name = "ownerTab";
+            this.ownerTab.Padding = new System.Windows.Forms.Padding(3);
+            this.ownerTab.Size = new System.Drawing.Size(1032, 421);
+            this.ownerTab.TabIndex = 0;
+            this.ownerTab.Text = "Owner Playlists";
+            this.ownerTab.UseVisualStyleBackColor = true;
             // 
             // ownerPlaylistsList
             // 
+            this.ownerPlaylistsList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.ownerPlaylistsList.HideSelection = false;
             this.ownerPlaylistsList.Location = new System.Drawing.Point(6, 6);
             this.ownerPlaylistsList.Name = "ownerPlaylistsList";
-            this.ownerPlaylistsList.Size = new System.Drawing.Size(646, 273);
-            this.ownerPlaylistsList.TabIndex = 5;
+            this.ownerPlaylistsList.Size = new System.Drawing.Size(1015, 412);
+            this.ownerPlaylistsList.TabIndex = 0;
             this.ownerPlaylistsList.UseCompatibleStateImageBehavior = false;
+            this.ownerPlaylistsList.SelectedIndexChanged += new System.EventHandler(this.ownerPlaylistsList_SelectedIndexChanged);
             this.ownerPlaylistsList.DoubleClick += new System.EventHandler(this.ownerPlaylistsList_DoubleClicked);
             // 
-            // Contributor
+            // contributorTab
             // 
-            this.Contributor.Controls.Add(this.contributorPlaylistsList);
-            this.Contributor.Controls.Add(this.RemoveContributorPlaylistButton);
-            this.Contributor.Controls.Add(this.AddContributorPlaylistButton);
-            this.Contributor.Location = new System.Drawing.Point(4, 34);
-            this.Contributor.Name = "Contributor";
-            this.Contributor.Padding = new System.Windows.Forms.Padding(3);
-            this.Contributor.Size = new System.Drawing.Size(658, 285);
-            this.Contributor.TabIndex = 1;
-            this.Contributor.Text = "Contributor Playlists";
-            this.Contributor.UseVisualStyleBackColor = true;
+            this.contributorTab.Controls.Add(this.contributorPlaylistsList);
+            this.contributorTab.Controls.Add(this.removeContributorPlaylistButton);
+            this.contributorTab.Controls.Add(this.addContributorPlaylistButton);
+            this.contributorTab.Location = new System.Drawing.Point(4, 34);
+            this.contributorTab.Name = "contributorTab";
+            this.contributorTab.Padding = new System.Windows.Forms.Padding(3);
+            this.contributorTab.Size = new System.Drawing.Size(1032, 421);
+            this.contributorTab.TabIndex = 1;
+            this.contributorTab.Text = "Contributor Playlists";
+            this.contributorTab.UseVisualStyleBackColor = true;
             // 
             // contributorPlaylistsList
             // 
+            this.contributorPlaylistsList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.contributorPlaylistsList.HideSelection = false;
-            this.contributorPlaylistsList.Location = new System.Drawing.Point(7, 54);
+            this.contributorPlaylistsList.Location = new System.Drawing.Point(6, 54);
             this.contributorPlaylistsList.Name = "contributorPlaylistsList";
-            this.contributorPlaylistsList.Size = new System.Drawing.Size(651, 228);
+            this.contributorPlaylistsList.Size = new System.Drawing.Size(1020, 361);
             this.contributorPlaylistsList.TabIndex = 4;
             this.contributorPlaylistsList.UseCompatibleStateImageBehavior = false;
+            this.contributorPlaylistsList.SelectedIndexChanged += new System.EventHandler(this.contributorPlaylistsList_SelectedIndexChanged);
             this.contributorPlaylistsList.DoubleClick += new System.EventHandler(this.contributorPlaylistsList_DoubleClicked);
             // 
-            // RemoveContributorPlaylistButton
+            // removeContributorPlaylistButton
             // 
-            this.RemoveContributorPlaylistButton.Location = new System.Drawing.Point(530, 12);
-            this.RemoveContributorPlaylistButton.Name = "RemoveContributorPlaylistButton";
-            this.RemoveContributorPlaylistButton.Size = new System.Drawing.Size(112, 34);
-            this.RemoveContributorPlaylistButton.TabIndex = 3;
-            this.RemoveContributorPlaylistButton.Text = "Remove";
-            this.RemoveContributorPlaylistButton.UseVisualStyleBackColor = true;
-            this.RemoveContributorPlaylistButton.Click += new System.EventHandler(this.RemoveContributorPlaylistButton_Click);
+            this.removeContributorPlaylistButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.removeContributorPlaylistButton.Location = new System.Drawing.Point(914, 11);
+            this.removeContributorPlaylistButton.Name = "removeContributorPlaylistButton";
+            this.removeContributorPlaylistButton.Size = new System.Drawing.Size(112, 34);
+            this.removeContributorPlaylistButton.TabIndex = 3;
+            this.removeContributorPlaylistButton.Text = "Remove";
+            this.removeContributorPlaylistButton.UseVisualStyleBackColor = true;
+            this.removeContributorPlaylistButton.Click += new System.EventHandler(this.RemoveContributorPlaylistButton_Click);
             // 
-            // AddContributorPlaylistButton
+            // addContributorPlaylistButton
             // 
-            this.AddContributorPlaylistButton.Location = new System.Drawing.Point(402, 12);
-            this.AddContributorPlaylistButton.Name = "AddContributorPlaylistButton";
-            this.AddContributorPlaylistButton.Size = new System.Drawing.Size(122, 34);
-            this.AddContributorPlaylistButton.TabIndex = 0;
-            this.AddContributorPlaylistButton.Text = "Add";
-            this.AddContributorPlaylistButton.UseVisualStyleBackColor = true;
-            this.AddContributorPlaylistButton.Click += new System.EventHandler(this.AddContributorPlaylistButton_Click);
+            this.addContributorPlaylistButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.addContributorPlaylistButton.Location = new System.Drawing.Point(786, 11);
+            this.addContributorPlaylistButton.Name = "addContributorPlaylistButton";
+            this.addContributorPlaylistButton.Size = new System.Drawing.Size(122, 34);
+            this.addContributorPlaylistButton.TabIndex = 0;
+            this.addContributorPlaylistButton.Text = "Add";
+            this.addContributorPlaylistButton.UseVisualStyleBackColor = true;
+            this.addContributorPlaylistButton.Click += new System.EventHandler(this.AddContributorPlaylistButton_Click);
             // 
-            // imageList3
+            // refreshPlaylistsButton
             // 
-            this.imageList3.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
-            this.imageList3.ImageSize = new System.Drawing.Size(16, 16);
-            this.imageList3.TransparentColor = System.Drawing.Color.Transparent;
+            this.refreshPlaylistsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.refreshPlaylistsButton.Location = new System.Drawing.Point(934, 102);
+            this.refreshPlaylistsButton.Name = "refreshPlaylistsButton";
+            this.refreshPlaylistsButton.Size = new System.Drawing.Size(112, 34);
+            this.refreshPlaylistsButton.TabIndex = 2;
+            this.refreshPlaylistsButton.Text = "Refresh";
+            this.refreshPlaylistsButton.UseVisualStyleBackColor = true;
+            this.refreshPlaylistsButton.Click += new System.EventHandler(this.RefreshPlaylistsButton_Click);
             // 
-            // RefreshPlaylistsButton
+            // choosePlaylistLabel
             // 
-            this.RefreshPlaylistsButton.Location = new System.Drawing.Point(684, 395);
-            this.RefreshPlaylistsButton.Name = "RefreshPlaylistsButton";
-            this.RefreshPlaylistsButton.Size = new System.Drawing.Size(95, 34);
-            this.RefreshPlaylistsButton.TabIndex = 2;
-            this.RefreshPlaylistsButton.Text = "Refresh";
-            this.RefreshPlaylistsButton.UseVisualStyleBackColor = true;
-            this.RefreshPlaylistsButton.Click += new System.EventHandler(this.RefreshPlaylistsButton_Click);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(16, 77);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(241, 25);
-            this.label1.TabIndex = 3;
-            this.label1.Text = "Choose a playlist to manage:";
+            this.choosePlaylistLabel.AutoSize = true;
+            this.choosePlaylistLabel.Location = new System.Drawing.Point(16, 77);
+            this.choosePlaylistLabel.Name = "choosePlaylistLabel";
+            this.choosePlaylistLabel.Size = new System.Drawing.Size(241, 25);
+            this.choosePlaylistLabel.TabIndex = 3;
+            this.choosePlaylistLabel.Text = "Choose a playlist to manage:";
             // 
             // menuStrip1
             // 
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.PlaylistsMenu,
-            this.AccountMenu,
-            this.AboutMenu});
+            this.playlistsMenu,
+            this.accountMenu,
+            this.aboutMenu});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(800, 33);
+            this.menuStrip1.Size = new System.Drawing.Size(1068, 33);
             this.menuStrip1.TabIndex = 4;
             this.menuStrip1.Text = "menuStrip1";
             // 
-            // PlaylistsMenu
+            // playlistsMenu
             // 
-            this.PlaylistsMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.RefreshPlaylistsMenuItem});
-            this.PlaylistsMenu.Name = "PlaylistsMenu";
-            this.PlaylistsMenu.Size = new System.Drawing.Size(90, 29);
-            this.PlaylistsMenu.Text = "Playlists";
+            this.playlistsMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.refreshPlaylistsMenuItem});
+            this.playlistsMenu.Name = "playlistsMenu";
+            this.playlistsMenu.Size = new System.Drawing.Size(90, 29);
+            this.playlistsMenu.Text = "Playlists";
             // 
-            // RefreshPlaylistsMenuItem
+            // refreshPlaylistsMenuItem
             // 
-            this.RefreshPlaylistsMenuItem.Name = "RefreshPlaylistsMenuItem";
-            this.RefreshPlaylistsMenuItem.Size = new System.Drawing.Size(239, 34);
-            this.RefreshPlaylistsMenuItem.Text = "Refresh Playlists";
-            this.RefreshPlaylistsMenuItem.Click += new System.EventHandler(this.RefreshPlaylists_Click);
+            this.refreshPlaylistsMenuItem.Name = "refreshPlaylistsMenuItem";
+            this.refreshPlaylistsMenuItem.Size = new System.Drawing.Size(239, 34);
+            this.refreshPlaylistsMenuItem.Text = "Refresh Playlists";
+            this.refreshPlaylistsMenuItem.Click += new System.EventHandler(this.RefreshPlaylists_Click);
             // 
-            // AccountMenu
+            // accountMenu
             // 
-            this.AccountMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.SwitchAccount,
-            this.ForgetCurrentAccount,
-            this.AddNewAccountMenuItem});
-            this.AccountMenu.Name = "AccountMenu";
-            this.AccountMenu.Size = new System.Drawing.Size(93, 29);
-            this.AccountMenu.Text = "Account";
+            this.accountMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.switchAccountMenuItem,
+            this.forgetCurrentAccountMenuItem,
+            this.addNewAccountMenuItem});
+            this.accountMenu.Name = "accountMenu";
+            this.accountMenu.Size = new System.Drawing.Size(93, 29);
+            this.accountMenu.Text = "Account";
             // 
-            // SwitchAccount
+            // switchAccountMenuItem
             // 
-            this.SwitchAccount.Name = "SwitchAccount";
-            this.SwitchAccount.Size = new System.Drawing.Size(299, 34);
-            this.SwitchAccount.Text = "Switch Account";
-            this.SwitchAccount.DropDownItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.SwitchToAccountWithSelectedEmail);
+            this.switchAccountMenuItem.Name = "switchAccountMenuItem";
+            this.switchAccountMenuItem.Size = new System.Drawing.Size(299, 34);
+            this.switchAccountMenuItem.Text = "Switch Account";
+            this.switchAccountMenuItem.DropDownItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.SwitchToAccountWithSelectedEmail);
             // 
-            // ForgetCurrentAccount
+            // forgetCurrentAccountMenuItem
             // 
-            this.ForgetCurrentAccount.Name = "ForgetCurrentAccount";
-            this.ForgetCurrentAccount.Size = new System.Drawing.Size(299, 34);
-            this.ForgetCurrentAccount.Text = "Forget Current Account";
-            this.ForgetCurrentAccount.Click += new System.EventHandler(this.ForgetCurrentAccount_Click);
+            this.forgetCurrentAccountMenuItem.Name = "forgetCurrentAccountMenuItem";
+            this.forgetCurrentAccountMenuItem.Size = new System.Drawing.Size(299, 34);
+            this.forgetCurrentAccountMenuItem.Text = "Forget Current Account";
+            this.forgetCurrentAccountMenuItem.Click += new System.EventHandler(this.ForgetCurrentAccount_Click);
             // 
-            // AddNewAccountMenuItem
+            // addNewAccountMenuItem
             // 
-            this.AddNewAccountMenuItem.Name = "AddNewAccountMenuItem";
-            this.AddNewAccountMenuItem.Size = new System.Drawing.Size(299, 34);
-            this.AddNewAccountMenuItem.Text = "Add New Account";
-            this.AddNewAccountMenuItem.Click += new System.EventHandler(this.AddNewAccountMenuItem_Click);
+            this.addNewAccountMenuItem.Name = "addNewAccountMenuItem";
+            this.addNewAccountMenuItem.Size = new System.Drawing.Size(299, 34);
+            this.addNewAccountMenuItem.Text = "Add New Account";
+            this.addNewAccountMenuItem.Click += new System.EventHandler(this.AddNewAccountMenuItem_Click);
             // 
-            // AboutMenu
+            // aboutMenu
             // 
-            this.AboutMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ViewDetails});
-            this.AboutMenu.Name = "AboutMenu";
-            this.AboutMenu.Size = new System.Drawing.Size(78, 29);
-            this.AboutMenu.Text = "About";
+            this.aboutMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.viewDetailsMenuItem});
+            this.aboutMenu.Name = "aboutMenu";
+            this.aboutMenu.Size = new System.Drawing.Size(78, 29);
+            this.aboutMenu.Text = "About";
             // 
-            // ViewDetails
+            // viewDetailsMenuItem
             // 
-            this.ViewDetails.Name = "ViewDetails";
-            this.ViewDetails.Size = new System.Drawing.Size(270, 34);
-            this.ViewDetails.Text = "View Details";
-            this.ViewDetails.Click += new System.EventHandler(this.ViewDetails_Click);
-            // 
-            // imageList1
-            // 
-            this.imageList1.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
-            this.imageList1.ImageSize = new System.Drawing.Size(16, 16);
-            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
-            // 
-            // imageList2
-            // 
-            this.imageList2.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
-            this.imageList2.ImageSize = new System.Drawing.Size(16, 16);
-            this.imageList2.TransparentColor = System.Drawing.Color.Transparent;
+            this.viewDetailsMenuItem.Name = "viewDetailsMenuItem";
+            this.viewDetailsMenuItem.Size = new System.Drawing.Size(209, 34);
+            this.viewDetailsMenuItem.Text = "View Details";
+            this.viewDetailsMenuItem.Click += new System.EventHandler(this.ViewDetails_Click);
             // 
             // LoggerLabel
             // 
@@ -263,24 +274,202 @@ namespace Youtube_Playlist_Naukar_Windows
             this.LoggerLabel.Size = new System.Drawing.Size(0, 25);
             this.LoggerLabel.TabIndex = 5;
             // 
+            // playlistThumbnailPreview
+            // 
+            this.playlistThumbnailPreview.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.playlistThumbnailPreview.Location = new System.Drawing.Point(10, 25);
+            this.playlistThumbnailPreview.MaximumSize = new System.Drawing.Size(277, 157);
+            this.playlistThumbnailPreview.Name = "playlistThumbnailPreview";
+            this.playlistThumbnailPreview.Size = new System.Drawing.Size(277, 157);
+            this.playlistThumbnailPreview.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.playlistThumbnailPreview.TabIndex = 6;
+            this.playlistThumbnailPreview.TabStop = false;
+            // 
+            // createdOnLabel
+            // 
+            this.createdOnLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.createdOnLabel.AutoSize = true;
+            this.createdOnLabel.Location = new System.Drawing.Point(345, 688);
+            this.createdOnLabel.Name = "createdOnLabel";
+            this.createdOnLabel.Size = new System.Drawing.Size(106, 25);
+            this.createdOnLabel.TabIndex = 7;
+            this.createdOnLabel.Text = "Created On:";
+            // 
+            // ownerLabel
+            // 
+            this.ownerLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.ownerLabel.AutoSize = true;
+            this.ownerLabel.Location = new System.Drawing.Point(345, 663);
+            this.ownerLabel.Name = "ownerLabel";
+            this.ownerLabel.Size = new System.Drawing.Size(68, 25);
+            this.ownerLabel.TabIndex = 10;
+            this.ownerLabel.Text = "Owner:";
+            // 
+            // titleLabel
+            // 
+            this.titleLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.titleLabel.AutoSize = true;
+            this.titleLabel.Location = new System.Drawing.Point(345, 588);
+            this.titleLabel.Name = "titleLabel";
+            this.titleLabel.Size = new System.Drawing.Size(48, 25);
+            this.titleLabel.TabIndex = 11;
+            this.titleLabel.Text = "Title:";
+            // 
+            // urlLabel
+            // 
+            this.urlLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.urlLabel.AutoSize = true;
+            this.urlLabel.Location = new System.Drawing.Point(345, 613);
+            this.urlLabel.Name = "urlLabel";
+            this.urlLabel.Size = new System.Drawing.Size(47, 25);
+            this.urlLabel.TabIndex = 12;
+            this.urlLabel.Text = "URL:";
+            // 
+            // totalVideosLabel
+            // 
+            this.totalVideosLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.totalVideosLabel.AutoSize = true;
+            this.totalVideosLabel.Location = new System.Drawing.Point(345, 638);
+            this.totalVideosLabel.Name = "totalVideosLabel";
+            this.totalVideosLabel.Size = new System.Drawing.Size(112, 25);
+            this.totalVideosLabel.TabIndex = 14;
+            this.totalVideosLabel.Text = "Total Videos:";
+            // 
+            // titleValue
+            // 
+            this.titleValue.AutoSize = true;
+            this.titleValue.Location = new System.Drawing.Point(518, 8);
+            this.titleValue.Name = "titleValue";
+            this.titleValue.Size = new System.Drawing.Size(19, 25);
+            this.titleValue.TabIndex = 15;
+            this.titleValue.Text = "-";
+            // 
+            // privacyStatusValue
+            // 
+            this.privacyStatusValue.AutoSize = true;
+            this.privacyStatusValue.Location = new System.Drawing.Point(518, 133);
+            this.privacyStatusValue.Name = "privacyStatusValue";
+            this.privacyStatusValue.Size = new System.Drawing.Size(19, 25);
+            this.privacyStatusValue.TabIndex = 16;
+            this.privacyStatusValue.Text = "-";
+            // 
+            // totalVideosValue
+            // 
+            this.totalVideosValue.AutoSize = true;
+            this.totalVideosValue.Location = new System.Drawing.Point(518, 58);
+            this.totalVideosValue.Name = "totalVideosValue";
+            this.totalVideosValue.Size = new System.Drawing.Size(19, 25);
+            this.totalVideosValue.TabIndex = 18;
+            this.totalVideosValue.Text = "-";
+            // 
+            // playlistDetailsPanel
+            // 
+            this.playlistDetailsPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.playlistDetailsPanel.Controls.Add(this.descriptionValue);
+            this.playlistDetailsPanel.Controls.Add(this.createdOnValue);
+            this.playlistDetailsPanel.Controls.Add(this.privacyStatusValue);
+            this.playlistDetailsPanel.Controls.Add(this.totalVideosValue);
+            this.playlistDetailsPanel.Controls.Add(this.privacyStatusLabel);
+            this.playlistDetailsPanel.Controls.Add(this.descriptionLabel);
+            this.playlistDetailsPanel.Controls.Add(this.titleValue);
+            this.playlistDetailsPanel.Controls.Add(this.ownerValue);
+            this.playlistDetailsPanel.Controls.Add(this.urlValue);
+            this.playlistDetailsPanel.Controls.Add(this.playlistThumbnailPreview);
+            this.playlistDetailsPanel.Location = new System.Drawing.Point(12, 580);
+            this.playlistDetailsPanel.Name = "playlistDetailsPanel";
+            this.playlistDetailsPanel.Size = new System.Drawing.Size(1044, 207);
+            this.playlistDetailsPanel.TabIndex = 20;
+            this.playlistDetailsPanel.Visible = false;
+            // 
+            // descriptionValue
+            // 
+            this.descriptionValue.AutoSize = true;
+            this.descriptionValue.Location = new System.Drawing.Point(518, 157);
+            this.descriptionValue.Name = "descriptionValue";
+            this.descriptionValue.Size = new System.Drawing.Size(19, 25);
+            this.descriptionValue.TabIndex = 24;
+            this.descriptionValue.Text = "-";
+            // 
+            // createdOnValue
+            // 
+            this.createdOnValue.AutoSize = true;
+            this.createdOnValue.Location = new System.Drawing.Point(518, 108);
+            this.createdOnValue.Name = "createdOnValue";
+            this.createdOnValue.Size = new System.Drawing.Size(19, 25);
+            this.createdOnValue.TabIndex = 23;
+            this.createdOnValue.Text = "-";
+            // 
+            // privacyStatusLabel
+            // 
+            this.privacyStatusLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.privacyStatusLabel.AutoSize = true;
+            this.privacyStatusLabel.Location = new System.Drawing.Point(333, 133);
+            this.privacyStatusLabel.Name = "privacyStatusLabel";
+            this.privacyStatusLabel.Size = new System.Drawing.Size(124, 25);
+            this.privacyStatusLabel.TabIndex = 22;
+            this.privacyStatusLabel.Text = "Privacy Status:";
+            // 
+            // descriptionLabel
+            // 
+            this.descriptionLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.descriptionLabel.AutoSize = true;
+            this.descriptionLabel.Location = new System.Drawing.Point(333, 158);
+            this.descriptionLabel.Name = "descriptionLabel";
+            this.descriptionLabel.Size = new System.Drawing.Size(106, 25);
+            this.descriptionLabel.TabIndex = 21;
+            this.descriptionLabel.Text = "Description:";
+            // 
+            // ownerValue
+            // 
+            this.ownerValue.AutoSize = true;
+            this.ownerValue.Location = new System.Drawing.Point(518, 83);
+            this.ownerValue.Name = "ownerValue";
+            this.ownerValue.Size = new System.Drawing.Size(19, 25);
+            this.ownerValue.TabIndex = 1;
+            this.ownerValue.TabStop = true;
+            this.ownerValue.Text = "-";
+            this.ownerValue.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.ownerValue_LinkClicked);
+            // 
+            // urlValue
+            // 
+            this.urlValue.AutoSize = true;
+            this.urlValue.Location = new System.Drawing.Point(518, 33);
+            this.urlValue.Name = "urlValue";
+            this.urlValue.Size = new System.Drawing.Size(19, 25);
+            this.urlValue.TabIndex = 0;
+            this.urlValue.TabStop = true;
+            this.urlValue.Text = "-";
+            this.urlValue.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.urlValue_LinkClicked);
+            // 
             // HomePageForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(1068, 794);
+            this.Controls.Add(this.totalVideosLabel);
+            this.Controls.Add(this.urlLabel);
+            this.Controls.Add(this.titleLabel);
+            this.Controls.Add(this.ownerLabel);
+            this.Controls.Add(this.createdOnLabel);
             this.Controls.Add(this.LoggerLabel);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.RefreshPlaylistsButton);
+            this.Controls.Add(this.choosePlaylistLabel);
+            this.Controls.Add(this.refreshPlaylistsButton);
             this.Controls.Add(this.playlistsTabs);
-            this.Controls.Add(this.Email);
+            this.Controls.Add(this.email);
             this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.playlistDetailsPanel);
+            this.MinimumSize = new System.Drawing.Size(1090, 850);
             this.Name = "HomePageForm";
-            this.Text = "HomePageForm";
+            this.Text = "Home";
             this.playlistsTabs.ResumeLayout(false);
-            this.Owner.ResumeLayout(false);
-            this.Contributor.ResumeLayout(false);
+            this.ownerTab.ResumeLayout(false);
+            this.contributorTab.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.playlistThumbnailPreview)).EndInit();
+            this.playlistDetailsPanel.ResumeLayout(false);
+            this.playlistDetailsPanel.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -288,28 +477,41 @@ namespace Youtube_Playlist_Naukar_Windows
 
         #endregion
 
-        private System.Windows.Forms.Label Email;
+        private System.Windows.Forms.Label email;
         private System.Windows.Forms.TabControl playlistsTabs;
-        private System.Windows.Forms.TabPage Contributor;
-        private System.Windows.Forms.Button AddContributorPlaylistButton;
-        private System.Windows.Forms.Button RefreshPlaylistsButton;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button RemoveContributorPlaylistButton;
+        private System.Windows.Forms.TabPage contributorTab;
+        private System.Windows.Forms.Button addContributorPlaylistButton;
+        private System.Windows.Forms.Button refreshPlaylistsButton;
+        private System.Windows.Forms.Label choosePlaylistLabel;
+        private System.Windows.Forms.Button removeContributorPlaylistButton;
         private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem PlaylistsMenu;
-        private System.Windows.Forms.ToolStripMenuItem RefreshPlaylistsMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem AccountMenu;
-        private System.Windows.Forms.ToolStripMenuItem SwitchAccount;
-        private System.Windows.Forms.ToolStripMenuItem ForgetCurrentAccount;
-        private System.Windows.Forms.ToolStripMenuItem AboutMenu;
-        private System.Windows.Forms.ToolStripMenuItem ViewDetails;
-        private System.Windows.Forms.TabPage Owner;
-        private System.Windows.Forms.ListView ownerPlaylistsList;
-        private System.Windows.Forms.ImageList imageList1;
-        private System.Windows.Forms.ImageList imageList2;
-        private System.Windows.Forms.ImageList imageList3;
+        private System.Windows.Forms.ToolStripMenuItem playlistsMenu;
+        private System.Windows.Forms.ToolStripMenuItem refreshPlaylistsMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem accountMenu;
+        private System.Windows.Forms.ToolStripMenuItem switchAccountMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem forgetCurrentAccountMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aboutMenu;
+        private System.Windows.Forms.ToolStripMenuItem viewDetailsMenuItem;
         private System.Windows.Forms.ListView contributorPlaylistsList;
         private System.Windows.Forms.Label LoggerLabel;
-        private ToolStripMenuItem AddNewAccountMenuItem;
+        private ToolStripMenuItem addNewAccountMenuItem;
+        private PictureBox playlistThumbnailPreview;
+        private Label createdOnLabel;
+        private Label ownerLabel;
+        private Label titleLabel;
+        private Label urlLabel;
+        private Label totalVideosLabel;
+        private Label titleValue;
+        private Label privacyStatusValue;
+        private Label totalVideosValue;
+        private Panel playlistDetailsPanel;
+        private LinkLabel ownerValue;
+        private LinkLabel urlValue;
+        private Label descriptionLabel;
+        private Label privacyStatusLabel;
+        private Label descriptionValue;
+        private Label createdOnValue;
+        private ListView ownerPlaylistsList;
+        private TabPage ownerTab;
     }
 }

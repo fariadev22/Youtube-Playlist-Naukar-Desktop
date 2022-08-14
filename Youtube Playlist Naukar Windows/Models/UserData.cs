@@ -15,10 +15,11 @@ namespace Youtube_Playlist_Naukar_Windows.Models
         /// </summary>
         public string ChannelId { get; set; }
 
+        public string UserOwnedPlaylistsETag { get; set; }
+
         /// <summary>
         /// List of playlists that the user owns
         /// </summary>
-        [JsonIgnore]
         public Dictionary<string, UserPlayList> UserOwnedPlayLists { get; set; } 
             = new Dictionary<string, UserPlayList>();
 

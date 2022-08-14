@@ -123,6 +123,14 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
             CommonUtilities.CreateDirectoryIfRequired(
                 activeUserSessionDirectoryPath);
 
+            CommonUtilities.CreateDirectoryIfRequired(
+                activeUserSessionDirectoryPath + "/" + 
+                Constants.VideoThumbnailsFolder);
+
+            CommonUtilities.CreateDirectoryIfRequired(
+                activeUserSessionDirectoryPath + "/" +
+                Constants.PlaylistThumbnailsFolder);
+
             return activeUserSessionDirectoryPath;
         }
 

@@ -29,42 +29,142 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         }
 
         public async Task LoadUserOwnedPlaylists(
-            string channelId)
+            string channelId,
+            Dictionary<string, UserPlayList> alreadyLoadedPlaylists,
+            string alreadyLoadedPlaylistsEtag)
         {
             if (string.IsNullOrWhiteSpace(channelId))
             {
-                Console.WriteLine("ERROR: No channel found to load playlists from.");
                 return;
             }
 
             try
             {
-                var playlists = await ApiClient.GetApiClient.GetUserPlayListsData(
-                    channelId);
-
-                if (playlists == null ||
-                    playlists.Count <= 0)
+                //playlists not loaded already
+                if(alreadyLoadedPlaylists == null ||
+                    alreadyLoadedPlaylists.Count <= 0 ||
+                    string.IsNullOrWhiteSpace(
+                        alreadyLoadedPlaylistsEtag))
                 {
-                    Console.WriteLine(
-                        "ERROR: No playlist exists for the current user. " +
-                        "Add a playlist to continue.");
-                    return;
-                }
+                    var playlistsResult =
+                        await ApiClient.GetApiClient.GetPlayListsData(
+                            channelId);
 
-                SessionManager.GetSessionManager.SaveUserOwnedPlaylistsToUserSession(
-                    playlists);
+                    var playlists =
+                        playlistsResult.Item1;
+
+                    string eTag = playlistsResult.Item2;
+
+                    if (playlists == null ||
+                        playlists.Count <= 0)
+                    {
+                        return;
+                    }
+
+                    SessionManager.GetSessionManager.
+                        SaveUserOwnedPlaylistsToUserSession(
+                            playlists, eTag);
+                }
+                else //playlists data already exists
+                {
+                    await RefreshUserOwnedPlaylists(channelId,
+                        alreadyLoadedPlaylists, 
+                        alreadyLoadedPlaylistsEtag);
+                }                
             }
             catch
             {
-                Console.WriteLine("ERROR: Unable to fetch playlists.");
+                //
+            }
+        }
+
+        public async Task RefreshUserOwnedPlaylists(
+            string channelId, 
+            Dictionary<string, UserPlayList> alreadyLoadedPlaylists,
+            string alreadyLoadedPlaylistsEtag)
+        {
+            alreadyLoadedPlaylists ??= 
+                new Dictionary<string, UserPlayList>();
+
+            var playlistsResult =
+                await ApiClient.GetApiClient
+                    .GetUserPlayListsPartialData(channelId);
+
+            var partialPlaylistsData =
+                playlistsResult.Item1;
+
+            string eTag = playlistsResult.Item2;
+
+            //playlists do not exist anymore
+            //so need to update data
+            if (partialPlaylistsData == null ||
+                partialPlaylistsData.Count <= 0)
+            {
+                alreadyLoadedPlaylists.Clear();
+                SessionManager.GetSessionManager.
+                    SaveUserOwnedPlaylistsToUserSession(
+                        partialPlaylistsData, eTag);
+                return;
+            }
+
+            //need to compare playlists data
+            if (eTag != alreadyLoadedPlaylistsEtag) 
+            {
+                List<string> idsOfplaylistsToLoad =
+                    new List<string>();
+
+                Dictionary<string, UserPlayList>
+                    newPlaylistsData =
+                        new Dictionary<string, UserPlayList>();
+
+                foreach (var partialPlaylist in
+                    partialPlaylistsData)
+                {
+                    if (alreadyLoadedPlaylists
+                            .ContainsKey(partialPlaylist.Id) &&
+                        partialPlaylist.ETag ==
+                        alreadyLoadedPlaylists[
+                                partialPlaylist.Id]
+                            ?.PlaylistETag)
+                    {
+                        //same playlist item so can be 
+                        //added directly
+                        newPlaylistsData.Add(partialPlaylist.Id,
+                            alreadyLoadedPlaylists[partialPlaylist.Id]);
+                    }
+                    else
+                    {
+                        idsOfplaylistsToLoad.Add(partialPlaylist.Id);
+                        newPlaylistsData.Add(
+                            partialPlaylist.Id,
+                            null);
+                    }
+                }
+
+                //load new playlists
+                if (idsOfplaylistsToLoad.Count > 0)
+                {
+                    playlistsResult =
+                        await ApiClient.GetApiClient
+                            .GetPlayListsData(
+                                channelId,
+                                playlistIds: idsOfplaylistsToLoad);
+
+                    var playlists =
+                        playlistsResult.Item1;
+
+                    eTag = playlistsResult.Item2;
+
+                    SessionManager.GetSessionManager.
+                        SaveUserOwnedPlaylistsToUserSession(
+                            newPlaylistsData, playlists, eTag);
+                }
             }
         }
 
         public async Task LoadPlaylist(
             UserPlayList userPlaylist)
         {
-            Console.WriteLine("INFO: Opening playlist.....");
-
             if (userPlaylist == null)
             {
                 Console.WriteLine("ERROR: No playlist found.");
@@ -79,53 +179,134 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
             try
             {
-                var playlistVideos =
-                    await ApiClient.GetApiClient.GetPlaylistVideos(userPlaylist);
-
-                Console.WriteLine("INFO: Playlist opened. " +
-                                  "Total " + 
-                                  (playlistVideos?.Count ?? 0) + 
-                                  " videos found.");
-
-                if (playlistVideos != null)
+                //no videos loaded before
+                if (string.IsNullOrWhiteSpace(
+                        userPlaylist.PlaylistVideosETag) ||
+                    userPlaylist.PlayListVideos == null ||
+                    userPlaylist.PlayListVideos.Count <= 0)
                 {
-                    SessionManager.GetSessionManager.SavePlaylistVideosToUserSessionPlaylist(
-                        userPlaylist, playlistVideos);
+                    var playlistVideosResult =
+                        await ApiClient.GetApiClient.GetPlaylistVideos(
+                            userPlaylist);
+
+                    var playlistVideos = playlistVideosResult.Item1;
+
+                    var etag =
+                        playlistVideosResult.Item2;
+
+                    if (playlistVideos != null)
+                    {
+                        SessionManager.GetSessionManager.
+                            SavePlaylistVideosToUserSessionPlaylist(
+                                userPlaylist, playlistVideos, etag);
+                    }
+                }
+                else
+                {
+                    await RefreshPlaylistVideos(userPlaylist);
                 }
             }
             catch
             {
-                Console.WriteLine("ERROR: Unable to open selected playlist.");
+                Console.WriteLine(
+                    "ERROR: Unable to open selected playlist.");
             }
         }
 
-        public async Task RefreshPlaylist(
+        public async Task RefreshPlaylistVideos(
             UserPlayList userPlaylist)
         {
-            Console.WriteLine("INFO: Refreshing playlist...");
-            userPlaylist.PlayListVideosDataLoaded = false;
-            try
+            var alreadyLoadedVideos =
+                userPlaylist.PlayListVideos ??
+                new Dictionary<string, UserPlayListVideo>();
+
+            var playlistVideosResult =
+                await ApiClient.GetApiClient.GetPlaylistVideosPartialData(
+                    userPlaylist);
+
+            var partialVideosData =
+                playlistVideosResult.Item1;
+
+            var eTag =
+                playlistVideosResult.Item2;
+
+            //videos do not exist anymore
+            //so need to update data
+            if (partialVideosData == null ||
+                partialVideosData.Count <= 0)
             {
-                await LoadPlaylist(userPlaylist);
-                Console.WriteLine("INFO: Playlist refreshed.");
+                userPlaylist.PlayListVideos?.Clear();
+                SessionManager.GetSessionManager.
+                    SavePlaylistVideosToUserSessionPlaylist(
+                        userPlaylist, partialVideosData, eTag);
+                return;
             }
-            catch 
+
+            //need to compare playlists data
+            if (eTag != userPlaylist.PlaylistVideosETag)
             {
-                Console.WriteLine("ERROR: Unable to refresh playlist.");
+                List<string> idsOfVideosToLoad =
+                    new List<string>();
+
+                Dictionary<string, UserPlayListVideo>
+                    newVideosData =
+                        new Dictionary<string, UserPlayListVideo>();
+
+                foreach (var partialVideo in
+                    partialVideosData)
+                {
+                    if (alreadyLoadedVideos
+                            .ContainsKey(partialVideo.Id) &&
+                        partialVideo.ETag ==
+                        alreadyLoadedVideos[
+                                partialVideo.Id]
+                            ?.ETag)
+                    {
+                        //same video item so can be 
+                        //added directly
+                        newVideosData.Add(
+                            partialVideo.Id,
+                            alreadyLoadedVideos[partialVideo.Id]);
+                    }
+                    else
+                    {
+                        idsOfVideosToLoad.Add(partialVideo.Id);
+                        newVideosData.Add(
+                            partialVideo.Id,
+                            null);
+                    }
+                }
+
+                //load new videos
+                if (idsOfVideosToLoad.Count > 0)
+                {
+                    playlistVideosResult =
+                        await ApiClient.GetApiClient
+                            .GetPlaylistVideos(
+                                userPlaylist,
+                                videoIds: idsOfVideosToLoad);
+
+                    var videos =
+                        playlistVideosResult.Item1;
+
+                    eTag = playlistVideosResult.Item2;
+
+                    SessionManager.GetSessionManager.
+                        SavePlaylistVideosToUserSessionPlaylist(
+                            userPlaylist, newVideosData, videos, eTag);
+                }
             }
         }
 
-        public void SearchVideoInPlayList(
+        public List<UserPlayListVideo> SearchVideoInPlayList(
             string searchQuery,
             UserPlayList userPlayList)
         {
             if (userPlayList == null ||
                 string.IsNullOrWhiteSpace(searchQuery))
             {
-                return;
+                return new List<UserPlayListVideo>();
             }
-
-            Console.WriteLine("INFO: Searching in playlist....");
 
             Dictionary<UserPlayListVideo, int> videoAndSearchScores =
                 new Dictionary<UserPlayListVideo, int>();
@@ -149,41 +330,18 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 videoAndSearchScores.OrderByDescending(v =>
                     v.Value).Select(v => v.Key).ToList();
 
-            if (results.Count <= 0)
-            {
-                Console.WriteLine("INFO: No search results found.");
-            }
-            else
-            {
-                Console.WriteLine("INFO: Search results returned following videos:");
-                int index = 1;
-
-                foreach (var video in results)
-                {
-                    Console.WriteLine(
-                        index + 
-                        ". Title: " + video.Title + 
-                        ". Position " + (video.PositionInPlayList + 1) + 
-                        ". Url: " + CommonUtilities.GetYoutubeVideoUrlFromVideoId(
-                            video.VideoId));
-                    index++;
-                }
-            }
+            return results;
         }
 
-        public async Task AddVideoOrVideosToPlayList(
+        public async Task<List<string>> AddVideoOrVideosToPlayList(
             string youTubeUrlsString,
             UserPlayList userPlayList)
         {
-            if (string.IsNullOrWhiteSpace(youTubeUrlsString))
-            {
-                Console.WriteLine("WARN: No YouTube URL(s) found.");
-                return;
-            }
-
             List<string> urls =
-                youTubeUrlsString.Split(',').
+                youTubeUrlsString.Split('\n').
                     Select(url => url.Trim()).ToList();
+
+            List<string> messages = new List<string>();
 
             foreach (var url in urls)
             {
@@ -193,8 +351,9 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
                 if (!isValidUrl)
                 {
-                    Console.WriteLine(
-                        "ERROR: Unable to add video with URL [" + url + "] -> " +
+                    messages.Add(
+                        "Unable to add video with URL " +
+                        "[" + url + "] -> " +
                         "Invalid URL");
 
                     continue;
@@ -203,8 +362,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 if (userPlayList.PlayListVideos?.Values.ToList()
                     .Any(v => v.VideoId == videoId) == true)
                 {
-                    Console.WriteLine(
-                        "ERROR: Video with URL [" + url + "] " +
+                    messages.Add(
+                        "Video with URL [" + url + "] " +
                         "already exists in the playlist.");
                 }
                 else
@@ -212,74 +371,50 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     try
                     {
                         var playListItem =
-                            await ApiClient.GetApiClient.AddVideoToPlayList(videoId, userPlayList);
+                            await ApiClient.GetApiClient.AddVideoToPlayList(
+                                videoId, userPlayList);
 
                         if (playListItem == null)
                         {
-                            Console.WriteLine(
-                                "ERROR: Unable to add video with URL [" + url + "]");
+                            messages.Add(
+                                "Unable to add video with URL [" + url + "]");
                         }
                         else
                         {
-                            Console.WriteLine(
-                                "INFO: Successfully added video with URL [" + url + "]");
+                            messages.Add(
+                                "Successfully added video with URL [" + url + "]");
 
-                            SessionManager.GetSessionManager.SavePlaylistVideoToUserSessionPlaylist(
-                                userPlayList, playListItem);
+                            SessionManager.GetSessionManager.
+                                SavePlaylistVideoToUserSessionPlaylist(
+                                    userPlayList, playListItem);
                         }
                     }
                     catch
                     {
-                        Console.WriteLine(
-                            "ERROR: Unable to add video with URL [" + url + "]");
+                        messages.Add(
+                            "Unable to add video with URL [" + url + "]");
                     }
                 }
             }
+
+            return messages;
         }
 
-        public void PrintPlaylistDuplicates(
+        public List<List<UserPlayListVideo>> GetPlaylistDuplicates(
             UserPlayList playlist)
         {
             if (playlist != null &&
                 playlist.PlayListVideosDataLoaded &&
                 playlist.PlayListVideos != null)
             {
-                var duplicateVideos = 
+                return 
                     playlist.PlayListVideos.Values.GroupBy(v => v.VideoId)
                         .Select(grp => grp.ToList())
                         .Where(grp => grp.Count > 1)
                         .ToList();
-
-                if (duplicateVideos.Count > 0)
-                {
-                    Console.WriteLine(
-                        "INFO: Following duplicate videos detected in the playlist:");
-
-                    int index = 1;
-                    foreach (var duplicateVideo in
-                        duplicateVideos)
-                    {
-                        Console.WriteLine(
-                            index + ". " + 
-                            "Title: " + duplicateVideo[0].Title + ", " +
-                            "Positions: " +
-                            string.Join(
-                                ", ",
-                                duplicateVideo.Select(
-                                    v => v.PositionInPlayList + 1)
-                            ) + ". URL: " + 
-                            CommonUtilities.GetYoutubeVideoUrlFromVideoId(
-                                duplicateVideo[0].VideoId)
-                        );
-
-                        index++;
-                    }
-
-                    return;
-                }
             }
 
-            Console.WriteLine("INFO: No duplicate videos found in selected playlist.");
+            return new List<List<UserPlayListVideo>>();
         }
 
         public async Task DeleteVideoFromPlaylist(
@@ -316,95 +451,35 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             }
         }
 
-        public async Task RefreshUserPlaylists(
-            string channelId)
-        {
-            Console.WriteLine("INFO: Refreshing playlists...");
-
-            var currentPlaylists =
-                SessionManager.GetSessionManager.GetUserSessionPlaylists();
-
-            List<Playlist> playlistsFromApi;
-            try
-            {
-                playlistsFromApi =
-                    await ApiClient.GetApiClient.GetUserPlayListsData(
-                        channelId);
-            }
-            catch
-            {
-                Console.WriteLine("ERROR: Unable to fetch new playlists data.");
-                return;
-            }
-            
-            var currentUserOwnedPlaylists = 
-                currentPlaylists.Item1;
-
-            if (playlistsFromApi != null &&
-                currentUserOwnedPlaylists != null)
-            {
-                var playlistIds = playlistsFromApi.Select(p => p.Id);
-
-                //remove extra playlists
-                var userOwnedPlaylistIdsToRemove =
-                    currentUserOwnedPlaylists.Keys.Where(k => 
-                        !playlistIds.Contains(k));
-
-                foreach (var playlistToRemove in 
-                    userOwnedPlaylistIdsToRemove)
-                {
-                    currentUserOwnedPlaylists.Remove(playlistToRemove);
-                }
-
-                List<Playlist> newPlaylists =
-                    new List<Playlist>();
-
-                foreach (var playlist in playlistsFromApi)
-                {
-                    if (currentUserOwnedPlaylists.ContainsKey(playlist.Id))
-                    {
-                        UpdatePlaylistWithNewInformation(
-                            currentUserOwnedPlaylists[playlist.Id],
-                            playlist);
-                    }
-                    else
-                    {
-                        newPlaylists.Add(playlist);
-                    }
-                }
-
-                //save newly discovered playlists
-                //that were not loaded before
-                if (newPlaylists.Count > 0)
-                {
-                    SessionManager.GetSessionManager.SaveUserOwnedPlaylistsToUserSession(
-                        newPlaylists);
-                }
-            }
-
-            Console.WriteLine("INFO: Playlists information refreshed.");
-        }
-
         public async Task AddContributorPlaylist(
             string playListId)
         {
             try
             {
-                var contributorPlaylist =
+                var playlistResult =
                     await ApiClient.GetApiClient
-                        .GetUserPlaylistMetaData(playListId);
+                        .GetPlayListsData(playlistIds: 
+                            new List<string> { playListId });
 
-                if (contributorPlaylist != null)
+                var playlists =
+                    playlistResult.Item1;
+
+                if (playlists != null &&
+                    playlists.Count > 0 &&
+                    playlists[0] != null)
                 {
+                    var contributorPlaylist =
+                        playlists[0];
+
                     Console.WriteLine(
                         "INFO: Playlist with title '" +
                         contributorPlaylist.Snippet?.Title +
                         "' added successfully.");
-                }
 
-                SessionManager.GetSessionManager.
-                    SaveUserContributorPlaylistToUserSession(
-                    contributorPlaylist);
+                    SessionManager.GetSessionManager.
+                        SaveUserContributorPlaylistToUserSession(
+                            contributorPlaylist);
+                }
             }
             catch
             {
@@ -435,28 +510,6 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     "WARN: Selected playlist for removal " +
                     "does not exist in the currently loaded " +
                     "contributor playlists already.");
-            }
-        }
-
-        private void UpdatePlaylistWithNewInformation(
-            UserPlayList userPlaylist,
-            Playlist newPlaylist)
-        {
-            if (userPlaylist == null ||
-                newPlaylist == null)
-            {
-                return;
-            }
-
-            if (newPlaylist.Snippet != null)
-            {
-                userPlaylist.ThumbnailUrl =
-                    newPlaylist.Snippet?.Thumbnails?.Default__?.Url;
-
-                userPlaylist.Title =
-                    newPlaylist.Snippet?.Title;
-
-                userPlaylist.PlayListVideosDataLoaded = false;
             }
         }
     }

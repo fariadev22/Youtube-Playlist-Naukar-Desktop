@@ -22,7 +22,7 @@ namespace Youtube_Playlist_Naukar_Windows
 
                 if (activeUserSession == null)
                 {
-                    MessageBox.Show("Login failed");
+                    MessageBox.Show(@"Login failed.");
                 }
                 else
                 {
@@ -39,8 +39,6 @@ namespace Youtube_Playlist_Naukar_Windows
                             SaveChannelIdInUserSession(
                                 channelId);
 
-                        Hide();
-
                         var loadingPage =
                             new LoadingForm();
 
@@ -53,21 +51,21 @@ namespace Youtube_Playlist_Naukar_Windows
                         await homePage.LoadUserPlaylists();
 
                         loadingPage.Dispose();
-
+                        
                         homePage.Show();
                     }
                     catch
                     {
                         MessageBox.Show(
-                            "You do not have a YouTube Channel. " +
-                            "Please create a channel against your " +
-                            "YouTube account and then try again.");
+                            @"You do not have a YouTube Channel. " +
+                            @"Please create a channel against your " +
+                            @"YouTube account and then try again.");
                     }
                 }
             }
             catch
             {
-                MessageBox.Show("Login failed");
+                MessageBox.Show(@"Login failed.");
             }
             
         }

@@ -29,7 +29,6 @@ namespace Youtube_Playlist_Naukar_Windows.Models
         /// <summary>
         /// Data related to playlists associated with this session
         /// </summary>
-        [JsonIgnore]
         public UserData UserData { get; set; }
 
         [JsonIgnore]

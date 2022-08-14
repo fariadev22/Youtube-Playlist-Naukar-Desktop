@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Web;
 using System.Windows.Forms;
 
@@ -10,35 +11,44 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
 {
     public static class CommonUtilities
     {
-        public static void DownloadImagesToUserDirectory(
+        public static void DownloadImageToUserDirectory(
             string userDirectoryPath,
-            List<KeyValuePair<string, string>> imageUrls,
+            string imageId,
+            string imageUrl,
+            out string imageFileName)
+        {
+            imageFileName = imageId + ".jpg";
+            WebClient webClient = new WebClient();
+            webClient.DownloadFile(
+                imageUrl, 
+                userDirectoryPath + "/" + imageFileName);
+        }
+
+        public static void ConvertLocalImagesToBitmapImageList(
+            string userDirectoryPath,
+            List<KeyValuePair<string, string>> localImagePathsFromDirectory,
             ImageList imageList)
         {
-            foreach (var imageUrl in imageUrls)
+            foreach (var imageInfo in localImagePathsFromDirectory)
             {
                 try
                 {
-                    System.Net.WebRequest request =
-                        System.Net.WebRequest.Create(imageUrl.Value);
-                    System.Net.WebResponse response = request.GetResponse();
-                    Stream respStream = response.GetResponseStream();
-                    Bitmap bitmap = new Bitmap(respStream);
-                    respStream?.Dispose();
-
-                    imageList.Images.Add(imageUrl.Key, bitmap);
+                    using (FileStream imageStream = new FileStream(
+                        userDirectoryPath + "/" + imageInfo.Value, 
+                        FileMode.Open))
+                    {
+                        Bitmap bitmap = new Bitmap(imageStream);
+                        imageList.Images.Add(imageInfo.Key, bitmap);
+                    }
                 }
                 catch
                 {
-                    System.Net.WebRequest request =
-                        System.Net.WebRequest.Create(
-                            "https://www.contentviewspro.com/wp-content/uploads/2017/07/default_image.png");
-                    System.Net.WebResponse response = request.GetResponse();
-                    Stream respStream = response.GetResponseStream();
-                    Bitmap bitmap = new Bitmap(respStream);
-                    respStream?.Dispose();
-
-                    imageList.Images.Add(imageUrl.Key, bitmap);
+                    using (FileStream imageStream = new FileStream(
+                        "default_image.png", FileMode.Open))
+                    {
+                        var defaultBitmap = new Bitmap(imageStream);
+                        imageList.Images.Add(imageInfo.Key, defaultBitmap);
+                    }
                 }
             }
         }
@@ -63,6 +73,10 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
             {
                 var files = Directory.EnumerateFiles(directoryPath).ToList();
                 files.ForEach(File.Delete);
+
+                var directories =
+                    Directory.EnumerateDirectories(directoryPath).ToList();
+                directories.ForEach(DeleteDirectoryIfExists);
 
                 Directory.Delete(directoryPath);
             }
@@ -103,6 +117,28 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
             }
 
             return "https://youtube.com/watch?v=" + videoId;
+        }
+
+        public static string GetYoutubeChannelUrlFromChannelId(
+            string channelId)
+        {
+            if (string.IsNullOrWhiteSpace(channelId))
+            {
+                return string.Empty;
+            }
+
+            return "https://www.youtube.com/channel/" + channelId;
+        }
+
+        public static string GetYoutubePlaylistUrlFromPlaylistId(
+            string playlistId)
+        {
+            if (string.IsNullOrWhiteSpace(playlistId))
+            {
+                return string.Empty;
+            }
+
+            return "https://www.youtube.com/playlist?list=" + playlistId;
         }
 
         public static bool TryGetPlaylistIdFromYoutubeUrl(string youtubeUrl,
