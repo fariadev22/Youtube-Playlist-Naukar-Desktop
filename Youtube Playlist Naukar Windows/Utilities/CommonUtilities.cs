@@ -31,24 +31,35 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
         {
             foreach (var imageInfo in localImagePathsFromDirectory)
             {
-                try
+                ConvertLocalImageToBitmap(
+                    userDirectoryPath, imageList, 
+                    imageInfo.Key, imageInfo.Value);
+            }
+        }
+
+        public static void ConvertLocalImageToBitmap(
+            string userDirectoryPath, 
+            ImageList imageList, 
+            string imageId,
+            string imageFileName)
+        {
+            try
+            {
+                using (FileStream imageStream = new FileStream(
+                    userDirectoryPath + "/" + imageFileName,
+                    FileMode.Open))
                 {
-                    using (FileStream imageStream = new FileStream(
-                        userDirectoryPath + "/" + imageInfo.Value, 
-                        FileMode.Open))
-                    {
-                        Bitmap bitmap = new Bitmap(imageStream);
-                        imageList.Images.Add(imageInfo.Key, bitmap);
-                    }
+                    Bitmap bitmap = new Bitmap(imageStream);
+                    imageList.Images.Add(imageId, bitmap);
                 }
-                catch
+            }
+            catch
+            {
+                using (FileStream imageStream = new FileStream(
+                    "default_image.png", FileMode.Open))
                 {
-                    using (FileStream imageStream = new FileStream(
-                        "default_image.png", FileMode.Open))
-                    {
-                        var defaultBitmap = new Bitmap(imageStream);
-                        imageList.Images.Add(imageInfo.Key, defaultBitmap);
-                    }
+                    var defaultBitmap = new Bitmap(imageStream);
+                    imageList.Images.Add(imageId, defaultBitmap);
                 }
             }
         }

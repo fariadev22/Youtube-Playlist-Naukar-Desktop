@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Youtube_Playlist_Naukar_Windows.Helpers;
@@ -53,6 +52,10 @@ namespace Youtube_Playlist_Naukar_Windows
             _userContributorPlaylists =
                 playlists.Item2 ?? 
                 new Dictionary<string, UserPlayList>();
+
+            SessionManager.GetSessionManager.
+                    PlaylistThumbnailUpdated += 
+                UpdatePlaylistThumbnail;
         }
 
         public async Task LoadUserPlaylists()
@@ -361,15 +364,6 @@ namespace Youtube_Playlist_Naukar_Windows
             ownerPlaylistsList.LargeImageList ??=
                 new ImageList();
 
-            CommonUtilities.ConvertLocalImagesToBitmapImageList(
-                _activeUserSession.UserDirectory,
-                _userOwnedPlaylists.Values.Select(v =>
-                    new KeyValuePair<string, string>(
-                        v.Id,
-                        v.ThumbnailLocalPathFromUserDirectory)
-                ).ToList(),
-                ownerPlaylistsList.LargeImageList);
-
             ownerPlaylistsList.LargeImageList.ImageSize
                 = new Size(320, 180);
 
@@ -383,19 +377,63 @@ namespace Youtube_Playlist_Naukar_Windows
             }
         }
 
+        private void UpdatePlaylistThumbnail(
+            object sender, PlaylistThumbnailUpdatedEventArgs eventArgs)
+        {
+            var isUserOwnedPlaylist =
+                eventArgs.IsOwnerPlaylist;
+
+            if (isUserOwnedPlaylist)
+            {
+                if (ownerPlaylistsList.InvokeRequired)
+                {
+                    ownerPlaylistsList.Invoke(
+                        new MethodInvoker(delegate
+                        {
+                            CommonUtilities.ConvertLocalImageToBitmap(
+                                _activeUserSession.UserDirectory,
+                                ownerPlaylistsList.LargeImageList,
+                                eventArgs.PlaylistId,
+                                eventArgs.PlaylistImagePathFromCustomerDirectory);
+
+                            int indexOfKey =
+                                ownerPlaylistsList.Items.IndexOfKey(
+                                    eventArgs.PlaylistId);
+
+                            ownerPlaylistsList.Items[indexOfKey].ImageKey =
+                                eventArgs.PlaylistId;
+                        }));
+                }
+            }
+            else
+            {
+                if (contributorPlaylistsList.InvokeRequired)
+                {
+                    contributorPlaylistsList.Invoke(
+                        new MethodInvoker(delegate
+                        {
+                            CommonUtilities.ConvertLocalImageToBitmap(
+                                _activeUserSession.UserDirectory,
+                                contributorPlaylistsList.LargeImageList,
+                                eventArgs.PlaylistId,
+                                eventArgs.PlaylistImagePathFromCustomerDirectory);
+
+                            int indexOfKey =
+                                contributorPlaylistsList.Items.IndexOfKey(
+                                    eventArgs.PlaylistId);
+
+                            contributorPlaylistsList.Items[
+                                    indexOfKey].ImageKey =
+                                eventArgs.PlaylistId;
+                        }));
+                }
+            }
+        }
+
         private void LoadContributorPlaylistsUI()
         {
             contributorPlaylistsList.LargeImageList
                 ??= new ImageList();
-
-            CommonUtilities.ConvertLocalImagesToBitmapImageList(
-                _activeUserSession.UserDirectory,
-                _userContributorPlaylists.Values.Select(v =>
-                    new KeyValuePair<string, string>(
-                        v.Id,
-                        v.ThumbnailLocalPathFromUserDirectory)
-                ).ToList(),
-                contributorPlaylistsList.LargeImageList);
 
             contributorPlaylistsList.LargeImageList.ImageSize
                 = new Size(320, 180);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Google.Apis.YouTube.v3.Data;
@@ -8,10 +9,32 @@ using Youtube_Playlist_Naukar_Windows.Utilities;
 
 namespace Youtube_Playlist_Naukar_Windows.Helpers
 {
+    public class PlaylistThumbnailUpdatedEventArgs : EventArgs
+    {
+        public string PlaylistId { get; set; }
+
+        public string PlaylistImagePathFromCustomerDirectory { get; set; }
+
+        public bool IsOwnerPlaylist { get; set; }
+    }
+
+    public class PlaylistVideoThumbnailUpdatedEventArgs: EventArgs
+    {
+        public string VideoId { get; set; }
+
+        public string PlaylistVideoImagePathFromCustomerDirectory { get; set; }
+    }
+
     public class SessionManager
     {
         private static readonly SessionManager SessionManagerInstance =
             new SessionManager();
+
+        public event EventHandler<PlaylistThumbnailUpdatedEventArgs> 
+            PlaylistThumbnailUpdated;
+
+        public event EventHandler<PlaylistVideoThumbnailUpdatedEventArgs>
+            PlaylistVideoThumbnailUpdated;
 
         static SessionManager()
         {
@@ -171,9 +194,15 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 }
             }
 
-            DownloadPlaylistsThumbnailsToUserDirectory(
-                _activeUserSession.UserData.UserOwnedPlayLists
-                    .Values.ToList());
+            BackgroundWorker imageBackgroundDownloadWorker =
+                new BackgroundWorker();
+
+            imageBackgroundDownloadWorker.DoWork += 
+                DownloadPlaylistsThumbnailsToUserDirectory;
+
+            imageBackgroundDownloadWorker.RunWorkerAsync(
+                (_activeUserSession.UserData.UserOwnedPlayLists
+                    .Values.ToList(), true));
         }
 
         public void SaveUserOwnedPlaylistsToUserSession(
@@ -209,12 +238,18 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     }
                 }
 
-                DownloadPlaylistsThumbnailsToUserDirectory(
-                    _activeUserSession.UserData.UserOwnedPlayLists
+                BackgroundWorker imageBackgroundDownloadWorker =
+                    new BackgroundWorker();
+
+                imageBackgroundDownloadWorker.DoWork +=
+                    DownloadPlaylistsThumbnailsToUserDirectory;
+
+                imageBackgroundDownloadWorker.RunWorkerAsync(
+                    (_activeUserSession.UserData.UserOwnedPlayLists
                         .Values
                         .Where(v => newPlayListsData.Any(
                             p => p.Id == v.Id))
-                        .ToList());
+                        .ToList(), true));
             }
         }
 
@@ -238,8 +273,14 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                         userPlaylist
                     );
 
-                    DownloadPlaylistsThumbnailsToUserDirectory(
-                        new List<UserPlayList>{userPlaylist});
+                    BackgroundWorker imageBackgroundDownloadWorker =
+                        new BackgroundWorker();
+
+                    imageBackgroundDownloadWorker.DoWork +=
+                        DownloadPlaylistsThumbnailsToUserDirectory;
+
+                    imageBackgroundDownloadWorker.RunWorkerAsync(
+                        (new List<UserPlayList> { userPlaylist }, false));
                 }
                 else
                 {
@@ -283,7 +324,13 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     playListItem);
             }
 
-            DownloadPlaylistVideosThumbnailsToUserDirectory(
+            BackgroundWorker imageBackgroundDownloadWorker =
+                new BackgroundWorker();
+
+            imageBackgroundDownloadWorker.DoWork +=
+                DownloadPlaylistVideosThumbnailsToUserDirectory;
+
+            imageBackgroundDownloadWorker.RunWorkerAsync(
                 userPlayList.PlayListVideos.Values.ToList());
 
             userPlayList.PlaylistVideosETag =
@@ -313,7 +360,13 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                         playListItem);
                 }
 
-                DownloadPlaylistVideosThumbnailsToUserDirectory(
+                BackgroundWorker imageBackgroundDownloadWorker =
+                    new BackgroundWorker();
+
+                imageBackgroundDownloadWorker.DoWork +=
+                    DownloadPlaylistVideosThumbnailsToUserDirectory;
+
+                imageBackgroundDownloadWorker.RunWorkerAsync(
                     userPlaylist.PlayListVideos.Values
                         .Where(v => newPlaylistItems.Any(
                             p => p.Id == v.UniqueVideoIdInPlaylist))
@@ -401,43 +454,67 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         }
 
         public void DownloadPlaylistsThumbnailsToUserDirectory(
-            List<UserPlayList> userPlaylists)
+            object sender, DoWorkEventArgs e)
         {
+            (List<UserPlayList>, bool) userPlaylistThumbnailsData =
+                ((List<UserPlayList>, bool))e.Argument;
+
+            if (userPlaylistThumbnailsData.Item1 == null)
+            {
+                return;
+            }
+
+            var userPlaylists =
+                userPlaylistThumbnailsData.Item1;
+
             string directoryPath =
                 _activeUserSession.UserDirectory + "/" +
                 Constants.PlaylistThumbnailsFolder;
 
-            if (userPlaylists != null)
+            foreach (var userPlaylist in
+                userPlaylists)
             {
-                foreach (var userPlaylist in
-                    userPlaylists)
-                {
-                    CommonUtilities.DownloadImageToUserDirectory(
-                        directoryPath,
-                        userPlaylist.Id,
-                        userPlaylist.ThumbnailUrl,
-                        out var imageFileName);
+                CommonUtilities.DownloadImageToUserDirectory(
+                    directoryPath,
+                    userPlaylist.Id,
+                    userPlaylist.ThumbnailUrl,
+                    out var imageFileName);
 
-                    userPlaylist.
-                            ThumbnailLocalPathFromUserDirectory =
-                        "/" +
-                        Constants.PlaylistThumbnailsFolder + "/" +
-                        imageFileName;
+                userPlaylist.
+                        ThumbnailLocalPathFromUserDirectory =
+                    "/" +
+                    Constants.PlaylistThumbnailsFolder + "/" +
+                    imageFileName;
+
+                if (PlaylistThumbnailUpdated != null)
+                {
+                    PlaylistThumbnailUpdated(null,
+                        new PlaylistThumbnailUpdatedEventArgs
+                        {
+                            PlaylistId = userPlaylist.Id,
+                            PlaylistImagePathFromCustomerDirectory =
+                                userPlaylist.ThumbnailLocalPathFromUserDirectory,
+                            IsOwnerPlaylist = 
+                                userPlaylistThumbnailsData.Item2
+                        });
                 }
             }
         }
 
         public void DownloadPlaylistVideosThumbnailsToUserDirectory(
-            List<UserPlayListVideo> userPlaylistVideos)
+            object sender, DoWorkEventArgs e)
         {
-            string directoryPath =
-                _activeUserSession.UserDirectory + "/" +
-                Constants.VideoThumbnailsFolder;
+            List<UserPlayListVideo> userPlaylistVideos =
+                e.Argument as List<UserPlayListVideo>;
 
             if (userPlaylistVideos == null)
             {
                 return;
             }
+
+            string directoryPath =
+                _activeUserSession.UserDirectory + "/" +
+                Constants.VideoThumbnailsFolder;
 
             foreach (var userPlaylistVideo in
                 userPlaylistVideos)
@@ -463,6 +540,17 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                         "/" +
                         Constants.VideoThumbnailsFolder + "/" +
                         imageFileName;
+
+                    if (PlaylistVideoThumbnailUpdated != null)
+                    {
+                        PlaylistVideoThumbnailUpdated(null,
+                            new PlaylistVideoThumbnailUpdatedEventArgs
+                            {
+                                VideoId = userPlaylistVideo.UniqueVideoIdInPlaylist,
+                                PlaylistVideoImagePathFromCustomerDirectory = 
+                                    userPlaylistVideo.ThumbnailLocalPathFromUserDirectory
+                            });
+                    }
                 }
                 catch
                 {
