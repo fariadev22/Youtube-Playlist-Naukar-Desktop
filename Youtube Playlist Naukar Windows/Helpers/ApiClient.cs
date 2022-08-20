@@ -188,6 +188,52 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             return (playLists, eTag);
         }
 
+        public async Task<(List<Playlist>, string)>
+            GetUserPlayListsPartialData(
+                List<string> playlistIds,
+                string pageToken = null)
+        {
+            //part string needs to be same as original request
+            //in order to get same etags
+            var playListsRequest =
+                _youtubeService.Playlists.List(
+                    GetPlaylistsRequestPartString());
+            playListsRequest.Id =
+                string.Join(",", playlistIds);
+            playListsRequest.MaxResults = 50;
+            playListsRequest.Fields =
+                "nextPageToken, etag, items(id, etag)";
+
+            if (!string.IsNullOrWhiteSpace(pageToken))
+            {
+                playListsRequest.PageToken = pageToken;
+            }
+
+            var playListsResponse =
+                await playListsRequest.ExecuteAsync();
+
+            string eTag = playListsResponse.ETag;
+
+            var playLists = playListsResponse.Items?.ToList()
+                            ?? new List<Playlist>();
+
+            if (!string.IsNullOrWhiteSpace(
+                playListsResponse.NextPageToken))
+            {
+                var nextPlayLists =
+                    (await GetUserPlayListsPartialData(
+                        playListsResponse.NextPageToken)).Item1;
+
+                if (nextPlayLists != null &&
+                    nextPlayLists.Count > 0)
+                {
+                    playLists.AddRange(nextPlayLists);
+                }
+            }
+
+            return (playLists, eTag);
+        }
+
         public async Task<(List<PlaylistItem>, string)> 
             GetPlaylistVideos(
             UserPlayList userPlayList,

@@ -19,9 +19,7 @@ namespace Youtube_Playlist_Naukar_Windows.Models
 
         public string Title { get; set; }
 
-        public string ThumbnailUrl { get; set; }
-
-        public string ThumbnailLocalPathFromUserDirectory { get; set; }
+        public Thumbnail Thumbnail { get; set; }
 
         public long TotalVideosInPlaylist { get; set; }
 
@@ -60,8 +58,20 @@ namespace Youtube_Playlist_Naukar_Windows.Models
                     playList.Snippet.Title;
                 userPlaylist.Description =
                     playList.Snippet.Description;
-                userPlaylist.ThumbnailUrl =
-                    playList.Snippet.Thumbnails?.Medium?.Url;
+
+                if (!string.IsNullOrWhiteSpace(
+                    playList.Snippet.Thumbnails?.Medium?.Url))
+                {
+                    userPlaylist.Thumbnail =
+                        new Thumbnail
+                        {
+                            LocalPathFromUserDirectory =
+                                "/" + Constants.PlaylistThumbnailsFolder +
+                                "/" + playList.Id + ".jpg",
+                            Url = playList.Snippet.Thumbnails.Medium.Url
+                        };
+                }
+                
                 userPlaylist.PublishedOn =
                     playList.Snippet.PublishedAt;
                 userPlaylist.PlaylistOwnerChannelId =

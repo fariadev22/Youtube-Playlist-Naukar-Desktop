@@ -159,7 +159,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.removeContributorPlaylistButton.TabIndex = 3;
             this.removeContributorPlaylistButton.Text = "Remove";
             this.removeContributorPlaylistButton.UseVisualStyleBackColor = true;
-            this.removeContributorPlaylistButton.Click += new System.EventHandler(this.RemoveContributorPlaylistButton_Click);
+            this.removeContributorPlaylistButton.Click += new System.EventHandler(this.removeContributorPlaylistButton_Click);
             // 
             // addContributorPlaylistButton
             // 
@@ -170,7 +170,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.addContributorPlaylistButton.TabIndex = 0;
             this.addContributorPlaylistButton.Text = "Add";
             this.addContributorPlaylistButton.UseVisualStyleBackColor = true;
-            this.addContributorPlaylistButton.Click += new System.EventHandler(this.AddContributorPlaylistButton_Click);
+            this.addContributorPlaylistButton.Click += new System.EventHandler(this.addContributorPlaylistButton_Click);
             // 
             // refreshPlaylistsButton
             // 
@@ -181,7 +181,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.refreshPlaylistsButton.TabIndex = 2;
             this.refreshPlaylistsButton.Text = "Refresh";
             this.refreshPlaylistsButton.UseVisualStyleBackColor = true;
-            this.refreshPlaylistsButton.Click += new System.EventHandler(this.RefreshPlaylistsButton_Click);
+            this.refreshPlaylistsButton.Click += new System.EventHandler(this.refreshPlaylistsButton_Click);
             // 
             // choosePlaylistLabel
             // 
@@ -218,7 +218,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.refreshPlaylistsMenuItem.Name = "refreshPlaylistsMenuItem";
             this.refreshPlaylistsMenuItem.Size = new System.Drawing.Size(239, 34);
             this.refreshPlaylistsMenuItem.Text = "Refresh Playlists";
-            this.refreshPlaylistsMenuItem.Click += new System.EventHandler(this.RefreshPlaylists_Click);
+            this.refreshPlaylistsMenuItem.Click += new System.EventHandler(this.refreshPlaylistsMenuItem_Click);
             // 
             // accountMenu
             // 
@@ -235,21 +235,21 @@ namespace Youtube_Playlist_Naukar_Windows
             this.switchAccountMenuItem.Name = "switchAccountMenuItem";
             this.switchAccountMenuItem.Size = new System.Drawing.Size(299, 34);
             this.switchAccountMenuItem.Text = "Switch Account";
-            this.switchAccountMenuItem.DropDownItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.SwitchToAccountWithSelectedEmail);
+            this.switchAccountMenuItem.DropDownItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.switchAccountWithSelectedEmail);
             // 
             // forgetCurrentAccountMenuItem
             // 
             this.forgetCurrentAccountMenuItem.Name = "forgetCurrentAccountMenuItem";
             this.forgetCurrentAccountMenuItem.Size = new System.Drawing.Size(299, 34);
             this.forgetCurrentAccountMenuItem.Text = "Forget Current Account";
-            this.forgetCurrentAccountMenuItem.Click += new System.EventHandler(this.ForgetCurrentAccount_Click);
+            this.forgetCurrentAccountMenuItem.Click += new System.EventHandler(this.forgetCurrentAccountMenuItem_Click);
             // 
             // addNewAccountMenuItem
             // 
             this.addNewAccountMenuItem.Name = "addNewAccountMenuItem";
             this.addNewAccountMenuItem.Size = new System.Drawing.Size(299, 34);
             this.addNewAccountMenuItem.Text = "Add New Account";
-            this.addNewAccountMenuItem.Click += new System.EventHandler(this.AddNewAccountMenuItem_Click);
+            this.addNewAccountMenuItem.Click += new System.EventHandler(this.addNewAccountMenuItem_Click);
             // 
             // aboutMenu
             // 
@@ -264,7 +264,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.viewDetailsMenuItem.Name = "viewDetailsMenuItem";
             this.viewDetailsMenuItem.Size = new System.Drawing.Size(209, 34);
             this.viewDetailsMenuItem.Text = "View Details";
-            this.viewDetailsMenuItem.Click += new System.EventHandler(this.ViewDetails_Click);
+            this.viewDetailsMenuItem.Click += new System.EventHandler(this.viewDetailsMenuItem_Click);
             // 
             // LoggerLabel
             // 
@@ -277,6 +277,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // playlistThumbnailPreview
             // 
             this.playlistThumbnailPreview.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.playlistThumbnailPreview.ImageLocation = "default_image.png";
             this.playlistThumbnailPreview.Location = new System.Drawing.Point(10, 25);
             this.playlistThumbnailPreview.MaximumSize = new System.Drawing.Size(277, 157);
             this.playlistThumbnailPreview.Name = "playlistThumbnailPreview";
@@ -380,7 +381,6 @@ namespace Youtube_Playlist_Naukar_Windows
             this.playlistDetailsPanel.Name = "playlistDetailsPanel";
             this.playlistDetailsPanel.Size = new System.Drawing.Size(1044, 207);
             this.playlistDetailsPanel.TabIndex = 20;
-            this.playlistDetailsPanel.Visible = false;
             // 
             // descriptionValue
             // 

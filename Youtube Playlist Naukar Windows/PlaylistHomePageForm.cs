@@ -19,23 +19,23 @@ namespace Youtube_Playlist_Naukar_Windows
 
         private UserSession _activeUserSession;
 
-        private HomePageForm _mainMenu;
-
         public PlaylistHomePageForm(
             UserPlayList playlist,
-            UserSession activeUserSession,
-            HomePageForm mainMenu)
+            UserSession activeUserSession)
         {
             InitializeComponent();
             _playlist = playlist;
             _activeUserSession = activeUserSession;
-            _mainMenu = mainMenu;
             Text = _playlist.Title;
+
+            SessionManager.GetSessionManager.
+                    PlaylistVideoThumbnailUpdated +=
+                UpdatePlaylistVideoThumbnail;
         }
 
         public async Task LoadPlaylistVideos()
         {
-            await PlaylistHelper.GetPlaylistHelper
+            await PlaylistVideosHelper.GetPlaylistVideosHelper
                 .LoadPlaylist(_playlist);
 
             LoadPlaylistVideosUI(
@@ -48,7 +48,7 @@ namespace Youtube_Playlist_Naukar_Windows
             //playlistVideoList.Items.Clear();
 
             var filteredVideos = 
-                PlaylistHelper.GetPlaylistHelper
+                PlaylistVideosHelper.GetPlaylistVideosHelper
                 .SearchVideoInPlayList(
                     searchBar.Text, _playlist);
 
@@ -95,12 +95,6 @@ namespace Youtube_Playlist_Naukar_Windows
             //    AnchorStyles.Bottom;
         }
 
-        private void returnToMainMenu_Click(object sender, EventArgs e)
-        {
-            Hide();
-            _mainMenu.Show();
-        }
-
         private async void addVideos_Click(object sender, EventArgs e)
         {
             var urlInputForm = new AddVideoForm();
@@ -119,9 +113,10 @@ namespace Youtube_Playlist_Naukar_Windows
                 else
                 {
                     var messages = 
-                        await PlaylistHelper.GetPlaylistHelper
-                            .AddVideoOrVideosToPlayList(
-                                urlInput, _playlist);
+                        await PlaylistVideosHelper.
+                            GetPlaylistVideosHelper
+                                .AddVideoOrVideosToPlayList(
+                                    urlInput, _playlist);
 
                     new LogsForm(messages).Show(this);
                 }
@@ -145,8 +140,8 @@ namespace Youtube_Playlist_Naukar_Windows
         private void findDuplicates_Click(object sender, EventArgs e)
         {
             var duplicates = 
-                PlaylistHelper.GetPlaylistHelper.GetPlaylistDuplicates(
-                    _playlist);
+                PlaylistVideosHelper.GetPlaylistVideosHelper
+                    .GetPlaylistDuplicates(_playlist);
 
             if (duplicates.Count > 0)
             {
@@ -205,6 +200,20 @@ namespace Youtube_Playlist_Naukar_Windows
             //    MessageBox.Show(
             //        "Select a video to remove.");
             //}
+        }
+
+        private void UpdatePlaylistVideoThumbnail(
+            object sender, PlaylistVideoThumbnailUpdatedEventArgs eventArgs)
+        {
+            //CommonUtilities.ConvertLocalImageToBitmap(
+            //    _activeUserSession.UserDirectory,
+            //    videoList.LargeImageList,
+            //    eventArgs.VideoId,
+            //    eventArgs.PlaylistVideoImagePathFromCustomerDirectory);
+
+            //ownerPlaylistsList.Items[
+            //        eventArgs.VideoId].ImageKey =
+            //    eventArgs.VideoId;
         }
     }
 }

@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Web;
 using System.Windows.Forms;
+using Youtube_Playlist_Naukar_Windows.Models;
 
 namespace Youtube_Playlist_Naukar_Windows.Utilities
 {
@@ -14,27 +14,13 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
         public static void DownloadImageToUserDirectory(
             string userDirectoryPath,
             string imageId,
-            string imageUrl,
-            out string imageFileName)
+            Thumbnail thumbnail)
         {
-            imageFileName = imageId + ".jpg";
             WebClient webClient = new WebClient();
             webClient.DownloadFile(
-                imageUrl, 
-                userDirectoryPath + "/" + imageFileName);
-        }
-
-        public static void ConvertLocalImagesToBitmapImageList(
-            string userDirectoryPath,
-            List<KeyValuePair<string, string>> localImagePathsFromDirectory,
-            ImageList imageList)
-        {
-            foreach (var imageInfo in localImagePathsFromDirectory)
-            {
-                ConvertLocalImageToBitmap(
-                    userDirectoryPath, imageList, 
-                    imageInfo.Key, imageInfo.Value);
-            }
+                thumbnail.Url, 
+                userDirectoryPath + "/" + 
+                    thumbnail.LocalPathFromUserDirectory);
         }
 
         public static void ConvertLocalImageToBitmap(

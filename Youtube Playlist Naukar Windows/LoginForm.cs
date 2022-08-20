@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Windows.Forms;
 using Youtube_Playlist_Naukar_Windows.Helpers;
+using Youtube_Playlist_Naukar_Windows.Models;
 
 namespace Youtube_Playlist_Naukar_Windows
 {
     public partial class LoginForm : Form
     {
+        public bool LoginSuccessful { get; set; }
+
+        public UserSession ActiveUserSession { get; set; } 
+
         public LoginForm()
         {
             InitializeComponent();
@@ -22,6 +27,7 @@ namespace Youtube_Playlist_Naukar_Windows
 
                 if (activeUserSession == null)
                 {
+                    LoginSuccessful = false;
                     MessageBox.Show(@"Login failed.");
                 }
                 else
@@ -31,31 +37,16 @@ namespace Youtube_Playlist_Naukar_Windows
 
                     try
                     {
-                        string channelId =
-                            await ApiClient.GetApiClient.
-                                GetUserChannelId();
+                        ActiveUserSession =
+                            activeUserSession;
+
+                        LoginSuccessful = true;
                         
-                        SessionManager.GetSessionManager.
-                            SaveChannelIdInUserSession(
-                                channelId);
-
-                        var loadingPage =
-                            new LoadingForm();
-
-                        loadingPage.Show();
-
-                        var homePage = new HomePageForm(
-                            channelId,
-                            activeUserSession);
-
-                        await homePage.LoadUserPlaylists();
-
-                        loadingPage.Dispose();
-                        
-                        homePage.Show();
+                        Close();
                     }
                     catch
                     {
+                        LoginSuccessful = false;
                         MessageBox.Show(
                             @"You do not have a YouTube Channel. " +
                             @"Please create a channel against your " +
@@ -65,6 +56,7 @@ namespace Youtube_Playlist_Naukar_Windows
             }
             catch
             {
+                LoginSuccessful = false;
                 MessageBox.Show(@"Login failed.");
             }
             

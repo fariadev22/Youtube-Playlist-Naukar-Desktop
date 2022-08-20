@@ -36,7 +36,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // loginButton
             // 
-            this.loginButton.Location = new System.Drawing.Point(300, 194);
+            this.loginButton.Location = new System.Drawing.Point(252, 203);
             this.loginButton.Name = "loginButton";
             this.loginButton.Size = new System.Drawing.Size(179, 62);
             this.loginButton.TabIndex = 0;
@@ -47,7 +47,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // welcomeLabel
             // 
             this.welcomeLabel.AutoSize = true;
-            this.welcomeLabel.Location = new System.Drawing.Point(341, 52);
+            this.welcomeLabel.Location = new System.Drawing.Point(294, 57);
             this.welcomeLabel.Name = "welcomeLabel";
             this.welcomeLabel.Size = new System.Drawing.Size(90, 25);
             this.welcomeLabel.TabIndex = 1;
@@ -56,7 +56,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // loginMotivationLabel
             // 
             this.loginMotivationLabel.AutoSize = true;
-            this.loginMotivationLabel.Location = new System.Drawing.Point(226, 136);
+            this.loginMotivationLabel.Location = new System.Drawing.Point(172, 127);
             this.loginMotivationLabel.Name = "loginMotivationLabel";
             this.loginMotivationLabel.Size = new System.Drawing.Size(389, 25);
             this.loginMotivationLabel.TabIndex = 2;
@@ -66,12 +66,12 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(821, 331);
+            this.ClientSize = new System.Drawing.Size(720, 290);
             this.Controls.Add(this.loginMotivationLabel);
             this.Controls.Add(this.welcomeLabel);
             this.Controls.Add(this.loginButton);
-            this.MaximumSize = new System.Drawing.Size(843, 387);
-            this.MinimumSize = new System.Drawing.Size(843, 387);
+            this.MaximumSize = new System.Drawing.Size(742, 346);
+            this.MinimumSize = new System.Drawing.Size(742, 346);
             this.Name = "LoginForm";
             this.Text = "Login";
             this.ResumeLayout(false);
