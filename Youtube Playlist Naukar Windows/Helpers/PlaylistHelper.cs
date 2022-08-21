@@ -169,7 +169,27 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             }
         }
 
-        public async Task AddContributorPlaylist(
+        public void DownloadUserOwnedPlaylistsThumbnails(
+            Dictionary<string, UserPlayList> userOwnedPlaylists)
+        {
+            if (userOwnedPlaylists.Count > 0)
+            {
+                SessionStorageManager.GetSessionManager.
+                    DownloadPlaylistThumbnailsInBackgroundAndInformUI(
+                        userOwnedPlaylists
+                            .Values.ToList(), true);
+            }
+        }
+
+        public Dictionary<string, UserPlayList>
+            GetStoredUserOwnedPlaylists()
+        {
+            return
+                SessionStorageManager.GetSessionManager.
+                    GetUserOwnedPlaylistsFromSession();
+        }
+
+        public async Task<bool> AddContributorPlaylist(
             string playListId)
         {
             try
@@ -189,21 +209,19 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     var contributorPlaylist =
                         playlists[0];
 
-                    Console.WriteLine(
-                        "INFO: Playlist with title '" +
-                        contributorPlaylist.Snippet?.Title +
-                        "' added successfully.");
-
                     SessionStorageManager.GetSessionManager.
                         SaveUserContributorPlaylistToUserSession(
                             contributorPlaylist);
+
+                    return true;
                 }
             }
             catch
             {
-                Console.WriteLine("ERROR: Unable to add " +
-                                  "selected contributor playlist.");
+                //
             }
+
+            return false;
         }
 
         public async Task RefreshUserContributorPlaylists(
@@ -295,38 +313,15 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         public void RemoveContributorPlaylistEntry(
             string playlistId)
         {
-            Console.WriteLine("INFO: Removing playlist entry...");
-
             var userContributorPlaylists =
-                SessionStorageManager.GetSessionManager.GetUserSessionPlaylists().Item2;
+                SessionStorageManager.GetSessionManager.
+                    GetUserContributorPlaylistsFromSession();
 
             if (userContributorPlaylists?.ContainsKey(playlistId) == true)
             {
                 SessionStorageManager.GetSessionManager.
                     DeleteUserContributorPlaylistFromUserSession(
                         userContributorPlaylists[playlistId]);
-
-                Console.WriteLine("INFO: Selected contributor playlist " +
-                                  "has been successfully removed.");
-            }
-            else
-            {
-                Console.WriteLine(
-                    "WARN: Selected playlist for removal " +
-                    "does not exist in the currently loaded " +
-                    "contributor playlists already.");
-            }
-        }
-
-        public void DownloadUserOwnedPlaylistsThumbnails(
-            Dictionary<string, UserPlayList> userOwnedPlaylists)
-        {
-            if (userOwnedPlaylists.Count > 0)
-            {
-                SessionStorageManager.GetSessionManager.
-                    DownloadPlaylistThumbnailsInBackgroundAndInformUI(
-                        userOwnedPlaylists
-                            .Values.ToList(), true);
             }
         }
 
@@ -342,18 +337,12 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             }
         }
 
-        public Dictionary<string, UserPlayList> GetStoredUserOwnedPlaylists()
-        {
-            return 
-                SessionStorageManager.GetSessionManager.
-                    GetUserSessionPlaylists().Item1;
-        }
-
-        public Dictionary<string, UserPlayList> GetStoredUserContributorPlaylists()
+        public Dictionary<string, UserPlayList> 
+            GetStoredUserContributorPlaylists()
         {
             return
                 SessionStorageManager.GetSessionManager.
-                    GetUserSessionPlaylists().Item2;
+                    GetUserContributorPlaylistsFromSession();
         }
 
         private static void notifyUIForPlaylistThumbnailChange(

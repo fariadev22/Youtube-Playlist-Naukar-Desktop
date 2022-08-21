@@ -515,13 +515,22 @@ namespace Youtube_Playlist_Naukar_Windows
                     }
                     else
                     {
-                        await PlaylistHelper.
-                            GetPlaylistHelper.AddContributorPlaylist(
-                                playListId);
+                        var added = 
+                            await PlaylistHelper.
+                                GetPlaylistHelper.AddContributorPlaylist(
+                                    playListId);
 
-                        LoadContributorPlaylistsUI();
+                        if (added)
+                        {
+                            LoadContributorPlaylistsUI();
 
-                        MessageBox.Show("Entry successfully added.");
+                            MessageBox.Show("Playlist added successfully.");
+                        }
+                        else
+                        {
+                            MessageBox.Show("An error occurred while trying to " +
+                                            "add the new playlist entry.");
+                        }
                     }
                 }
 

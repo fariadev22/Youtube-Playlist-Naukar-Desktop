@@ -296,11 +296,16 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             SaveSession();
         }
 
-        public (Dictionary<string, UserPlayList>, Dictionary<string, UserPlayList>) 
-            GetUserSessionPlaylists()
+        public Dictionary<string, UserPlayList> 
+            GetUserOwnedPlaylistsFromSession()
         {
-            return (_activeUserSession.UserData?.UserOwnedPlayLists,
-                _activeUserSession.UserData?.UserContributorPlayLists);
+            return _activeUserSession.UserData?.UserOwnedPlayLists;
+        }
+
+        public Dictionary<string, UserPlayList>
+            GetUserContributorPlaylistsFromSession()
+        {
+            return _activeUserSession.UserData?.UserContributorPlayLists;
         }
 
         public void SavePlaylistVideosToUserSessionPlaylist(
