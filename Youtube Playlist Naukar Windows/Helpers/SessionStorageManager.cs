@@ -10,26 +10,10 @@ using Youtube_Playlist_Naukar_Windows.Utilities;
 
 namespace Youtube_Playlist_Naukar_Windows.Helpers
 {
-    public class PlaylistThumbnailUpdatedEventArgs : EventArgs
+    public class SessionStorageManager
     {
-        public string PlaylistId { get; set; }
-
-        public string PlaylistImagePathFromCustomerDirectory { get; set; }
-
-        public bool IsOwnerPlaylist { get; set; }
-    }
-
-    public class PlaylistVideoThumbnailUpdatedEventArgs: EventArgs
-    {
-        public string VideoId { get; set; }
-
-        public string PlaylistVideoImagePathFromCustomerDirectory { get; set; }
-    }
-
-    public class SessionManager
-    {
-        private static readonly SessionManager SessionManagerInstance =
-            new SessionManager();
+        private static readonly SessionStorageManager SessionManagerInstance =
+            new SessionStorageManager();
 
         public event EventHandler<PlaylistThumbnailUpdatedEventArgs> 
             PlaylistThumbnailUpdated;
@@ -37,12 +21,12 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         public event EventHandler<PlaylistVideoThumbnailUpdatedEventArgs>
             PlaylistVideoThumbnailUpdated;
 
-        static SessionManager()
+        static SessionStorageManager()
         {
 
         }
 
-        public static SessionManager GetSessionManager
+        public static SessionStorageManager GetSessionManager
         {
             get
             {
@@ -58,7 +42,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
         private string _applicationDirectory;
 
-        public SessionManager()
+        public SessionStorageManager()
         {
             _applicationDirectory =
                 Environment.GetFolderPath(

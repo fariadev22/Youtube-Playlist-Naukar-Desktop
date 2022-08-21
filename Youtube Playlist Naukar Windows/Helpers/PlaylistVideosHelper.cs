@@ -62,7 +62,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
                     if (playlistVideos != null)
                     {
-                        SessionManager.GetSessionManager.
+                        SessionStorageManager.GetSessionManager.
                             SavePlaylistVideosToUserSessionPlaylist(
                                 userPlaylist, playlistVideos, etag);
                     }
@@ -102,7 +102,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 partialVideosData.Count <= 0)
             {
                 userPlaylist.PlayListVideos?.Clear();
-                SessionManager.GetSessionManager.
+                SessionStorageManager.GetSessionManager.
                     SavePlaylistVideosToUserSessionPlaylist(
                         userPlaylist, partialVideosData, eTag);
                 return;
@@ -157,7 +157,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
                     eTag = playlistVideosResult.Item2;
 
-                    SessionManager.GetSessionManager.
+                    SessionStorageManager.GetSessionManager.
                         SavePlaylistVideosToUserSessionPlaylist(
                             userPlaylist, newVideosData, videos, eTag);
                 }
@@ -250,7 +250,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                             messages.Add(
                                 "Successfully added video with URL [" + url + "]");
 
-                            SessionManager.GetSessionManager.
+                            SessionStorageManager.GetSessionManager.
                                 SavePlaylistVideoToUserSessionPlaylist(
                                     userPlayList, playListItem);
                         }
@@ -303,7 +303,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 await ApiClient.GetApiClient.DeletePlaylistVideo(
                     videoToDelete.UniqueVideoIdInPlaylist);
 
-                SessionManager.GetSessionManager.DeleteVideoFromUserSessionPlaylist(
+                SessionStorageManager.GetSessionManager.DeleteVideoFromUserSessionPlaylist(
                     userPlaylist,
                     videoToDelete);
 

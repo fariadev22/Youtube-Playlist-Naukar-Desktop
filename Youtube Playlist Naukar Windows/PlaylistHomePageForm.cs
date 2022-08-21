@@ -28,7 +28,7 @@ namespace Youtube_Playlist_Naukar_Windows
             _activeUserSession = activeUserSession;
             Text = _playlist.Title;
 
-            SessionManager.GetSessionManager.
+            SessionStorageManager.GetSessionManager.
                     PlaylistVideoThumbnailUpdated +=
                 UpdatePlaylistVideoThumbnail;
         }

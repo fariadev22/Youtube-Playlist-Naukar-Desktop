@@ -19,47 +19,25 @@ namespace Youtube_Playlist_Naukar_Windows
         private async void loginButton_Click(
             object sender, EventArgs e)
         {
-            try
+            var loginResult = 
+                await AccountHelper.GetAccountHelper
+                    .TryOpenUserAccount();
+
+            if (loginResult.Item1)
             {
-                var activeUserSession =
-                    await SessionManager.GetSessionManager
-                        .StartSession();
+                LoginSuccessful = true;
 
-                if (activeUserSession == null)
-                {
-                    LoginSuccessful = false;
-                    MessageBox.Show(@"Login failed.");
-                }
-                else
-                {
-                    ApiClient.GetApiClient
-                        .Initialize(activeUserSession);
+                ActiveUserSession =
+                    AccountHelper.GetAccountHelper.
+                        GetActiveUserSession();
 
-                    try
-                    {
-                        ActiveUserSession =
-                            activeUserSession;
-
-                        LoginSuccessful = true;
-                        
-                        Close();
-                    }
-                    catch
-                    {
-                        LoginSuccessful = false;
-                        MessageBox.Show(
-                            @"You do not have a YouTube Channel. " +
-                            @"Please create a channel against your " +
-                            @"YouTube account and then try again.");
-                    }
-                }
+                Close();
             }
-            catch
+            else
             {
                 LoginSuccessful = false;
-                MessageBox.Show(@"Login failed.");
+                MessageBox.Show(loginResult.Item2);
             }
-            
         }
     }
 }

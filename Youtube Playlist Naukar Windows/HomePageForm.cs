@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Youtube_Playlist_Naukar_Windows.Helpers;
@@ -14,17 +13,17 @@ namespace Youtube_Playlist_Naukar_Windows
 {
     public partial class HomePageForm : Form
     {
+        public bool ReturnToLoginScreen { get; set; }
+
         private UserSession _activeUserSession;
 
         private string _youtubeChannelId;
 
-        private Bitmap _defaultThumbnail { get; set; }
+        private Bitmap _defaultThumbnail;
 
         private Dictionary<string, UserPlayList> _userOwnedPlaylists;
 
         private Dictionary<string, UserPlayList> _userContributorPlaylists;
-
-        public bool ReturnToLoginScreen { get; set; }
 
         public HomePageForm(
             UserSession activeUserSession)
@@ -33,9 +32,11 @@ namespace Youtube_Playlist_Naukar_Windows
 
             _activeUserSession = activeUserSession;
 
-            SessionManager.GetSessionManager.
-                    PlaylistThumbnailUpdated +=
-                updatePlaylistThumbnail;
+            PlaylistHelper.UserOwnedPlaylistThumbnailReady +=
+                updateUserOwnedPlaylistThumbnail;
+
+            PlaylistHelper.UserContributorPlaylistThumbnailReady +=
+                updateUserContributorPlaylistThumbnail;
 
             ConvertDefaultThumbnailToBitmap();
         }
@@ -43,7 +44,7 @@ namespace Youtube_Playlist_Naukar_Windows
         protected override async void OnLoad(EventArgs e)
         {
             //load user data
-            await OpenUserAccount();
+            LoadActiveUsersAccountInfo();
 
             //load playlists data when form starts loading
             await LoadUserPlaylists();
@@ -51,27 +52,17 @@ namespace Youtube_Playlist_Naukar_Windows
 
         #region Helpers
 
-        private async Task OpenUserAccount()
+        private void LoadActiveUsersAccountInfo()
         {
-            ApiClient.GetApiClient.Initialize(
-                _activeUserSession);
-
             _youtubeChannelId =
-                await ApiClient.GetApiClient.GetUserChannelId();
+                _activeUserSession.UserData?.ChannelId;
 
-            SessionManager.GetSessionManager.
-                SaveChannelIdInUserSession(
-                    _youtubeChannelId);
-
-            if (_activeUserSession.EmailAddress != null)
-            {
-                email.Text = _activeUserSession.EmailAddress;
-            }
+            email.Text = _activeUserSession.EmailAddress ?? "";
 
             switchAccountMenuItem.DropDownItems.Clear();
 
-            SessionManager.GetSessionManager
-                .GetUserSessionEmails()?
+            AccountHelper.GetAccountHelper
+                .GetActiveAccountEmails()?
                 .ForEach(
                     s => switchAccountMenuItem.DropDownItems.Add(s));
         }
@@ -91,16 +82,14 @@ namespace Youtube_Playlist_Naukar_Windows
                         UserOwnedPlaylistsETag);
 
             //fetch data loaded from api and saved into session
-            var playlists =
-                SessionManager.GetSessionManager.
-                    GetUserSessionPlaylists();
-
             _userOwnedPlaylists =
-                playlists.Item1 ??
+                PlaylistHelper.GetPlaylistHelper.
+                    GetStoredUserOwnedPlaylists() ??
                 new Dictionary<string, UserPlayList>();
 
             _userContributorPlaylists =
-                playlists.Item2 ??
+                PlaylistHelper.GetPlaylistHelper.
+                    GetStoredUserContributorPlaylists() ??
                 new Dictionary<string, UserPlayList>();
 
             if (_userContributorPlaylists.Count > 0)
@@ -112,17 +101,48 @@ namespace Youtube_Playlist_Naukar_Windows
                         _userContributorPlaylists);
 
                 _userContributorPlaylists =
-                    SessionManager.GetSessionManager.
-                        GetUserSessionPlaylists().Item2;
+                    PlaylistHelper.GetPlaylistHelper.
+                        GetStoredUserContributorPlaylists();
             }
             
             LoadOwnerPlaylistsUI();
 
             LoadContributorPlaylistsUI();
 
-            DownloadPlaylistThumbnails();
+            LoggerLabel.Text = "";
+        }
+
+        private async Task RefreshPlaylists()
+        {
+            LoggerLabel.Text = "Refreshing....";
+            LoggerLabel.ForeColor = Color.DodgerBlue;
+
+            await PlaylistHelper.GetPlaylistHelper
+                .RefreshUserOwnedPlaylists(
+                    _youtubeChannelId,
+                    _userOwnedPlaylists,
+                    _activeUserSession.UserData?.
+                        UserOwnedPlaylistsETag);
+
+            await PlaylistHelper.GetPlaylistHelper.
+                RefreshUserContributorPlaylists(
+                    _userContributorPlaylists);
+
+            _userOwnedPlaylists =
+                PlaylistHelper.GetPlaylistHelper.
+                    GetStoredUserOwnedPlaylists();
+
+            _userContributorPlaylists =
+                PlaylistHelper.GetPlaylistHelper.
+                    GetStoredUserContributorPlaylists();
+
+            LoadOwnerPlaylistsUI();
+
+            LoadContributorPlaylistsUI();
 
             LoggerLabel.Text = "";
+
+            MessageBox.Show("Playlists data has been refreshed.");
         }
 
         private void LoadOwnerPlaylistsUI()
@@ -149,6 +169,10 @@ namespace Youtube_Playlist_Naukar_Windows
                         userOwnedPlaylist.Value.Title,
                         "default");
                 }
+
+                PlaylistHelper.GetPlaylistHelper
+                    .DownloadUserOwnedPlaylistsThumbnails(
+                        _userOwnedPlaylists);
             }
         }
 
@@ -176,26 +200,16 @@ namespace Youtube_Playlist_Naukar_Windows
                         userContributorPlaylist.Value.Title,
                         "default");
                 }
+
+                PlaylistHelper.GetPlaylistHelper
+                    .DownloadUserContributorPlaylistsThumbnails(
+                        _userContributorPlaylists);
             }
         }
 
-        private void DownloadPlaylistThumbnails()
+        private void ClearPlaylistPreviewDetails()
         {
-            if (_userOwnedPlaylists.Count > 0)
-            {
-                SessionManager.GetSessionManager.
-                    DownloadPlaylistThumbnailsInBackgroundAndInformUI(
-                        _userOwnedPlaylists
-                            .Values.ToList(), true);
-            }
-
-            if (_userContributorPlaylists.Count > 0)
-            {
-                SessionManager.GetSessionManager.
-                    DownloadPlaylistThumbnailsInBackgroundAndInformUI(
-                        _userContributorPlaylists
-                            .Values.ToList(), false);
-            }
+            LoadPlaylistPreviewDetails(null);
         }
 
         private void LoadPlaylistPreviewDetails(
@@ -279,43 +293,6 @@ namespace Youtube_Playlist_Naukar_Windows
             return value;
         }
 
-        private async Task RefreshPlaylists()
-        {
-            LoggerLabel.Text = "Refreshing....";
-            LoggerLabel.ForeColor = Color.DodgerBlue;
-
-            await PlaylistHelper.GetPlaylistHelper
-                .RefreshUserOwnedPlaylists(
-                    _youtubeChannelId,
-                    _userOwnedPlaylists,
-                    _activeUserSession.UserData?.
-                        UserOwnedPlaylistsETag);
-
-            await PlaylistHelper.GetPlaylistHelper.
-                RefreshUserContributorPlaylists(
-                    _userContributorPlaylists);
-
-            var playlistsResult =
-                SessionManager.GetSessionManager.
-                    GetUserSessionPlaylists();
-
-            _userOwnedPlaylists =
-                playlistsResult.Item1;
-
-            _userContributorPlaylists =
-                playlistsResult.Item2;
-
-            LoadOwnerPlaylistsUI();
-
-            LoadContributorPlaylistsUI();
-
-            DownloadPlaylistThumbnails();
-
-            LoggerLabel.Text = "";
-
-            MessageBox.Show("Playlists data has been refreshed.");
-        }
-
         private void OpenLinkInBrowser(
             string url)
         {
@@ -346,58 +323,59 @@ namespace Youtube_Playlist_Naukar_Windows
 
         #region Events
 
-        private void updatePlaylistThumbnail(
+        private void updateUserOwnedPlaylistThumbnail(
             object sender,
-            PlaylistThumbnailUpdatedEventArgs eventArgs)
+            UserOwnedPlaylistThumbnailReadyEventArgs eventArgs)
         {
-            var isUserOwnedPlaylist =
-                eventArgs.IsOwnerPlaylist;
-
-            if (isUserOwnedPlaylist)
+            if (!ownerPlaylistsList.InvokeRequired)
             {
-                if (ownerPlaylistsList.InvokeRequired)
-                {
-                    ownerPlaylistsList.Invoke(
-                        new MethodInvoker(delegate
-                        {
-                            CommonUtilities.ConvertLocalImageToBitmap(
-                                _activeUserSession.UserDirectory,
-                                ownerPlaylistsList.LargeImageList,
-                                eventArgs.PlaylistId,
-                                eventArgs.PlaylistImagePathFromCustomerDirectory);
-
-                            int indexOfKey =
-                                ownerPlaylistsList.Items.IndexOfKey(
-                                    eventArgs.PlaylistId);
-
-                            ownerPlaylistsList.Items[indexOfKey].ImageKey =
-                                eventArgs.PlaylistId;
-                        }));
-                }
+                return;
             }
-            else
+
+            ownerPlaylistsList.Invoke(
+                new MethodInvoker(delegate
+                {
+                    CommonUtilities.ConvertLocalImageToBitmap(
+                        _activeUserSession.UserDirectory,
+                        ownerPlaylistsList.LargeImageList,
+                        eventArgs.PlaylistId,
+                        eventArgs.PlaylistImagePathFromCustomerDirectory);
+
+                    int indexOfKey =
+                        ownerPlaylistsList.Items.IndexOfKey(
+                            eventArgs.PlaylistId);
+
+                    ownerPlaylistsList.Items[indexOfKey].ImageKey =
+                        eventArgs.PlaylistId;
+                }));
+        }
+
+        private void updateUserContributorPlaylistThumbnail(
+            object sender,
+            UserContributorPlaylistThumbnailReadyEventArgs eventArgs)
+        {
+            if (!contributorPlaylistsList.InvokeRequired)
             {
-                if (contributorPlaylistsList.InvokeRequired)
-                {
-                    contributorPlaylistsList.Invoke(
-                        new MethodInvoker(delegate
-                        {
-                            CommonUtilities.ConvertLocalImageToBitmap(
-                                _activeUserSession.UserDirectory,
-                                contributorPlaylistsList.LargeImageList,
-                                eventArgs.PlaylistId,
-                                eventArgs.PlaylistImagePathFromCustomerDirectory);
-
-                            int indexOfKey =
-                                contributorPlaylistsList.Items.IndexOfKey(
-                                    eventArgs.PlaylistId);
-
-                            contributorPlaylistsList.Items[
-                                    indexOfKey].ImageKey =
-                                eventArgs.PlaylistId;
-                        }));
-                }
+                return;
             }
+
+            contributorPlaylistsList.Invoke(
+                new MethodInvoker(delegate
+                {
+                    CommonUtilities.ConvertLocalImageToBitmap(
+                        _activeUserSession.UserDirectory,
+                        contributorPlaylistsList.LargeImageList,
+                        eventArgs.PlaylistId,
+                        eventArgs.PlaylistImagePathFromCustomerDirectory);
+
+                    int indexOfKey =
+                        contributorPlaylistsList.Items.IndexOfKey(
+                            eventArgs.PlaylistId);
+
+                    contributorPlaylistsList.Items[
+                            indexOfKey].ImageKey =
+                        eventArgs.PlaylistId;
+                }));
         }
 
         private void ownerPlaylistsList_SelectedIndexChanged(
@@ -610,25 +588,30 @@ namespace Youtube_Playlist_Naukar_Windows
         private async void forgetCurrentAccountMenuItem_Click(
             object sender, EventArgs e)
         {
-            try
-            {
-                await SessionManager.GetSessionManager
-                    .ForgetCurrentUser();
+            var forgetAccountResult = 
+                await AccountHelper.GetAccountHelper.
+                    ForgetAndCloseAccount();
 
+            if (forgetAccountResult.Item1)
+            {
                 MessageBox.Show(
                     "Data associated with current " +
                     "active account has been removed.",
                     "Message",
                     MessageBoxButtons.OK);
 
+
+                _activeUserSession = null;
+                _youtubeChannelId = null;
+                _userContributorPlaylists.Clear();
+                _userOwnedPlaylists.Clear();
+
                 ReturnToLoginScreen = true;
                 Close();
             }
-            catch
+            else
             {
-                MessageBox.Show(
-                    "Unable to remove account details. " +
-                    "Please try again.");
+                MessageBox.Show(forgetAccountResult.Item2);
             }
         }
 
@@ -638,15 +621,34 @@ namespace Youtube_Playlist_Naukar_Windows
             string selectedEmail =
                 e.ClickedItem.Text;
 
-            _activeUserSession =
-                await SessionManager.GetSessionManager
-                    .ChangeSession(selectedEmail);
+            if (selectedEmail == _activeUserSession.EmailAddress)
+            {
+                MessageBox.Show("Account already active.");
+                return;
+            }
 
-            await OpenUserAccount();
+            ClearPlaylistPreviewDetails();
 
-            await LoadUserPlaylists();
+            var changeAccountResult = 
+                await AccountHelper.GetAccountHelper.ChangeAccount(
+                    selectedEmail);
 
-            MessageBox.Show("Account switched to " + selectedEmail);
+            if (changeAccountResult.Item1)
+            {
+                _activeUserSession =
+                    AccountHelper.GetAccountHelper.GetActiveUserSession();
+
+                LoadActiveUsersAccountInfo();
+
+                await LoadUserPlaylists();
+
+                MessageBox.Show("Account switched to " + selectedEmail);
+            }
+            else
+            {
+                MessageBox.Show("Unable to switch account to: " + 
+                                selectedEmail);
+            }
         }
 
         private async void addNewAccountMenuItem_Click(
@@ -672,17 +674,27 @@ namespace Youtube_Playlist_Naukar_Windows
                 }
                 else
                 {
-                    _activeUserSession =
-                        await SessionManager.GetSessionManager
-                            .ChangeSession(emailInput);
+                    var addAccountResult =
+                        await AccountHelper.GetAccountHelper.ChangeAccount(
+                            emailInput);
 
-                    await OpenUserAccount();
+                    if (addAccountResult.Item1)
+                    {
+                        _activeUserSession =
+                            AccountHelper.GetAccountHelper.GetActiveUserSession();
 
-                    await LoadUserPlaylists();
+                        LoadActiveUsersAccountInfo();
 
-                    MessageBox.Show(
-                        "Account with email " + 
-                        email.Text + " added.");
+                        await LoadUserPlaylists();
+
+                        MessageBox.Show("Account with email " +
+                                        email.Text + " added.");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Unable to add account with email" +
+                                        " -> " + emailInput);
+                    }
                 }
 
                 emailInputForm.Dispose();

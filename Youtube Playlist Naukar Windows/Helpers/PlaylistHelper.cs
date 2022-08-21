@@ -12,9 +12,19 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             PlaylistHelperInstance =
                 new PlaylistHelper();
 
+        public static event EventHandler<
+                UserOwnedPlaylistThumbnailReadyEventArgs>
+            UserOwnedPlaylistThumbnailReady;
+
+        public static event EventHandler<
+                UserContributorPlaylistThumbnailReadyEventArgs>
+            UserContributorPlaylistThumbnailReady;
+
         static PlaylistHelper()
         {
-
+            SessionStorageManager.GetSessionManager.
+                    PlaylistThumbnailUpdated +=
+                notifyUIForPlaylistThumbnailChange;
         }
 
         public static PlaylistHelper GetPlaylistHelper
@@ -58,7 +68,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                         return;
                     }
 
-                    SessionManager.GetSessionManager.
+                    SessionStorageManager.GetSessionManager.
                         SaveUserOwnedPlaylistsToUserSession(
                             playlists, eTag);
                 }
@@ -98,7 +108,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 partialPlaylistsData.Count <= 0)
             {
                 alreadyLoadedPlaylists.Clear();
-                SessionManager.GetSessionManager.
+                SessionStorageManager.GetSessionManager.
                     SaveUserOwnedPlaylistsToUserSession(
                         partialPlaylistsData, eTag);
                 return;
@@ -152,10 +162,47 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
                     eTag = playlistsResult.Item2;
 
-                    SessionManager.GetSessionManager.
+                    SessionStorageManager.GetSessionManager.
                         SaveUserOwnedPlaylistsToUserSession(
                             newPlaylistsData, playlists, eTag);
                 }
+            }
+        }
+
+        public async Task AddContributorPlaylist(
+            string playListId)
+        {
+            try
+            {
+                var playlistResult =
+                    await ApiClient.GetApiClient
+                        .GetPlayListsData(playlistIds:
+                            new List<string> { playListId });
+
+                var playlists =
+                    playlistResult.Item1;
+
+                if (playlists != null &&
+                    playlists.Count > 0 &&
+                    playlists[0] != null)
+                {
+                    var contributorPlaylist =
+                        playlists[0];
+
+                    Console.WriteLine(
+                        "INFO: Playlist with title '" +
+                        contributorPlaylist.Snippet?.Title +
+                        "' added successfully.");
+
+                    SessionStorageManager.GetSessionManager.
+                        SaveUserContributorPlaylistToUserSession(
+                            contributorPlaylist);
+                }
+            }
+            catch
+            {
+                Console.WriteLine("ERROR: Unable to add " +
+                                  "selected contributor playlist.");
             }
         }
 
@@ -181,7 +228,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 foreach (var alreadyLoadedPlaylist in
                     alreadyLoadedPlaylists)
                 {
-                    SessionManager.GetSessionManager
+                    SessionStorageManager.GetSessionManager
                         .DeleteUserContributorPlaylistFromUserSession(
                             alreadyLoadedPlaylist.Value);
                 }
@@ -238,47 +285,10 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 var playlists =
                     playlistsResult.Item1;
 
-                SessionManager.GetSessionManager
+                SessionStorageManager.GetSessionManager
                     .SaveUserContributorPlaylistsToUserSession(
                         newPlaylistsData,
                         playlists);
-            }
-        }
-
-        public async Task AddContributorPlaylist(
-            string playListId)
-        {
-            try
-            {
-                var playlistResult =
-                    await ApiClient.GetApiClient
-                        .GetPlayListsData(playlistIds: 
-                            new List<string> { playListId });
-
-                var playlists =
-                    playlistResult.Item1;
-
-                if (playlists != null &&
-                    playlists.Count > 0 &&
-                    playlists[0] != null)
-                {
-                    var contributorPlaylist =
-                        playlists[0];
-
-                    Console.WriteLine(
-                        "INFO: Playlist with title '" +
-                        contributorPlaylist.Snippet?.Title +
-                        "' added successfully.");
-
-                    SessionManager.GetSessionManager.
-                        SaveUserContributorPlaylistToUserSession(
-                            contributorPlaylist);
-                }
-            }
-            catch
-            {
-                Console.WriteLine("ERROR: Unable to add " +
-                                  "selected contributor playlist.");
             }
         }
 
@@ -288,12 +298,13 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             Console.WriteLine("INFO: Removing playlist entry...");
 
             var userContributorPlaylists =
-                SessionManager.GetSessionManager.GetUserSessionPlaylists().Item2;
+                SessionStorageManager.GetSessionManager.GetUserSessionPlaylists().Item2;
 
             if (userContributorPlaylists?.ContainsKey(playlistId) == true)
             {
-                SessionManager.GetSessionManager.DeleteUserContributorPlaylistFromUserSession(
-                    userContributorPlaylists[playlistId]);
+                SessionStorageManager.GetSessionManager.
+                    DeleteUserContributorPlaylistFromUserSession(
+                        userContributorPlaylists[playlistId]);
 
                 Console.WriteLine("INFO: Selected contributor playlist " +
                                   "has been successfully removed.");
@@ -304,6 +315,81 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     "WARN: Selected playlist for removal " +
                     "does not exist in the currently loaded " +
                     "contributor playlists already.");
+            }
+        }
+
+        public void DownloadUserOwnedPlaylistsThumbnails(
+            Dictionary<string, UserPlayList> userOwnedPlaylists)
+        {
+            if (userOwnedPlaylists.Count > 0)
+            {
+                SessionStorageManager.GetSessionManager.
+                    DownloadPlaylistThumbnailsInBackgroundAndInformUI(
+                        userOwnedPlaylists
+                            .Values.ToList(), true);
+            }
+        }
+
+        public void DownloadUserContributorPlaylistsThumbnails(
+            Dictionary<string, UserPlayList> userContributorPlaylists)
+        {
+            if (userContributorPlaylists.Count > 0)
+            {
+                SessionStorageManager.GetSessionManager.
+                    DownloadPlaylistThumbnailsInBackgroundAndInformUI(
+                        userContributorPlaylists
+                            .Values.ToList(), false);
+            }
+        }
+
+        public Dictionary<string, UserPlayList> GetStoredUserOwnedPlaylists()
+        {
+            return 
+                SessionStorageManager.GetSessionManager.
+                    GetUserSessionPlaylists().Item1;
+        }
+
+        public Dictionary<string, UserPlayList> GetStoredUserContributorPlaylists()
+        {
+            return
+                SessionStorageManager.GetSessionManager.
+                    GetUserSessionPlaylists().Item2;
+        }
+
+        private static void notifyUIForPlaylistThumbnailChange(
+            object sender,
+            PlaylistThumbnailUpdatedEventArgs eventArgs)
+        {
+            var isUserOwnedPlaylist =
+                eventArgs.IsOwnerPlaylist;
+
+            if (isUserOwnedPlaylist)
+            {
+                if (UserOwnedPlaylistThumbnailReady != null)
+                {
+                    UserOwnedPlaylistThumbnailReady(null,
+                        new UserOwnedPlaylistThumbnailReadyEventArgs
+                        {
+                            PlaylistId = 
+                                eventArgs.PlaylistId,
+                            PlaylistImagePathFromCustomerDirectory = 
+                                eventArgs.PlaylistImagePathFromCustomerDirectory
+                        });
+                }
+            }
+            else
+            {
+                if (UserContributorPlaylistThumbnailReady != null)
+                {
+                    UserContributorPlaylistThumbnailReady(null,
+                        new UserContributorPlaylistThumbnailReadyEventArgs
+                        {
+                            PlaylistId = 
+                                eventArgs.PlaylistId,
+                            PlaylistImagePathFromCustomerDirectory = 
+                                eventArgs.PlaylistImagePathFromCustomerDirectory
+                        });
+                }
             }
         }
     }
