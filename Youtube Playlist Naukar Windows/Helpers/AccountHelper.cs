@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Youtube_Playlist_Naukar_Windows.Models;
 
@@ -25,6 +28,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         }
 
         public async Task<(bool, string)> TryOpenUserAccount(
+            CancellationToken cancellationToken,
             UserSession userSession = null)
         {
             _activeUserSession =
@@ -43,31 +47,46 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             try
             {
                 var channelId =
-                    await ApiClient.GetApiClient.GetUserChannelId();
+                    await ApiClient.GetApiClient.GetUserChannelId(
+                        cancellationToken);
 
-                SessionStorageManager.GetSessionManager.
-                    SaveChannelIdInUserSession(
-                        channelId);
+                SessionStorageManager.GetSessionManager.SaveChannelIdInUserSession(
+                    channelId);
 
                 return (true, string.Empty);
             }
-            catch
+            catch (AggregateException)
             {
-                return (false, 
+                return (false,
                     "You do not have a YouTube Channel. " +
                     "Please create a channel against your " +
                     "YouTube account and then try again.");
             }
+            catch (HttpRequestException)
+            {
+                return (false,
+                    "Unable to connect to YouTube server. " +
+                    "Please check your internet connection.");
+            }
+            catch
+            {
+                return (false,
+                    "An unknown error occurred. " +
+                    "Please try again later.");
+            }
         }
 
         public async Task<(bool, string)> ChangeAccount(
-            string emailAddress)
+            string emailAddress,
+            CancellationToken cancellationToken)
         {
             _activeUserSession =
                 await SessionStorageManager.GetSessionManager
                     .ChangeSession(emailAddress);
 
-            return await TryOpenUserAccount(_activeUserSession);
+            return await TryOpenUserAccount(
+                cancellationToken, 
+                _activeUserSession);
         }
 
         public List<string> GetActiveAccountEmails()
@@ -85,8 +104,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
                 _activeUserSession = null;
 
-                return (true, "Data associated with current " +
-                              "active account has been removed.");
+                return (true, "");
             }
             catch
             {

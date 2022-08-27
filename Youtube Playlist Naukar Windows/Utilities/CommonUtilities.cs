@@ -23,7 +23,7 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
                     thumbnail.LocalPathFromUserDirectory);
         }
 
-        public static void ConvertLocalImageToBitmap(
+        public static void ConvertLocalImageToBitmapAndStoreInImageList(
             string userDirectoryPath, 
             ImageList imageList, 
             string imageId,
@@ -47,6 +47,30 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
                     var defaultBitmap = new Bitmap(imageStream);
                     imageList.Images.Add(imageId, defaultBitmap);
                 }
+            }
+        }
+
+        public static Bitmap ConvertLocalImageToBitmap(
+            string userDirectoryPath,
+            string imageFileName,
+            int width,
+            int height)
+        {
+            try
+            {
+                return new Bitmap(
+                    Image.FromFile(
+                        userDirectoryPath + "/" + imageFileName),
+                    width,
+                    height);
+            }
+            catch
+            {
+                return new Bitmap(
+                    Image.FromFile(
+                        "default_image.png"),
+                    width,
+                    height);
             }
         }
 

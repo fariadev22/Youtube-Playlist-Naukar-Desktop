@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using FuzzySharp;
-using Google.Apis.YouTube.v3.Data;
 using Youtube_Playlist_Naukar_Windows.Models;
 using Youtube_Playlist_Naukar_Windows.Utilities;
 
@@ -15,9 +15,14 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             PlaylistVideosHelperInstance =
                 new PlaylistVideosHelper();
 
+        public static event EventHandler<
+                VideoThumbnailReadyEventArgs> VideoThumbnailReady;
+
         static PlaylistVideosHelper()
         {
-
+            SessionStorageManager.GetSessionManager.
+                    PlaylistVideoThumbnailUpdated +=
+                notifyUIForVideoThumbnailChange;
         }
 
         public static PlaylistVideosHelper GetPlaylistVideosHelper
@@ -29,17 +34,11 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         }
 
         public async Task LoadPlaylist(
-            UserPlayList userPlaylist)
+            UserPlayList userPlaylist,
+            CancellationToken cancellationToken)
         {
             if (userPlaylist == null)
             {
-                Console.WriteLine("ERROR: No playlist found.");
-                return;
-            }
-
-            if (userPlaylist.PlayListVideosDataLoaded)
-            {
-                Console.WriteLine("INFO: Playlist opened.");
                 return;
             }
 
@@ -53,7 +52,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 {
                     var playlistVideosResult =
                         await ApiClient.GetApiClient.GetPlaylistVideos(
-                            userPlaylist);
+                            userPlaylist, cancellationToken);
 
                     var playlistVideos = playlistVideosResult.Item1;
 
@@ -62,33 +61,45 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
                     if (playlistVideos != null)
                     {
+                        var playlistVideosDurationResult =
+                            await ApiClient.GetApiClient.GetVideosDuration(
+                                playlistVideos
+                                    .Select(v => 
+                                        v.Snippet?.ResourceId?.VideoId)
+                                    .ToList(),
+                                cancellationToken);
+
                         SessionStorageManager.GetSessionManager.
                             SavePlaylistVideosToUserSessionPlaylist(
-                                userPlaylist, playlistVideos, etag);
+                                userPlaylist, playlistVideos, 
+                                playlistVideosDurationResult,
+                                etag);
                     }
                 }
                 else
                 {
-                    await RefreshPlaylistVideos(userPlaylist);
+                    await RefreshPlaylistVideos(userPlaylist,
+                        cancellationToken);
                 }
             }
             catch
             {
-                Console.WriteLine(
-                    "ERROR: Unable to open selected playlist.");
+                //
             }
         }
 
         public async Task RefreshPlaylistVideos(
-            UserPlayList userPlaylist)
+            UserPlayList userPlaylist,
+            CancellationToken cancellationToken)
         {
             var alreadyLoadedVideos =
                 userPlaylist.PlayListVideos ??
                 new Dictionary<string, UserPlayListVideo>();
 
             var playlistVideosResult =
-                await ApiClient.GetApiClient.GetPlaylistVideosPartialData(
-                    userPlaylist);
+                await ApiClient.GetApiClient.
+                    GetPlaylistVideosPartialData(
+                        userPlaylist, cancellationToken);
 
             var partialVideosData =
                 playlistVideosResult.Item1;
@@ -102,9 +113,11 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 partialVideosData.Count <= 0)
             {
                 userPlaylist.PlayListVideos?.Clear();
+
                 SessionStorageManager.GetSessionManager.
                     SavePlaylistVideosToUserSessionPlaylist(
-                        userPlaylist, partialVideosData, eTag);
+                        userPlaylist, partialVideosData, 
+                        new Dictionary<string, string>(), eTag);
                 return;
             }
 
@@ -150,6 +163,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                         await ApiClient.GetApiClient
                             .GetPlaylistVideos(
                                 userPlaylist,
+                                cancellationToken,
                                 videoIds: idsOfVideosToLoad);
 
                     var videos =
@@ -157,9 +171,18 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
                     eTag = playlistVideosResult.Item2;
 
+                    var playlistVideosDurationResult =
+                        await ApiClient.GetApiClient.GetVideosDuration(
+                            videos
+                                .Select(v =>
+                                    v.Snippet?.ResourceId?.VideoId)
+                                .ToList(),
+                            cancellationToken);
+
                     SessionStorageManager.GetSessionManager.
                         SavePlaylistVideosToUserSessionPlaylist(
-                            userPlaylist, newVideosData, videos, eTag);
+                            userPlaylist, newVideosData, videos, 
+                            playlistVideosDurationResult, eTag);
                 }
             }
         }
@@ -179,29 +202,31 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
             if (userPlayList.PlayListVideos?.Values != null)
             {
-                foreach (var playlistVideo in userPlayList.PlayListVideos.Values)
+                foreach (var playlistVideo in userPlayList.
+                    PlayListVideos.Values)
                 {
                     int score = Fuzz.PartialRatio(
-                        searchQuery.ToLower(), playlistVideo.Title.ToLower());
+                        searchQuery.ToLower(), 
+                        playlistVideo.Title.ToLower());
 
                     if (score >= 80)
                     {
-                        videoAndSearchScores.Add(playlistVideo, score);
+                        videoAndSearchScores.Add(
+                            playlistVideo, score);
                     }
                 }
             }
 
             //most relevant stuff on top
-            var results =
+            return
                 videoAndSearchScores.OrderByDescending(v =>
                     v.Value).Select(v => v.Key).ToList();
-
-            return results;
         }
 
         public async Task<List<string>> AddVideoOrVideosToPlayList(
             string youTubeUrlsString,
-            UserPlayList userPlayList)
+            UserPlayList userPlayList,
+            CancellationToken cancellationToken)
         {
             List<string> urls =
                 youTubeUrlsString.Split('\n').
@@ -238,7 +263,15 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     {
                         var playListItem =
                             await ApiClient.GetApiClient.AddVideoToPlayList(
-                                videoId, userPlayList);
+                                videoId, userPlayList, cancellationToken);
+
+                        var playlistVideosDurationResult =
+                            await ApiClient.GetApiClient.GetVideosDuration(
+                                new List<string>
+                                {
+                                    playListItem?.Snippet?.ResourceId?.VideoId
+                                },
+                                cancellationToken);
 
                         if (playListItem == null)
                         {
@@ -252,7 +285,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
                             SessionStorageManager.GetSessionManager.
                                 SavePlaylistVideoToUserSessionPlaylist(
-                                    userPlayList, playListItem);
+                                    userPlayList, playListItem,
+                                    playlistVideosDurationResult);
                         }
                     }
                     catch
@@ -270,7 +304,6 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             UserPlayList playlist)
         {
             if (playlist != null &&
-                playlist.PlayListVideosDataLoaded &&
                 playlist.PlayListVideos != null)
             {
                 return 
@@ -283,37 +316,75 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             return new List<List<UserPlayListVideo>>();
         }
 
-        public async Task DeleteVideoFromPlaylist(
+        public async Task<bool> DeleteVideoFromPlaylist(
             UserPlayList userPlaylist,
-            UserPlayListVideo videoToDelete)
+            UserPlayListVideo videoToDelete,
+            CancellationToken cancellationToken)
         {
             if (userPlaylist == null ||
                 videoToDelete == null)
             {
-                return;
+                return true;
             }
-
-            Console.WriteLine("INFO: Deleting video...");
 
             try
             {
-                long? videoToDeleteIndex = 
-                    videoToDelete.PositionInPlayList;
-
                 await ApiClient.GetApiClient.DeletePlaylistVideo(
-                    videoToDelete.UniqueVideoIdInPlaylist);
+                    videoToDelete.UniqueVideoIdInPlaylist,
+                    cancellationToken);
 
-                SessionStorageManager.GetSessionManager.DeleteVideoFromUserSessionPlaylist(
-                    userPlaylist,
-                    videoToDelete);
+                SessionStorageManager.GetSessionManager.
+                    DeleteVideoFromUserSessionPlaylist(
+                        userPlaylist,
+                        videoToDelete);
 
-                Console.WriteLine("INFO: Video successfully " +
-                                  "removed from playlist.");
+                return true;
             }
             catch
             {
-                Console.WriteLine("ERROR: Unable to remove video " +
-                                  "from playlist successfully.");
+                return false;
+            }
+        }
+
+        public void DownloadPlaylistVideoThumbnails(
+            string playlistId,
+            List<UserPlayListVideo> playlistVideos)
+        {
+            if (playlistVideos.Count > 0)
+            {
+                SessionStorageManager.GetSessionManager.
+                    DownloadPlaylistVideoThumbnailsInBackgroundAndNotifyMainThread(
+                        playlistId, playlistVideos);
+            }
+        }
+
+        public List<UserPlayListVideo> GetPrivateVideos(
+            List<UserPlayListVideo> playlistVideos)
+        {
+            if (playlistVideos.Count > 0)
+            {
+                return playlistVideos.FindAll(
+                    v => v.PrivacyStatus == PrivacyStatusEnum.Private);
+            }
+
+            return new List<UserPlayListVideo>();
+        }
+
+        private static void notifyUIForVideoThumbnailChange(
+            object sender,
+            PlaylistVideoThumbnailUpdatedEventArgs eventArgs)
+        {
+            if (VideoThumbnailReady != null)
+            {
+                VideoThumbnailReady(null,
+                    new VideoThumbnailReadyEventArgs
+                    {
+                        PlaylistId = eventArgs.PlaylistId,
+                        VideoId =
+                            eventArgs.VideoId,
+                        PlaylistVideoImagePathFromCustomerDirectory =
+                            eventArgs.PlaylistVideoImagePathFromCustomerDirectory
+                    });
             }
         }
     }

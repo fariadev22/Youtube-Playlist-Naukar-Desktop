@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using Google.Apis;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
@@ -71,9 +71,10 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         /// </param>
         public async Task<(List<Playlist>, string)> 
             GetPlayListsData(
-            string channelId = null,
-            string pageToken = null,
-            List<string> playlistIds = null)
+                CancellationToken cancellationToken,
+                string channelId = null,
+                string pageToken = null,
+                List<string> playlistIds = null)
         {
             var playListsRequest = 
                 _youtubeService.Playlists.List(
@@ -120,7 +121,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             }
 
             var playListsResponse = 
-                await playListsRequest.ExecuteAsync();
+                await playListsRequest.ExecuteAsync(
+                    cancellationToken);
             string eTag = playListsResponse.ETag;
             var playLists = playListsResponse.Items?.ToList() 
                             ?? new List<Playlist>();
@@ -130,6 +132,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             {
                 var nextPlayLists =
                     (await GetPlayListsData(
+                        cancellationToken,
                         playListsResponse.NextPageToken,
                         playlistIds: playlistIds)).Item1;
 
@@ -146,6 +149,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         public async Task<(List<Playlist>, string)> 
             GetUserPlayListsPartialData(
             string channelId,
+            CancellationToken cancellationToken,
             string pageToken = null)
         {
             //part string needs to be same as original request
@@ -164,7 +168,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             }
 
             var playListsResponse = 
-                await playListsRequest.ExecuteAsync();
+                await playListsRequest.ExecuteAsync(
+                    cancellationToken);
 
             string eTag = playListsResponse.ETag;
 
@@ -176,6 +181,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             {
                 var nextPlayLists =
                     (await GetUserPlayListsPartialData(
+                        channelId,
+                        cancellationToken,
                         playListsResponse.NextPageToken)).Item1;
 
                 if (nextPlayLists != null &&
@@ -191,6 +198,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         public async Task<(List<Playlist>, string)>
             GetUserPlayListsPartialData(
                 List<string> playlistIds,
+                CancellationToken cancellationToken,
                 string pageToken = null)
         {
             //part string needs to be same as original request
@@ -210,7 +218,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             }
 
             var playListsResponse =
-                await playListsRequest.ExecuteAsync();
+                await playListsRequest.ExecuteAsync(
+                    cancellationToken);
 
             string eTag = playListsResponse.ETag;
 
@@ -222,6 +231,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             {
                 var nextPlayLists =
                     (await GetUserPlayListsPartialData(
+                        playlistIds,
+                        cancellationToken,
                         playListsResponse.NextPageToken)).Item1;
 
                 if (nextPlayLists != null &&
@@ -237,6 +248,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         public async Task<(List<PlaylistItem>, string)> 
             GetPlaylistVideos(
             UserPlayList userPlayList,
+            CancellationToken cancellationToken,
             string pageToken = null,
             List<string> videoIds = null)
         {
@@ -247,7 +259,6 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 _youtubeService.PlaylistItems.List(
                     GetVideoRequestPartString());
             playListItemsRequest.MaxResults = 500;
-            playListItemsRequest.PlaylistId = userPlayList.Id;
             playListItemsRequest.Fields =
                 "nextPageToken, etag, items(id, etag, " +
                 "snippet(publishedAt, channelId, title, " +
@@ -262,14 +273,19 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 playListItemsRequest.Id =
                     string.Join(",", videoIds);
             }
+            else
+            {
+                playListItemsRequest.PlaylistId = userPlayList.Id;
+            }
 
             if (!string.IsNullOrWhiteSpace(pageToken))
             {
                 playListItemsRequest.PageToken = pageToken;
             }
 
-            var playListItemsResponse = 
-                await playListItemsRequest.ExecuteAsync();
+            var playListItemsResponse =
+                await playListItemsRequest.ExecuteAsync(
+                    cancellationToken);
 
             string eTag = string.Empty;
 
@@ -289,6 +305,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     var nextItemsResult = 
                         await GetPlaylistVideos(
                             userPlayList,
+                            cancellationToken,
                             playListItemsResponse.NextPageToken,
                             videoIds: videoIds);
 
@@ -308,6 +325,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         public async Task<(List<PlaylistItem>, string)>
             GetPlaylistVideosPartialData(
             UserPlayList userPlayList,
+            CancellationToken cancellationToken,
             string pageToken = null)
         {
             List<PlaylistItem> playlistItems =
@@ -330,7 +348,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             }
 
             var playListItemsResponse =
-                await playListItemsRequest.ExecuteAsync();
+                await playListItemsRequest.ExecuteAsync(
+                    cancellationToken);
 
             string eTag = string.Empty;
 
@@ -351,6 +370,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     var nextItemsResult =
                         await GetPlaylistVideosPartialData(
                             userPlayList,
+                            cancellationToken,
                             playListItemsResponse.NextPageToken);
 
                     var nextItems = nextItemsResult.Item1;
@@ -369,6 +389,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         public async Task<Dictionary<string, string>>
             GetVideosDuration(
             List<string> videoIds,
+            CancellationToken cancellationToken,
             string pageToken = null)
         {
             //key = video id
@@ -376,37 +397,60 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             Dictionary<string, string> videosDuration =
                 new Dictionary<string, string>();
 
+            //videoIds split into chunks of 50 because 
+            //API does not support more than 50 ids at a 
+            //time.
+            List<List<string>> videoIdsChunks =
+                new List<List<string>>();
+
             if (videoIds == null ||
                 videoIds.Count <= 0)
             {
                 return videosDuration;
             }
 
-            var videoRequest =
-                _youtubeService.Videos.List(
-                    "contentDetails");
-            videoRequest.MaxResults = 500;
-            videoRequest.Id =
-                string.Join(",", videoIds);
-            videoRequest.Fields =
-                "items(id, contentDetails(duration))";
-
-            if (!string.IsNullOrWhiteSpace(pageToken))
+            if (videoIds.Count < 50)
             {
-                videoRequest.PageToken = pageToken;
+                videoIdsChunks.Add(videoIds);
+            }
+            else
+            {
+                int chunkSize = 50;
+                videoIdsChunks =
+                    videoIds
+                        .Select((x, i) => 
+                            new { Index = i, Value = x })
+                        .GroupBy(x => x.Index / chunkSize)
+                        .Select(x => x.Select(v => v.Value).ToList())
+                        .ToList();
             }
 
-            var videoResponse =
-                await videoRequest.ExecuteAsync();
-
-            if (videoResponse != null)
+            foreach (var currentVideoIds in videoIdsChunks)
             {
-                if (videoResponse.Items != null &&
+                var videoRequest =
+                   _youtubeService.Videos.List(
+                       "contentDetails");
+                videoRequest.MaxResults = 50;
+                videoRequest.Id =
+                    string.Join(",", currentVideoIds);
+                videoRequest.Fields =
+                    "items(id, contentDetails(duration))";
+
+                if (!string.IsNullOrWhiteSpace(pageToken))
+                {
+                    videoRequest.PageToken = pageToken;
+                }
+
+                var videoResponse =
+                    await videoRequest.ExecuteAsync(
+                        cancellationToken);
+
+                if (videoResponse?.Items != null &&
                     videoResponse.Items.Count > 0)
                 {
-                    foreach(var videoItem in videoResponse.Items)
+                    foreach (var videoItem in videoResponse.Items)
                     {
-                        if(!string.IsNullOrWhiteSpace(videoItem.Id) &&
+                        if (!string.IsNullOrWhiteSpace(videoItem.Id) &&
                             !videosDuration.ContainsKey(videoItem.Id))
                         {
                             videosDuration.Add(videoItem.Id,
@@ -414,32 +458,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                         }
                     }
                 }
-
-                if (!string.IsNullOrWhiteSpace(
-                    videoResponse.NextPageToken))
-                {
-                    var nextVideosDuration =
-                        await GetVideosDuration(
-                            videoIds,
-                            videoResponse.NextPageToken);
-
-                    if (nextVideosDuration != null &&
-                        nextVideosDuration.Count > 0)
-                    {
-                        foreach(var nextVideoDuration in 
-                            nextVideosDuration)
-                        {
-                            if (!videosDuration.ContainsKey(
-                                    nextVideoDuration.Key))
-                            {
-                                videosDuration.Add(
-                                    nextVideoDuration.Key,
-                                    nextVideoDuration.Value);
-                            }
-                        }
-                    }
-                }
             }
+
 
             return videosDuration;
         }
@@ -447,7 +467,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         public async Task<PlaylistItem> 
             AddVideoToPlayList(
             string videoId,
-            UserPlayList userPlayList)
+            UserPlayList userPlayList,
+            CancellationToken cancellationToken)
         {
             var playListItemFromVideoId = new PlaylistItem
             {
@@ -470,28 +491,32 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 "resourceId, videoOwnerChannelTitle, " +
                 "videoOwnerChannelId, position)";
 
-            return await addVideoRequest.ExecuteAsync();
+            return await addVideoRequest.ExecuteAsync(
+                cancellationToken);
         }
 
         public async Task 
             DeletePlaylistVideo(
-            string uniqueVideoIdOfPlaylist)
+            string uniqueVideoIdOfPlaylist,
+            CancellationToken cancellationToken)
         {
             if (!string.IsNullOrWhiteSpace(uniqueVideoIdOfPlaylist))
             {
                 await _youtubeService.PlaylistItems.Delete(
-                    uniqueVideoIdOfPlaylist).ExecuteAsync();
+                    uniqueVideoIdOfPlaylist).ExecuteAsync(
+                    cancellationToken);
             }
         }
         
         public async Task<string>
-            GetUserChannelId()
+            GetUserChannelId(CancellationToken cancellationToken)
         {
             //get user channel id
             var channelRequest = _youtubeService.Channels.List("snippet");
             channelRequest.Mine = true;
             channelRequest.Fields = "items/id";
-            var channelInfo = await channelRequest.ExecuteAsync();
+            var channelInfo = await channelRequest.ExecuteAsync(
+                cancellationToken);
             string channelId = null;
 
             if (channelInfo?.Items != null && 

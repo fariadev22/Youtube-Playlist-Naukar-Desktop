@@ -29,105 +29,109 @@ namespace Youtube_Playlist_Naukar_Windows
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.searchBar = new System.Windows.Forms.TextBox();
-            this.findDuplicates = new System.Windows.Forms.Button();
-            this.refreshVideos = new System.Windows.Forms.Button();
-            this.addVideos = new System.Windows.Forms.Button();
-            this.deleteVideo = new System.Windows.Forms.Button();
+            this.findDuplicatesButton = new System.Windows.Forms.Button();
+            this.refreshVideosButton = new System.Windows.Forms.Button();
+            this.addVideosButton = new System.Windows.Forms.Button();
+            this.deleteVideoButton = new System.Windows.Forms.Button();
             this.MessageLogger = new System.Windows.Forms.Label();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.label18 = new System.Windows.Forms.Label();
-            this.label19 = new System.Windows.Forms.Label();
-            this.label15 = new System.Windows.Forms.Label();
+            this.searchPanel = new System.Windows.Forms.Panel();
+            this.searchIcon = new System.Windows.Forms.PictureBox();
+            this.videoPreviewThumbnail = new System.Windows.Forms.Panel();
+            this.addedByValue = new System.Windows.Forms.LinkLabel();
+            this.playlistPositionValue = new System.Windows.Forms.Label();
+            this.privacyStatusValue = new System.Windows.Forms.Label();
+            this.addedByLabel = new System.Windows.Forms.Label();
+            this.descriptionValue = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
-            this.label13 = new System.Windows.Forms.Label();
-            this.label12 = new System.Windows.Forms.Label();
-            this.label11 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.positionLabel = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
+            this.addedOnValue = new System.Windows.Forms.Label();
+            this.durationValue = new System.Windows.Forms.Label();
+            this.descriptionLabel = new System.Windows.Forms.Label();
+            this.privacyStatusLabel = new System.Windows.Forms.Label();
+            this.durationLabel = new System.Windows.Forms.Label();
+            this.titleValue = new System.Windows.Forms.Label();
+            this.playlistPositionLabel = new System.Windows.Forms.Label();
             this.urlLabel = new System.Windows.Forms.Label();
             this.titleLabel = new System.Windows.Forms.Label();
-            this.linkLabel = new System.Windows.Forms.LinkLabel();
+            this.videoOwnerLabel = new System.Windows.Forms.Label();
+            this.addedOnLabel = new System.Windows.Forms.Label();
+            this.urlValue = new System.Windows.Forms.LinkLabel();
             this.title = new System.Windows.Forms.Label();
             this.ownerLabel = new System.Windows.Forms.Label();
-            this.ownerLinkLabel = new System.Windows.Forms.LinkLabel();
+            this.videoOwnerValue = new System.Windows.Forms.LinkLabel();
             this.createdOn = new System.Windows.Forms.Label();
             this.createdOnLabel = new System.Windows.Forms.Label();
-            this.pictureBox2 = new System.Windows.Forms.PictureBox();
-            this.selectVideoLabel = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.TitleColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Duration = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.OwnerName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.label16 = new System.Windows.Forms.Label();
-            this.label17 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.panel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            this.panel2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            this.videoThumbnailPreview = new System.Windows.Forms.PictureBox();
+            this.playlistNameLabel = new System.Windows.Forms.Label();
+            this.totalVideosLabel = new System.Windows.Forms.Label();
+            this.playlistVideosDataView = new System.Windows.Forms.DataGridView();
+            this.totalVideosValue = new System.Windows.Forms.Label();
+            this.playlistNameValue = new System.Windows.Forms.Label();
+            this.viewPrivateVideosButton = new System.Windows.Forms.Button();
+            this.returnHomeButton = new System.Windows.Forms.Button();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.searchPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.searchIcon)).BeginInit();
+            this.videoPreviewThumbnail.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.videoThumbnailPreview)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.playlistVideosDataView)).BeginInit();
             this.SuspendLayout();
             // 
             // searchBar
             // 
-            this.searchBar.Location = new System.Drawing.Point(23, 27);
+            this.searchBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.searchBar.Location = new System.Drawing.Point(241, 27);
             this.searchBar.Name = "searchBar";
             this.searchBar.PlaceholderText = "Enter query to search playlist videos.";
-            this.searchBar.Size = new System.Drawing.Size(933, 31);
+            this.searchBar.Size = new System.Drawing.Size(715, 31);
             this.searchBar.TabIndex = 1;
             this.searchBar.TextChanged += new System.EventHandler(this.searchBar_TextChanged);
             // 
-            // findDuplicates
+            // findDuplicatesButton
             // 
-            this.findDuplicates.Location = new System.Drawing.Point(851, 211);
-            this.findDuplicates.Name = "findDuplicates";
-            this.findDuplicates.Size = new System.Drawing.Size(156, 34);
-            this.findDuplicates.TabIndex = 3;
-            this.findDuplicates.Text = "Find Duplicates";
-            this.findDuplicates.UseVisualStyleBackColor = true;
-            this.findDuplicates.Click += new System.EventHandler(this.findDuplicates_Click);
+            this.findDuplicatesButton.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.findDuplicatesButton.Location = new System.Drawing.Point(851, 211);
+            this.findDuplicatesButton.Name = "findDuplicatesButton";
+            this.findDuplicatesButton.Size = new System.Drawing.Size(156, 34);
+            this.findDuplicatesButton.TabIndex = 3;
+            this.findDuplicatesButton.Text = "Find Duplicates";
+            this.findDuplicatesButton.UseVisualStyleBackColor = true;
+            this.findDuplicatesButton.Click += new System.EventHandler(this.findDuplicates_Click);
             // 
-            // refreshVideos
+            // refreshVideosButton
             // 
-            this.refreshVideos.Location = new System.Drawing.Point(851, 154);
-            this.refreshVideos.Name = "refreshVideos";
-            this.refreshVideos.Size = new System.Drawing.Size(155, 34);
-            this.refreshVideos.TabIndex = 4;
-            this.refreshVideos.Text = "Refresh Videos";
-            this.refreshVideos.UseVisualStyleBackColor = true;
-            this.refreshVideos.Click += new System.EventHandler(this.refreshVideos_Click);
+            this.refreshVideosButton.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.refreshVideosButton.Location = new System.Drawing.Point(851, 154);
+            this.refreshVideosButton.Name = "refreshVideosButton";
+            this.refreshVideosButton.Size = new System.Drawing.Size(155, 34);
+            this.refreshVideosButton.TabIndex = 4;
+            this.refreshVideosButton.Text = "Refresh Videos";
+            this.refreshVideosButton.UseVisualStyleBackColor = true;
+            this.refreshVideosButton.Click += new System.EventHandler(this.refreshVideos_Click);
             // 
-            // addVideos
+            // addVideosButton
             // 
-            this.addVideos.Location = new System.Drawing.Point(851, 97);
-            this.addVideos.Name = "addVideos";
-            this.addVideos.Size = new System.Drawing.Size(155, 34);
-            this.addVideos.TabIndex = 5;
-            this.addVideos.Text = "Add Video(s)";
-            this.addVideos.UseVisualStyleBackColor = true;
-            this.addVideos.Click += new System.EventHandler(this.addVideos_Click);
+            this.addVideosButton.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.addVideosButton.Location = new System.Drawing.Point(851, 97);
+            this.addVideosButton.Name = "addVideosButton";
+            this.addVideosButton.Size = new System.Drawing.Size(155, 34);
+            this.addVideosButton.TabIndex = 5;
+            this.addVideosButton.Text = "Add Video(s)";
+            this.addVideosButton.UseVisualStyleBackColor = true;
+            this.addVideosButton.Click += new System.EventHandler(this.addVideos_Click);
             // 
-            // deleteVideo
+            // deleteVideoButton
             // 
-            this.deleteVideo.Location = new System.Drawing.Point(842, 109);
-            this.deleteVideo.Name = "deleteVideo";
-            this.deleteVideo.Size = new System.Drawing.Size(155, 34);
-            this.deleteVideo.TabIndex = 6;
-            this.deleteVideo.Text = "Delete Video";
-            this.deleteVideo.UseVisualStyleBackColor = true;
-            this.deleteVideo.Click += new System.EventHandler(this.deleteVideo_Click);
+            this.deleteVideoButton.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.deleteVideoButton.Location = new System.Drawing.Point(842, 109);
+            this.deleteVideoButton.Name = "deleteVideoButton";
+            this.deleteVideoButton.Size = new System.Drawing.Size(155, 34);
+            this.deleteVideoButton.TabIndex = 6;
+            this.deleteVideoButton.Text = "Delete Video";
+            this.deleteVideoButton.UseVisualStyleBackColor = true;
+            this.deleteVideoButton.Click += new System.EventHandler(this.deleteVideo_Click);
             // 
             // MessageLogger
             // 
@@ -137,238 +141,233 @@ namespace Youtube_Playlist_Naukar_Windows
             this.MessageLogger.Size = new System.Drawing.Size(0, 25);
             this.MessageLogger.TabIndex = 8;
             // 
-            // panel1
+            // searchPanel
             // 
-            this.panel1.Controls.Add(this.pictureBox1);
-            this.panel1.Location = new System.Drawing.Point(230, 26);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(769, 34);
-            this.panel1.TabIndex = 9;
+            this.searchPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.searchPanel.Controls.Add(this.searchIcon);
+            this.searchPanel.Location = new System.Drawing.Point(241, 26);
+            this.searchPanel.Name = "searchPanel";
+            this.searchPanel.Size = new System.Drawing.Size(758, 34);
+            this.searchPanel.TabIndex = 9;
             // 
-            // pictureBox1
+            // searchIcon
             // 
-            this.pictureBox1.Image = global::Youtube_Playlist_Naukar_Windows.Properties.Resources.search;
-            this.pictureBox1.Location = new System.Drawing.Point(727, 2);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(30, 30);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;
+            this.searchIcon.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.searchIcon.Image = global::Youtube_Playlist_Naukar_Windows.Properties.Resources.search;
+            this.searchIcon.Location = new System.Drawing.Point(727, 2);
+            this.searchIcon.Name = "searchIcon";
+            this.searchIcon.Size = new System.Drawing.Size(30, 30);
+            this.searchIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.searchIcon.TabIndex = 0;
+            this.searchIcon.TabStop = false;
             // 
-            // panel2
+            // videoPreviewThumbnail
             // 
-            this.panel2.Controls.Add(this.label18);
-            this.panel2.Controls.Add(this.label19);
-            this.panel2.Controls.Add(this.label15);
-            this.panel2.Controls.Add(this.label14);
-            this.panel2.Controls.Add(this.label13);
-            this.panel2.Controls.Add(this.label12);
-            this.panel2.Controls.Add(this.label11);
-            this.panel2.Controls.Add(this.label8);
-            this.panel2.Controls.Add(this.label7);
-            this.panel2.Controls.Add(this.label6);
-            this.panel2.Controls.Add(this.label5);
-            this.panel2.Controls.Add(this.positionLabel);
-            this.panel2.Controls.Add(this.label1);
-            this.panel2.Controls.Add(this.label2);
-            this.panel2.Controls.Add(this.label3);
-            this.panel2.Controls.Add(this.label4);
-            this.panel2.Controls.Add(this.urlLabel);
-            this.panel2.Controls.Add(this.titleLabel);
-            this.panel2.Controls.Add(this.linkLabel);
-            this.panel2.Controls.Add(this.title);
-            this.panel2.Controls.Add(this.ownerLabel);
-            this.panel2.Controls.Add(this.ownerLinkLabel);
-            this.panel2.Controls.Add(this.createdOn);
-            this.panel2.Controls.Add(this.createdOnLabel);
-            this.panel2.Controls.Add(this.pictureBox2);
-            this.panel2.Controls.Add(this.deleteVideo);
-            this.panel2.Controls.Add(this.selectVideoLabel);
-            this.panel2.Location = new System.Drawing.Point(7, 537);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(1015, 252);
-            this.panel2.TabIndex = 10;
+            this.videoPreviewThumbnail.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.videoPreviewThumbnail.Controls.Add(this.addedByValue);
+            this.videoPreviewThumbnail.Controls.Add(this.playlistPositionValue);
+            this.videoPreviewThumbnail.Controls.Add(this.privacyStatusValue);
+            this.videoPreviewThumbnail.Controls.Add(this.addedByLabel);
+            this.videoPreviewThumbnail.Controls.Add(this.descriptionValue);
+            this.videoPreviewThumbnail.Controls.Add(this.label14);
+            this.videoPreviewThumbnail.Controls.Add(this.addedOnValue);
+            this.videoPreviewThumbnail.Controls.Add(this.durationValue);
+            this.videoPreviewThumbnail.Controls.Add(this.descriptionLabel);
+            this.videoPreviewThumbnail.Controls.Add(this.privacyStatusLabel);
+            this.videoPreviewThumbnail.Controls.Add(this.durationLabel);
+            this.videoPreviewThumbnail.Controls.Add(this.titleValue);
+            this.videoPreviewThumbnail.Controls.Add(this.playlistPositionLabel);
+            this.videoPreviewThumbnail.Controls.Add(this.urlLabel);
+            this.videoPreviewThumbnail.Controls.Add(this.titleLabel);
+            this.videoPreviewThumbnail.Controls.Add(this.videoOwnerLabel);
+            this.videoPreviewThumbnail.Controls.Add(this.addedOnLabel);
+            this.videoPreviewThumbnail.Controls.Add(this.urlValue);
+            this.videoPreviewThumbnail.Controls.Add(this.title);
+            this.videoPreviewThumbnail.Controls.Add(this.ownerLabel);
+            this.videoPreviewThumbnail.Controls.Add(this.videoOwnerValue);
+            this.videoPreviewThumbnail.Controls.Add(this.createdOn);
+            this.videoPreviewThumbnail.Controls.Add(this.createdOnLabel);
+            this.videoPreviewThumbnail.Controls.Add(this.videoThumbnailPreview);
+            this.videoPreviewThumbnail.Controls.Add(this.deleteVideoButton);
+            this.videoPreviewThumbnail.Location = new System.Drawing.Point(7, 537);
+            this.videoPreviewThumbnail.Name = "videoPreviewThumbnail";
+            this.videoPreviewThumbnail.Size = new System.Drawing.Size(1015, 252);
+            this.videoPreviewThumbnail.TabIndex = 10;
             // 
-            // label18
+            // addedByValue
             // 
-            this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(499, 175);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(19, 25);
-            this.label18.TabIndex = 41;
-            this.label18.Text = "-";
+            this.addedByValue.AutoSize = true;
+            this.addedByValue.Location = new System.Drawing.Point(498, 140);
+            this.addedByValue.Name = "addedByValue";
+            this.addedByValue.Size = new System.Drawing.Size(19, 25);
+            this.addedByValue.TabIndex = 44;
+            this.addedByValue.TabStop = true;
+            this.addedByValue.Text = "-";
             // 
-            // label19
+            // playlistPositionValue
             // 
-            this.label19.AutoSize = true;
-            this.label19.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label19.Location = new System.Drawing.Point(308, 132);
-            this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(100, 25);
-            this.label19.TabIndex = 40;
-            this.label19.Text = "Added By:";
+            this.playlistPositionValue.AutoSize = true;
+            this.playlistPositionValue.Location = new System.Drawing.Point(498, 110);
+            this.playlistPositionValue.Name = "playlistPositionValue";
+            this.playlistPositionValue.Size = new System.Drawing.Size(19, 25);
+            this.playlistPositionValue.TabIndex = 42;
+            this.playlistPositionValue.Text = "-";
             // 
-            // label15
+            // privacyStatusValue
             // 
-            this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(499, 210);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(19, 25);
-            this.label15.TabIndex = 38;
-            this.label15.Text = "-";
+            this.privacyStatusValue.AutoSize = true;
+            this.privacyStatusValue.Location = new System.Drawing.Point(497, 192);
+            this.privacyStatusValue.Name = "privacyStatusValue";
+            this.privacyStatusValue.Size = new System.Drawing.Size(19, 25);
+            this.privacyStatusValue.TabIndex = 41;
+            this.privacyStatusValue.Text = "-";
+            // 
+            // addedByLabel
+            // 
+            this.addedByLabel.AutoSize = true;
+            this.addedByLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.addedByLabel.Location = new System.Drawing.Point(308, 137);
+            this.addedByLabel.Name = "addedByLabel";
+            this.addedByLabel.Size = new System.Drawing.Size(100, 25);
+            this.addedByLabel.TabIndex = 40;
+            this.addedByLabel.Text = "Added By:";
+            // 
+            // descriptionValue
+            // 
+            this.descriptionValue.AutoSize = true;
+            this.descriptionValue.Location = new System.Drawing.Point(497, 217);
+            this.descriptionValue.Name = "descriptionValue";
+            this.descriptionValue.Size = new System.Drawing.Size(19, 25);
+            this.descriptionValue.TabIndex = 38;
+            this.descriptionValue.Text = "-";
             // 
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(499, 185);
+            this.label14.Location = new System.Drawing.Point(497, 188);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(19, 25);
             this.label14.TabIndex = 37;
             this.label14.Text = "-";
             // 
-            // label13
+            // addedOnValue
             // 
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(499, 107);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(19, 25);
-            this.label13.TabIndex = 36;
-            this.label13.Text = "-";
+            this.addedOnValue.AutoSize = true;
+            this.addedOnValue.Location = new System.Drawing.Point(497, 85);
+            this.addedOnValue.Name = "addedOnValue";
+            this.addedOnValue.Size = new System.Drawing.Size(19, 25);
+            this.addedOnValue.TabIndex = 35;
+            this.addedOnValue.Text = "-";
             // 
-            // label12
+            // durationValue
             // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(499, 82);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(19, 25);
-            this.label12.TabIndex = 35;
-            this.label12.Text = "-";
+            this.durationValue.AutoSize = true;
+            this.durationValue.Location = new System.Drawing.Point(497, 60);
+            this.durationValue.Name = "durationValue";
+            this.durationValue.Size = new System.Drawing.Size(19, 25);
+            this.durationValue.TabIndex = 34;
+            this.durationValue.Text = "-";
             // 
-            // label11
+            // descriptionLabel
             // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(499, 57);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(19, 25);
-            this.label11.TabIndex = 34;
-            this.label11.Text = "-";
+            this.descriptionLabel.AutoSize = true;
+            this.descriptionLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.descriptionLabel.Location = new System.Drawing.Point(308, 214);
+            this.descriptionLabel.Name = "descriptionLabel";
+            this.descriptionLabel.Size = new System.Drawing.Size(114, 25);
+            this.descriptionLabel.TabIndex = 33;
+            this.descriptionLabel.Text = "Description:";
             // 
-            // label8
+            // privacyStatusLabel
             // 
-            this.label8.AutoSize = true;
-            this.label8.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label8.Location = new System.Drawing.Point(308, 210);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(114, 25);
-            this.label8.TabIndex = 33;
-            this.label8.Text = "Description:";
+            this.privacyStatusLabel.AutoSize = true;
+            this.privacyStatusLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.privacyStatusLabel.Location = new System.Drawing.Point(308, 188);
+            this.privacyStatusLabel.Name = "privacyStatusLabel";
+            this.privacyStatusLabel.Size = new System.Drawing.Size(137, 25);
+            this.privacyStatusLabel.TabIndex = 32;
+            this.privacyStatusLabel.Text = "Privacy Status:";
             // 
-            // label7
+            // durationLabel
             // 
-            this.label7.AutoSize = true;
-            this.label7.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label7.Location = new System.Drawing.Point(308, 185);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(137, 25);
-            this.label7.TabIndex = 32;
-            this.label7.Text = "Privacy Status:";
+            this.durationLabel.AutoSize = true;
+            this.durationLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.durationLabel.Location = new System.Drawing.Point(308, 57);
+            this.durationLabel.Name = "durationLabel";
+            this.durationLabel.Size = new System.Drawing.Size(92, 25);
+            this.durationLabel.TabIndex = 31;
+            this.durationLabel.Text = "Duration:";
             // 
-            // label6
+            // titleValue
             // 
-            this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label6.Location = new System.Drawing.Point(308, 57);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(92, 25);
-            this.label6.TabIndex = 31;
-            this.label6.Text = "Duration:";
+            this.titleValue.AutoSize = true;
+            this.titleValue.Location = new System.Drawing.Point(497, 10);
+            this.titleValue.Name = "titleValue";
+            this.titleValue.Size = new System.Drawing.Size(19, 25);
+            this.titleValue.TabIndex = 30;
+            this.titleValue.Text = "-";
             // 
-            // label5
+            // playlistPositionLabel
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(499, 7);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(19, 25);
-            this.label5.TabIndex = 30;
-            this.label5.Text = "-";
-            // 
-            // positionLabel
-            // 
-            this.positionLabel.AutoSize = true;
-            this.positionLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.positionLabel.Location = new System.Drawing.Point(308, 107);
-            this.positionLabel.Name = "positionLabel";
-            this.positionLabel.Size = new System.Drawing.Size(172, 25);
-            this.positionLabel.TabIndex = 29;
-            this.positionLabel.Text = "Position in Playlist:";
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(308, 32);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(51, 25);
-            this.label1.TabIndex = 28;
-            this.label1.Text = "URL:";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label2.Location = new System.Drawing.Point(308, 7);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(55, 25);
-            this.label2.TabIndex = 27;
-            this.label2.Text = "Title:";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label3.Location = new System.Drawing.Point(308, 157);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(128, 25);
-            this.label3.TabIndex = 26;
-            this.label3.Text = "Video Owner:";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label4.Location = new System.Drawing.Point(308, 82);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(103, 25);
-            this.label4.TabIndex = 25;
-            this.label4.Text = "Added On:";
+            this.playlistPositionLabel.AutoSize = true;
+            this.playlistPositionLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.playlistPositionLabel.Location = new System.Drawing.Point(308, 109);
+            this.playlistPositionLabel.Name = "playlistPositionLabel";
+            this.playlistPositionLabel.Size = new System.Drawing.Size(172, 25);
+            this.playlistPositionLabel.TabIndex = 29;
+            this.playlistPositionLabel.Text = "Position in Playlist:";
             // 
             // urlLabel
             // 
             this.urlLabel.AutoSize = true;
-            this.urlLabel.Location = new System.Drawing.Point(412, 565);
+            this.urlLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.urlLabel.Location = new System.Drawing.Point(308, 32);
             this.urlLabel.Name = "urlLabel";
-            this.urlLabel.Size = new System.Drawing.Size(47, 25);
-            this.urlLabel.TabIndex = 22;
+            this.urlLabel.Size = new System.Drawing.Size(51, 25);
+            this.urlLabel.TabIndex = 28;
             this.urlLabel.Text = "URL:";
             // 
             // titleLabel
             // 
             this.titleLabel.AutoSize = true;
-            this.titleLabel.Location = new System.Drawing.Point(412, 540);
+            this.titleLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.titleLabel.Location = new System.Drawing.Point(308, 7);
             this.titleLabel.Name = "titleLabel";
-            this.titleLabel.Size = new System.Drawing.Size(48, 25);
-            this.titleLabel.TabIndex = 21;
+            this.titleLabel.Size = new System.Drawing.Size(55, 25);
+            this.titleLabel.TabIndex = 27;
             this.titleLabel.Text = "Title:";
             // 
-            // linkLabel
+            // videoOwnerLabel
             // 
-            this.linkLabel.AutoSize = true;
-            this.linkLabel.Location = new System.Drawing.Point(499, 29);
-            this.linkLabel.Name = "linkLabel";
-            this.linkLabel.Size = new System.Drawing.Size(19, 25);
-            this.linkLabel.TabIndex = 17;
-            this.linkLabel.TabStop = true;
-            this.linkLabel.Text = "-";
+            this.videoOwnerLabel.AutoSize = true;
+            this.videoOwnerLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.videoOwnerLabel.Location = new System.Drawing.Point(308, 163);
+            this.videoOwnerLabel.Name = "videoOwnerLabel";
+            this.videoOwnerLabel.Size = new System.Drawing.Size(128, 25);
+            this.videoOwnerLabel.TabIndex = 26;
+            this.videoOwnerLabel.Text = "Video Owner:";
+            // 
+            // addedOnLabel
+            // 
+            this.addedOnLabel.AutoSize = true;
+            this.addedOnLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.addedOnLabel.Location = new System.Drawing.Point(308, 83);
+            this.addedOnLabel.Name = "addedOnLabel";
+            this.addedOnLabel.Size = new System.Drawing.Size(103, 25);
+            this.addedOnLabel.TabIndex = 25;
+            this.addedOnLabel.Text = "Added On:";
+            // 
+            // urlValue
+            // 
+            this.urlValue.AutoSize = true;
+            this.urlValue.Location = new System.Drawing.Point(497, 32);
+            this.urlValue.Name = "urlValue";
+            this.urlValue.Size = new System.Drawing.Size(19, 25);
+            this.urlValue.TabIndex = 17;
+            this.urlValue.TabStop = true;
+            this.urlValue.Text = "-";
             // 
             // title
             // 
@@ -388,15 +387,15 @@ namespace Youtube_Playlist_Naukar_Windows
             this.ownerLabel.TabIndex = 20;
             this.ownerLabel.Text = "Owner:";
             // 
-            // ownerLinkLabel
+            // videoOwnerValue
             // 
-            this.ownerLinkLabel.AutoSize = true;
-            this.ownerLinkLabel.Location = new System.Drawing.Point(499, 143);
-            this.ownerLinkLabel.Name = "ownerLinkLabel";
-            this.ownerLinkLabel.Size = new System.Drawing.Size(19, 25);
-            this.ownerLinkLabel.TabIndex = 18;
-            this.ownerLinkLabel.TabStop = true;
-            this.ownerLinkLabel.Text = "-";
+            this.videoOwnerValue.AutoSize = true;
+            this.videoOwnerValue.Location = new System.Drawing.Point(497, 163);
+            this.videoOwnerValue.Name = "videoOwnerValue";
+            this.videoOwnerValue.Size = new System.Drawing.Size(19, 25);
+            this.videoOwnerValue.TabIndex = 18;
+            this.videoOwnerValue.TabStop = true;
+            this.videoOwnerValue.Text = "-";
             // 
             // createdOn
             // 
@@ -416,140 +415,125 @@ namespace Youtube_Playlist_Naukar_Windows
             this.createdOnLabel.TabIndex = 19;
             this.createdOnLabel.Text = "Created On:";
             // 
-            // pictureBox2
+            // videoThumbnailPreview
             // 
-            this.pictureBox2.Location = new System.Drawing.Point(16, 43);
-            this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(277, 157);
-            this.pictureBox2.TabIndex = 0;
-            this.pictureBox2.TabStop = false;
+            this.videoThumbnailPreview.ImageLocation = "default_image.png";
+            this.videoThumbnailPreview.Location = new System.Drawing.Point(16, 43);
+            this.videoThumbnailPreview.Name = "videoThumbnailPreview";
+            this.videoThumbnailPreview.Size = new System.Drawing.Size(277, 157);
+            this.videoThumbnailPreview.TabIndex = 0;
+            this.videoThumbnailPreview.TabStop = false;
             // 
-            // selectVideoLabel
+            // playlistNameLabel
             // 
-            this.selectVideoLabel.AutoSize = true;
-            this.selectVideoLabel.Location = new System.Drawing.Point(412, 118);
-            this.selectVideoLabel.Name = "selectVideoLabel";
-            this.selectVideoLabel.Size = new System.Drawing.Size(243, 25);
-            this.selectVideoLabel.TabIndex = 39;
-            this.selectVideoLabel.Text = "Select a video to view details.";
+            this.playlistNameLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.playlistNameLabel.AutoSize = true;
+            this.playlistNameLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.playlistNameLabel.Location = new System.Drawing.Point(851, 425);
+            this.playlistNameLabel.Name = "playlistNameLabel";
+            this.playlistNameLabel.Size = new System.Drawing.Size(133, 25);
+            this.playlistNameLabel.TabIndex = 11;
+            this.playlistNameLabel.Text = "Playlist Name:";
             // 
-            // label9
+            // totalVideosLabel
             // 
-            this.label9.AutoSize = true;
-            this.label9.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label9.Location = new System.Drawing.Point(851, 425);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(133, 25);
-            this.label9.TabIndex = 11;
-            this.label9.Text = "Playlist Name:";
+            this.totalVideosLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.totalVideosLabel.AutoSize = true;
+            this.totalVideosLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.totalVideosLabel.Location = new System.Drawing.Point(851, 354);
+            this.totalVideosLabel.Name = "totalVideosLabel";
+            this.totalVideosLabel.Size = new System.Drawing.Size(121, 25);
+            this.totalVideosLabel.TabIndex = 12;
+            this.totalVideosLabel.Text = "Total Videos:";
             // 
-            // label10
+            // playlistVideosDataView
             // 
-            this.label10.AutoSize = true;
-            this.label10.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label10.Location = new System.Drawing.Point(851, 354);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(121, 25);
-            this.label10.TabIndex = 12;
-            this.label10.Text = "Total Videos:";
+            this.playlistVideosDataView.AllowUserToAddRows = false;
+            this.playlistVideosDataView.AllowUserToDeleteRows = false;
+            this.playlistVideosDataView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.playlistVideosDataView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.playlistVideosDataView.Location = new System.Drawing.Point(23, 82);
+            this.playlistVideosDataView.Name = "playlistVideosDataView";
+            this.playlistVideosDataView.ReadOnly = true;
+            this.playlistVideosDataView.RowHeadersWidth = 62;
+            this.playlistVideosDataView.RowTemplate.Height = 84;
+            this.playlistVideosDataView.Size = new System.Drawing.Size(805, 449);
+            this.playlistVideosDataView.TabIndex = 13;
             // 
-            // dataGridView1
+            // totalVideosValue
             // 
-            this.dataGridView1.AllowUserToAddRows = false;
-            this.dataGridView1.AllowUserToDeleteRows = false;
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.TitleColumn,
-            this.Duration,
-            this.OwnerName});
-            this.dataGridView1.Location = new System.Drawing.Point(23, 82);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.ReadOnly = true;
-            this.dataGridView1.RowHeadersWidth = 62;
-            this.dataGridView1.RowTemplate.Height = 33;
-            this.dataGridView1.Size = new System.Drawing.Size(805, 449);
-            this.dataGridView1.TabIndex = 13;
+            this.totalVideosValue.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.totalVideosValue.AutoSize = true;
+            this.totalVideosValue.Location = new System.Drawing.Point(860, 388);
+            this.totalVideosValue.Name = "totalVideosValue";
+            this.totalVideosValue.Size = new System.Drawing.Size(19, 25);
+            this.totalVideosValue.TabIndex = 39;
+            this.totalVideosValue.Text = "-";
             // 
-            // TitleColumn
+            // playlistNameValue
             // 
-            this.TitleColumn.Frozen = true;
-            this.TitleColumn.HeaderText = "Title";
-            this.TitleColumn.MinimumWidth = 8;
-            this.TitleColumn.Name = "TitleColumn";
-            this.TitleColumn.ReadOnly = true;
-            this.TitleColumn.Width = 150;
+            this.playlistNameValue.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.playlistNameValue.AutoSize = true;
+            this.playlistNameValue.Location = new System.Drawing.Point(861, 463);
+            this.playlistNameValue.Name = "playlistNameValue";
+            this.playlistNameValue.Size = new System.Drawing.Size(19, 25);
+            this.playlistNameValue.TabIndex = 40;
+            this.playlistNameValue.Text = "-";
             // 
-            // Duration
+            // viewPrivateVideosButton
             // 
-            this.Duration.Frozen = true;
-            this.Duration.HeaderText = "Duration";
-            this.Duration.MinimumWidth = 8;
-            this.Duration.Name = "Duration";
-            this.Duration.ReadOnly = true;
-            this.Duration.Width = 150;
+            this.viewPrivateVideosButton.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.viewPrivateVideosButton.Location = new System.Drawing.Point(851, 269);
+            this.viewPrivateVideosButton.Name = "viewPrivateVideosButton";
+            this.viewPrivateVideosButton.Size = new System.Drawing.Size(156, 63);
+            this.viewPrivateVideosButton.TabIndex = 41;
+            this.viewPrivateVideosButton.Text = "View Private Videos";
+            this.viewPrivateVideosButton.UseVisualStyleBackColor = true;
+            this.viewPrivateVideosButton.Click += new System.EventHandler(this.button1_Click);
             // 
-            // OwnerName
+            // returnHomeButton
             // 
-            this.OwnerName.Frozen = true;
-            this.OwnerName.HeaderText = "Owner Name";
-            this.OwnerName.MinimumWidth = 8;
-            this.OwnerName.Name = "OwnerName";
-            this.OwnerName.ReadOnly = true;
-            this.OwnerName.Width = 150;
+            this.returnHomeButton.Location = new System.Drawing.Point(25, 26);
+            this.returnHomeButton.Name = "returnHomeButton";
+            this.returnHomeButton.Size = new System.Drawing.Size(201, 34);
+            this.returnHomeButton.TabIndex = 42;
+            this.returnHomeButton.Text = "Return to Home";
+            this.returnHomeButton.UseVisualStyleBackColor = true;
+            this.returnHomeButton.Click += new System.EventHandler(this.returnHomeButton_Click);
             // 
-            // label16
+            // timer1
             // 
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(860, 388);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(19, 25);
-            this.label16.TabIndex = 39;
-            this.label16.Text = "-";
-            // 
-            // label17
-            // 
-            this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(861, 463);
-            this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(19, 25);
-            this.label17.TabIndex = 40;
-            this.label17.Text = "-";
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(851, 269);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(156, 63);
-            this.button1.TabIndex = 41;
-            this.button1.Text = "View Private Videos";
-            this.button1.UseVisualStyleBackColor = true;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // PlaylistHomePageForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1028, 794);
-            this.Controls.Add(this.button1);
-            this.Controls.Add(this.label17);
-            this.Controls.Add(this.label16);
-            this.Controls.Add(this.dataGridView1);
-            this.Controls.Add(this.label10);
-            this.Controls.Add(this.label9);
-            this.Controls.Add(this.panel2);
+            this.Controls.Add(this.returnHomeButton);
+            this.Controls.Add(this.viewPrivateVideosButton);
+            this.Controls.Add(this.playlistNameValue);
+            this.Controls.Add(this.totalVideosValue);
+            this.Controls.Add(this.playlistVideosDataView);
+            this.Controls.Add(this.totalVideosLabel);
+            this.Controls.Add(this.playlistNameLabel);
+            this.Controls.Add(this.videoPreviewThumbnail);
             this.Controls.Add(this.MessageLogger);
-            this.Controls.Add(this.addVideos);
-            this.Controls.Add(this.refreshVideos);
-            this.Controls.Add(this.findDuplicates);
+            this.Controls.Add(this.addVideosButton);
+            this.Controls.Add(this.refreshVideosButton);
+            this.Controls.Add(this.findDuplicatesButton);
             this.Controls.Add(this.searchBar);
-            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.searchPanel);
             this.Name = "PlaylistHomePageForm";
             this.Text = "PlaylistHomePageForm";
-            this.panel1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            this.panel2.ResumeLayout(false);
-            this.panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            this.searchPanel.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.searchIcon)).EndInit();
+            this.videoPreviewThumbnail.ResumeLayout(false);
+            this.videoPreviewThumbnail.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.videoThumbnailPreview)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.playlistVideosDataView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -557,48 +541,45 @@ namespace Youtube_Playlist_Naukar_Windows
 
         #endregion
         private System.Windows.Forms.TextBox searchBar;
-        private System.Windows.Forms.Button findDuplicates;
-        private System.Windows.Forms.Button refreshVideos;
-        private System.Windows.Forms.Button addVideos;
-        private System.Windows.Forms.Button deleteVideo;
+        private System.Windows.Forms.Button findDuplicatesButton;
+        private System.Windows.Forms.Button refreshVideosButton;
+        private System.Windows.Forms.Button addVideosButton;
+        private System.Windows.Forms.Button deleteVideoButton;
         private System.Windows.Forms.Label MessageLogger;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.PictureBox pictureBox2;
-        private System.Windows.Forms.Label urlLabel;
-        private System.Windows.Forms.Label titleLabel;
-        private System.Windows.Forms.LinkLabel linkLabel;
+        private System.Windows.Forms.Panel searchPanel;
+        private System.Windows.Forms.PictureBox searchIcon;
+        private System.Windows.Forms.Panel videoPreviewThumbnail;
+        private System.Windows.Forms.PictureBox videoThumbnailPreview;
+        private System.Windows.Forms.LinkLabel urlValue;
         private System.Windows.Forms.Label title;
         private System.Windows.Forms.Label ownerLabel;
-        private System.Windows.Forms.LinkLabel ownerLinkLabel;
+        private System.Windows.Forms.LinkLabel videoOwnerValue;
         private System.Windows.Forms.Label createdOn;
         private System.Windows.Forms.Label createdOnLabel;
-        private System.Windows.Forms.Label positionLabel;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.DataGridView dataGridView1;
-        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Label playlistPositionLabel;
+        private System.Windows.Forms.Label urlLabel;
+        private System.Windows.Forms.Label titleLabel;
+        private System.Windows.Forms.Label videoOwnerLabel;
+        private System.Windows.Forms.Label addedOnLabel;
+        private System.Windows.Forms.Label titleValue;
+        private System.Windows.Forms.Label descriptionLabel;
+        private System.Windows.Forms.Label privacyStatusLabel;
+        private System.Windows.Forms.Label durationLabel;
+        private System.Windows.Forms.Label playlistNameLabel;
+        private System.Windows.Forms.Label totalVideosLabel;
+        private System.Windows.Forms.DataGridView playlistVideosDataView;
+        private System.Windows.Forms.Label descriptionValue;
         private System.Windows.Forms.Label label14;
-        private System.Windows.Forms.Label label13;
-        private System.Windows.Forms.Label label12;
-        private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.Label label16;
-        private System.Windows.Forms.Label label17;
-        private System.Windows.Forms.Label selectVideoLabel;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn TitleColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Duration;
-        private System.Windows.Forms.DataGridViewTextBoxColumn OwnerName;
-        private System.Windows.Forms.Label label19;
-        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.Label addedOnValue;
+        private System.Windows.Forms.Label durationValue;
+        private System.Windows.Forms.Label totalVideosValue;
+        private System.Windows.Forms.Label playlistNameValue;
+        private System.Windows.Forms.Button viewPrivateVideosButton;
+        private System.Windows.Forms.Label addedByLabel;
+        private System.Windows.Forms.Label privacyStatusValue;
+        private System.Windows.Forms.Label playlistPositionValue;
+        private System.Windows.Forms.LinkLabel addedByValue;
+        private System.Windows.Forms.Button returnHomeButton;
+        private System.Windows.Forms.Timer timer1;
     }
 }

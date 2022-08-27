@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Youtube_Playlist_Naukar_Windows.Models;
 
@@ -38,7 +39,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         public async Task LoadUserOwnedPlaylists(
             string channelId,
             Dictionary<string, UserPlayList> alreadyLoadedPlaylists,
-            string alreadyLoadedPlaylistsEtag)
+            string alreadyLoadedPlaylistsEtag,
+            CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(channelId))
             {
@@ -55,6 +57,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 {
                     var playlistsResult =
                         await ApiClient.GetApiClient.GetPlayListsData(
+                            cancellationToken,
                             channelId);
 
                     var playlists =
@@ -76,7 +79,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 {
                     await RefreshUserOwnedPlaylists(channelId,
                         alreadyLoadedPlaylists, 
-                        alreadyLoadedPlaylistsEtag);
+                        alreadyLoadedPlaylistsEtag,
+                        cancellationToken);
                 }                
             }
             catch
@@ -88,14 +92,16 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         public async Task RefreshUserOwnedPlaylists(
             string channelId, 
             Dictionary<string, UserPlayList> alreadyLoadedPlaylists,
-            string alreadyLoadedPlaylistsEtag)
+            string alreadyLoadedPlaylistsEtag,
+            CancellationToken cancellationToken)
         {
             alreadyLoadedPlaylists ??= 
                 new Dictionary<string, UserPlayList>();
 
             var playlistsResult =
                 await ApiClient.GetApiClient
-                    .GetUserPlayListsPartialData(channelId);
+                    .GetUserPlayListsPartialData(channelId,
+                        cancellationToken);
 
             var partialPlaylistsData =
                 playlistsResult.Item1;
@@ -154,6 +160,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     playlistsResult =
                         await ApiClient.GetApiClient
                             .GetPlayListsData(
+                                cancellationToken,
                                 channelId,
                                 playlistIds: idsOfplaylistsToLoad);
 
@@ -175,7 +182,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             if (userOwnedPlaylists.Count > 0)
             {
                 SessionStorageManager.GetSessionManager.
-                    DownloadPlaylistThumbnailsInBackgroundAndInformUI(
+                    DownloadPlaylistThumbnailsInBackgroundAndNotifyMainThread(
                         userOwnedPlaylists
                             .Values.ToList(), true);
             }
@@ -190,13 +197,16 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         }
 
         public async Task<bool> AddContributorPlaylist(
-            string playListId)
+            string playListId,
+            CancellationToken cancellationToken)
         {
             try
             {
                 var playlistResult =
                     await ApiClient.GetApiClient
-                        .GetPlayListsData(playlistIds:
+                        .GetPlayListsData(
+                            cancellationToken,
+                            playlistIds:
                             new List<string> { playListId });
 
                 var playlists =
@@ -225,7 +235,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         }
 
         public async Task RefreshUserContributorPlaylists(
-            Dictionary<string, UserPlayList> alreadyLoadedPlaylists)
+            Dictionary<string, UserPlayList> alreadyLoadedPlaylists,
+            CancellationToken cancellationToken)
         {
             alreadyLoadedPlaylists ??=
                 new Dictionary<string, UserPlayList>();
@@ -233,7 +244,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             var playlistsResult =
                 await ApiClient.GetApiClient
                     .GetUserPlayListsPartialData(
-                        alreadyLoadedPlaylists.Keys.ToList());
+                        alreadyLoadedPlaylists.Keys.ToList(),
+                        cancellationToken);
 
             var partialPlaylistsData =
                 playlistsResult.Item1;
@@ -298,6 +310,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 playlistsResult =
                     await ApiClient.GetApiClient
                         .GetPlayListsData(
+                            cancellationToken,
                             playlistIds: idsOfplaylistsToLoad);
 
                 var playlists =
@@ -331,7 +344,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             if (userContributorPlaylists.Count > 0)
             {
                 SessionStorageManager.GetSessionManager.
-                    DownloadPlaylistThumbnailsInBackgroundAndInformUI(
+                    DownloadPlaylistThumbnailsInBackgroundAndNotifyMainThread(
                         userContributorPlaylists
                             .Values.ToList(), false);
             }

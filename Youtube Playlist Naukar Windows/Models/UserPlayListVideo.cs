@@ -1,5 +1,6 @@
 ﻿using Google.Apis.YouTube.v3.Data;
 using System;
+using System.Xml;
 
 namespace Youtube_Playlist_Naukar_Windows.Models
 {
@@ -12,6 +13,8 @@ namespace Youtube_Playlist_Naukar_Windows.Models
         public string VideoId { get; set; }
 
         public string Title { get; set; }
+
+        public string Duration { get; set; }
 
         public string Description { get; set; }
 
@@ -33,7 +36,8 @@ namespace Youtube_Playlist_Naukar_Windows.Models
 
         public static UserPlayListVideo
             ConvertPlayListItemToUserPlayListVideo(
-                PlaylistItem playListItem)
+                PlaylistItem playListItem,
+                string duration)
         {
             Enum.TryParse(
                 playListItem.Status?.PrivacyStatus,
@@ -47,6 +51,28 @@ namespace Youtube_Playlist_Naukar_Windows.Models
                     UniqueVideoIdInPlaylist = playListItem.Id,
                     PrivacyStatus = privacyStatus
                 };
+
+            if (!string.IsNullOrWhiteSpace(duration))
+            {
+                try
+                {
+                    TimeSpan timeSpan = 
+                        XmlConvert.ToTimeSpan(duration);
+
+                    userPlaylistVideo.Duration =
+                        timeSpan.ToString(@"hh\:mm\:ss");
+                }
+                catch
+                {
+                    userPlaylistVideo.Duration =
+                        "00:00:00";
+                }
+            }
+            else
+            {
+                userPlaylistVideo.Duration =
+                    "00:00:00";
+            }
 
             if (playListItem.Snippet != null)
             {

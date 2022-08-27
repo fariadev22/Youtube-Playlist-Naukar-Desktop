@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Google.Apis.YouTube.v3.Data;
-using Newtonsoft.Json;
 
 namespace Youtube_Playlist_Naukar_Windows.Models
 {
@@ -31,9 +30,6 @@ namespace Youtube_Playlist_Naukar_Windows.Models
 
         public Dictionary<string, UserPlayListVideo> PlayListVideos { get; set; } 
             = new Dictionary<string, UserPlayListVideo>();
-
-        [JsonIgnore]
-        public bool PlayListVideosDataLoaded { get; set; }
 
         public static UserPlayList ConvertYoutubePlaylistToUserPlaylist(
             Playlist playList)

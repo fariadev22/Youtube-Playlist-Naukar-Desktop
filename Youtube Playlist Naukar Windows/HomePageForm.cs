@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Youtube_Playlist_Naukar_Windows.Helpers;
@@ -25,6 +26,10 @@ namespace Youtube_Playlist_Naukar_Windows
 
         private Dictionary<string, UserPlayList> _userContributorPlaylists;
 
+        private PlaylistHomePageForm _playlistForm;
+
+        private CancellationTokenSource _cancellationTokenSource;
+
         public HomePageForm(
             UserSession activeUserSession)
         {
@@ -43,6 +48,9 @@ namespace Youtube_Playlist_Naukar_Windows
 
         protected override async void OnLoad(EventArgs e)
         {
+            _cancellationTokenSource =
+                new CancellationTokenSource();
+
             //load user data
             LoadActiveUsersAccountInfo();
 
@@ -79,7 +87,8 @@ namespace Youtube_Playlist_Naukar_Windows
                     _youtubeChannelId,
                     _userOwnedPlaylists,
                     _activeUserSession.UserData?.
-                        UserOwnedPlaylistsETag);
+                        UserOwnedPlaylistsETag,
+                    _cancellationTokenSource.Token);
 
             //fetch data loaded from api and saved into session
             _userOwnedPlaylists =
@@ -98,13 +107,19 @@ namespace Youtube_Playlist_Naukar_Windows
 
                 await PlaylistHelper.GetPlaylistHelper.
                     RefreshUserContributorPlaylists(
-                        _userContributorPlaylists);
+                        _userContributorPlaylists,
+                        _cancellationTokenSource.Token);
 
                 _userContributorPlaylists =
                     PlaylistHelper.GetPlaylistHelper.
                         GetStoredUserContributorPlaylists();
             }
-            
+
+            if (_cancellationTokenSource.IsCancellationRequested)
+            {
+                return;
+            }
+
             LoadOwnerPlaylistsUI();
 
             LoadContributorPlaylistsUI();
@@ -122,11 +137,13 @@ namespace Youtube_Playlist_Naukar_Windows
                     _youtubeChannelId,
                     _userOwnedPlaylists,
                     _activeUserSession.UserData?.
-                        UserOwnedPlaylistsETag);
+                        UserOwnedPlaylistsETag,
+                    _cancellationTokenSource.Token);
 
             await PlaylistHelper.GetPlaylistHelper.
                 RefreshUserContributorPlaylists(
-                    _userContributorPlaylists);
+                    _userContributorPlaylists,
+                    _cancellationTokenSource.Token);
 
             _userOwnedPlaylists =
                 PlaylistHelper.GetPlaylistHelper.
@@ -135,6 +152,11 @@ namespace Youtube_Playlist_Naukar_Windows
             _userContributorPlaylists =
                 PlaylistHelper.GetPlaylistHelper.
                     GetStoredUserContributorPlaylists();
+
+            if (_cancellationTokenSource.IsCancellationRequested)
+            {
+                return;
+            }
 
             LoadOwnerPlaylistsUI();
 
@@ -335,7 +357,7 @@ namespace Youtube_Playlist_Naukar_Windows
             ownerPlaylistsList.Invoke(
                 new MethodInvoker(delegate
                 {
-                    CommonUtilities.ConvertLocalImageToBitmap(
+                    CommonUtilities.ConvertLocalImageToBitmapAndStoreInImageList(
                         _activeUserSession.UserDirectory,
                         ownerPlaylistsList.LargeImageList,
                         eventArgs.PlaylistId,
@@ -362,7 +384,7 @@ namespace Youtube_Playlist_Naukar_Windows
             contributorPlaylistsList.Invoke(
                 new MethodInvoker(delegate
                 {
-                    CommonUtilities.ConvertLocalImageToBitmap(
+                    CommonUtilities.ConvertLocalImageToBitmapAndStoreInImageList(
                         _activeUserSession.UserDirectory,
                         contributorPlaylistsList.LargeImageList,
                         eventArgs.PlaylistId,
@@ -376,6 +398,13 @@ namespace Youtube_Playlist_Naukar_Windows
                             indexOfKey].ImageKey =
                         eventArgs.PlaylistId;
                 }));
+        }
+
+        private void closePlaylistForm(
+            object sender,
+            EventArgs eventArgs)
+        {
+            Show();
         }
 
         private void ownerPlaylistsList_SelectedIndexChanged(
@@ -412,21 +441,17 @@ namespace Youtube_Playlist_Naukar_Windows
 
             if (_userOwnedPlaylists.ContainsKey(item.Name))
             {
-                var loadingPage =
-                    new LoadingForm();
+                Hide();
 
-                loadingPage.Show();
-
-                var playlistForm =
+                _playlistForm =
                     new PlaylistHomePageForm(
                         _userOwnedPlaylists[item.Name],
                         _activeUserSession);
 
-                await playlistForm.LoadPlaylistVideos();
+                _playlistForm.Closed +=
+                    closePlaylistForm;
 
-                loadingPage.Dispose();
-                
-                playlistForm.Show();
+                _playlistForm.Show();
             }
         }
 
@@ -464,21 +489,17 @@ namespace Youtube_Playlist_Naukar_Windows
 
             if (_userContributorPlaylists.ContainsKey(item.Name))
             {
-                var loadingPage =
-                    new LoadingForm();
+                Hide();
 
-                loadingPage.Show();
-
-                var playlistForm =
+                _playlistForm =
                     new PlaylistHomePageForm(
                         _userContributorPlaylists[item.Name],
                         _activeUserSession);
 
-                await playlistForm.LoadPlaylistVideos();
+                _playlistForm.Closed +=
+                    closePlaylistForm;
 
-                loadingPage.Dispose();
-
-                playlistForm.Show();
+                _playlistForm.Show();
             }
         }
 
@@ -518,7 +539,8 @@ namespace Youtube_Playlist_Naukar_Windows
                         var added = 
                             await PlaylistHelper.
                                 GetPlaylistHelper.AddContributorPlaylist(
-                                    playListId);
+                                    playListId,
+                                    _cancellationTokenSource.Token);
 
                         if (added)
                         {
@@ -640,7 +662,8 @@ namespace Youtube_Playlist_Naukar_Windows
 
             var changeAccountResult = 
                 await AccountHelper.GetAccountHelper.ChangeAccount(
-                    selectedEmail);
+                    selectedEmail,
+                    _cancellationTokenSource.Token);
 
             if (changeAccountResult.Item1)
             {
@@ -685,7 +708,8 @@ namespace Youtube_Playlist_Naukar_Windows
                 {
                     var addAccountResult =
                         await AccountHelper.GetAccountHelper.ChangeAccount(
-                            emailInput);
+                            emailInput,
+                            _cancellationTokenSource.Token);
 
                     if (addAccountResult.Item1)
                     {
@@ -732,6 +756,12 @@ namespace Youtube_Playlist_Naukar_Windows
         {
             OpenLinkInBrowser(
                 ownerValue.Links[0].LinkData.ToString());
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource = null;
         }
 
         #endregion

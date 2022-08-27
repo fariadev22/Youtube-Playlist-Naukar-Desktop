@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace Youtube_Playlist_Naukar_Windows.Models
+﻿namespace Youtube_Playlist_Naukar_Windows.Models
 {
-    public class PlaylistVideoThumbnailUpdatedEventArgs: EventArgs
+    public class VideoThumbnailReadyEventArgs
     {
         public string PlaylistId { get; set; }
 
