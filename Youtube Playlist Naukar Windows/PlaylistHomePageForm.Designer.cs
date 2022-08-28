@@ -1,4 +1,6 @@
 ﻿
+using System.Windows.Forms;
+
 namespace Youtube_Playlist_Naukar_Windows
 {
     partial class PlaylistHomePageForm
@@ -31,7 +33,6 @@ namespace Youtube_Playlist_Naukar_Windows
         {
             this.components = new System.ComponentModel.Container();
             this.searchBar = new System.Windows.Forms.TextBox();
-            this.findDuplicatesButton = new System.Windows.Forms.Button();
             this.refreshVideosButton = new System.Windows.Forms.Button();
             this.addVideosButton = new System.Windows.Forms.Button();
             this.deleteVideoButton = new System.Windows.Forms.Button();
@@ -68,14 +69,19 @@ namespace Youtube_Playlist_Naukar_Windows
             this.playlistVideosDataView = new System.Windows.Forms.DataGridView();
             this.totalVideosValue = new System.Windows.Forms.Label();
             this.playlistNameValue = new System.Windows.Forms.Label();
-            this.viewPrivateVideosButton = new System.Windows.Forms.Button();
             this.returnHomeButton = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.noFilterButton = new System.Windows.Forms.RadioButton();
+            this.filterBox = new System.Windows.Forms.GroupBox();
+            this.showPrivate = new System.Windows.Forms.RadioButton();
+            this.showDuplicatesButton = new System.Windows.Forms.RadioButton();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.searchPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.searchIcon)).BeginInit();
             this.videoPreviewThumbnail.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.videoThumbnailPreview)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.playlistVideosDataView)).BeginInit();
+            this.filterBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // searchBar
@@ -85,25 +91,14 @@ namespace Youtube_Playlist_Naukar_Windows
             this.searchBar.Location = new System.Drawing.Point(241, 27);
             this.searchBar.Name = "searchBar";
             this.searchBar.PlaceholderText = "Enter query to search playlist videos.";
-            this.searchBar.Size = new System.Drawing.Size(715, 31);
+            this.searchBar.Size = new System.Drawing.Size(846, 31);
             this.searchBar.TabIndex = 1;
             this.searchBar.TextChanged += new System.EventHandler(this.searchBar_TextChanged);
-            // 
-            // findDuplicatesButton
-            // 
-            this.findDuplicatesButton.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.findDuplicatesButton.Location = new System.Drawing.Point(851, 211);
-            this.findDuplicatesButton.Name = "findDuplicatesButton";
-            this.findDuplicatesButton.Size = new System.Drawing.Size(156, 34);
-            this.findDuplicatesButton.TabIndex = 3;
-            this.findDuplicatesButton.Text = "Find Duplicates";
-            this.findDuplicatesButton.UseVisualStyleBackColor = true;
-            this.findDuplicatesButton.Click += new System.EventHandler(this.findDuplicates_Click);
             // 
             // refreshVideosButton
             // 
             this.refreshVideosButton.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.refreshVideosButton.Location = new System.Drawing.Point(851, 154);
+            this.refreshVideosButton.Location = new System.Drawing.Point(975, 132);
             this.refreshVideosButton.Name = "refreshVideosButton";
             this.refreshVideosButton.Size = new System.Drawing.Size(155, 34);
             this.refreshVideosButton.TabIndex = 4;
@@ -114,7 +109,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // addVideosButton
             // 
             this.addVideosButton.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.addVideosButton.Location = new System.Drawing.Point(851, 97);
+            this.addVideosButton.Location = new System.Drawing.Point(974, 82);
             this.addVideosButton.Name = "addVideosButton";
             this.addVideosButton.Size = new System.Drawing.Size(155, 34);
             this.addVideosButton.TabIndex = 5;
@@ -125,7 +120,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // deleteVideoButton
             // 
             this.deleteVideoButton.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.deleteVideoButton.Location = new System.Drawing.Point(842, 109);
+            this.deleteVideoButton.Location = new System.Drawing.Point(973, 109);
             this.deleteVideoButton.Name = "deleteVideoButton";
             this.deleteVideoButton.Size = new System.Drawing.Size(155, 34);
             this.deleteVideoButton.TabIndex = 6;
@@ -136,10 +131,13 @@ namespace Youtube_Playlist_Naukar_Windows
             // MessageLogger
             // 
             this.MessageLogger.AutoSize = true;
-            this.MessageLogger.Location = new System.Drawing.Point(630, 345);
+            this.MessageLogger.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.MessageLogger.ForeColor = System.Drawing.SystemColors.Highlight;
+            this.MessageLogger.Location = new System.Drawing.Point(973, 506);
             this.MessageLogger.Name = "MessageLogger";
-            this.MessageLogger.Size = new System.Drawing.Size(0, 25);
+            this.MessageLogger.Size = new System.Drawing.Size(19, 25);
             this.MessageLogger.TabIndex = 8;
+            this.MessageLogger.Text = "-";
             // 
             // searchPanel
             // 
@@ -148,14 +146,14 @@ namespace Youtube_Playlist_Naukar_Windows
             this.searchPanel.Controls.Add(this.searchIcon);
             this.searchPanel.Location = new System.Drawing.Point(241, 26);
             this.searchPanel.Name = "searchPanel";
-            this.searchPanel.Size = new System.Drawing.Size(758, 34);
+            this.searchPanel.Size = new System.Drawing.Size(889, 34);
             this.searchPanel.TabIndex = 9;
             // 
             // searchIcon
             // 
             this.searchIcon.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.searchIcon.Image = global::Youtube_Playlist_Naukar_Windows.Properties.Resources.search;
-            this.searchIcon.Location = new System.Drawing.Point(727, 2);
+            this.searchIcon.Location = new System.Drawing.Point(858, 2);
             this.searchIcon.Name = "searchIcon";
             this.searchIcon.Size = new System.Drawing.Size(30, 30);
             this.searchIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -193,11 +191,12 @@ namespace Youtube_Playlist_Naukar_Windows
             this.videoPreviewThumbnail.Controls.Add(this.deleteVideoButton);
             this.videoPreviewThumbnail.Location = new System.Drawing.Point(7, 537);
             this.videoPreviewThumbnail.Name = "videoPreviewThumbnail";
-            this.videoPreviewThumbnail.Size = new System.Drawing.Size(1015, 252);
+            this.videoPreviewThumbnail.Size = new System.Drawing.Size(1146, 252);
             this.videoPreviewThumbnail.TabIndex = 10;
             // 
             // addedByValue
             // 
+            this.addedByValue.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.addedByValue.AutoSize = true;
             this.addedByValue.Location = new System.Drawing.Point(498, 140);
             this.addedByValue.Name = "addedByValue";
@@ -205,9 +204,11 @@ namespace Youtube_Playlist_Naukar_Windows
             this.addedByValue.TabIndex = 44;
             this.addedByValue.TabStop = true;
             this.addedByValue.Text = "-";
+            this.addedByValue.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.addedByValue_LinkClicked);
             // 
             // playlistPositionValue
             // 
+            this.playlistPositionValue.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.playlistPositionValue.AutoSize = true;
             this.playlistPositionValue.Location = new System.Drawing.Point(498, 110);
             this.playlistPositionValue.Name = "playlistPositionValue";
@@ -217,6 +218,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // privacyStatusValue
             // 
+            this.privacyStatusValue.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.privacyStatusValue.AutoSize = true;
             this.privacyStatusValue.Location = new System.Drawing.Point(497, 192);
             this.privacyStatusValue.Name = "privacyStatusValue";
@@ -226,6 +228,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // addedByLabel
             // 
+            this.addedByLabel.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.addedByLabel.AutoSize = true;
             this.addedByLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.addedByLabel.Location = new System.Drawing.Point(308, 137);
@@ -236,6 +239,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // descriptionValue
             // 
+            this.descriptionValue.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.descriptionValue.AutoSize = true;
             this.descriptionValue.Location = new System.Drawing.Point(497, 217);
             this.descriptionValue.Name = "descriptionValue";
@@ -245,6 +249,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // label14
             // 
+            this.label14.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label14.AutoSize = true;
             this.label14.Location = new System.Drawing.Point(497, 188);
             this.label14.Name = "label14";
@@ -254,6 +259,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // addedOnValue
             // 
+            this.addedOnValue.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.addedOnValue.AutoSize = true;
             this.addedOnValue.Location = new System.Drawing.Point(497, 85);
             this.addedOnValue.Name = "addedOnValue";
@@ -263,6 +269,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // durationValue
             // 
+            this.durationValue.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.durationValue.AutoSize = true;
             this.durationValue.Location = new System.Drawing.Point(497, 60);
             this.durationValue.Name = "durationValue";
@@ -272,6 +279,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // descriptionLabel
             // 
+            this.descriptionLabel.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.descriptionLabel.AutoSize = true;
             this.descriptionLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.descriptionLabel.Location = new System.Drawing.Point(308, 214);
@@ -282,6 +290,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // privacyStatusLabel
             // 
+            this.privacyStatusLabel.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.privacyStatusLabel.AutoSize = true;
             this.privacyStatusLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.privacyStatusLabel.Location = new System.Drawing.Point(308, 188);
@@ -292,6 +301,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // durationLabel
             // 
+            this.durationLabel.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.durationLabel.AutoSize = true;
             this.durationLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.durationLabel.Location = new System.Drawing.Point(308, 57);
@@ -302,6 +312,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // titleValue
             // 
+            this.titleValue.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.titleValue.AutoSize = true;
             this.titleValue.Location = new System.Drawing.Point(497, 10);
             this.titleValue.Name = "titleValue";
@@ -311,6 +322,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // playlistPositionLabel
             // 
+            this.playlistPositionLabel.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.playlistPositionLabel.AutoSize = true;
             this.playlistPositionLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.playlistPositionLabel.Location = new System.Drawing.Point(308, 109);
@@ -321,6 +333,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // urlLabel
             // 
+            this.urlLabel.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.urlLabel.AutoSize = true;
             this.urlLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.urlLabel.Location = new System.Drawing.Point(308, 32);
@@ -331,6 +344,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // titleLabel
             // 
+            this.titleLabel.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.titleLabel.AutoSize = true;
             this.titleLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.titleLabel.Location = new System.Drawing.Point(308, 7);
@@ -341,6 +355,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // videoOwnerLabel
             // 
+            this.videoOwnerLabel.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.videoOwnerLabel.AutoSize = true;
             this.videoOwnerLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.videoOwnerLabel.Location = new System.Drawing.Point(308, 163);
@@ -351,6 +366,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // addedOnLabel
             // 
+            this.addedOnLabel.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.addedOnLabel.AutoSize = true;
             this.addedOnLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.addedOnLabel.Location = new System.Drawing.Point(308, 83);
@@ -361,6 +377,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // urlValue
             // 
+            this.urlValue.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.urlValue.AutoSize = true;
             this.urlValue.Location = new System.Drawing.Point(497, 32);
             this.urlValue.Name = "urlValue";
@@ -368,6 +385,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.urlValue.TabIndex = 17;
             this.urlValue.TabStop = true;
             this.urlValue.Text = "-";
+            this.urlValue.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.urlValue_LinkClicked);
             // 
             // title
             // 
@@ -389,6 +407,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // videoOwnerValue
             // 
+            this.videoOwnerValue.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.videoOwnerValue.AutoSize = true;
             this.videoOwnerValue.Location = new System.Drawing.Point(497, 163);
             this.videoOwnerValue.Name = "videoOwnerValue";
@@ -396,6 +415,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.videoOwnerValue.TabIndex = 18;
             this.videoOwnerValue.TabStop = true;
             this.videoOwnerValue.Text = "-";
+            this.videoOwnerValue.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.videoOwnerValue_LinkClicked);
             // 
             // createdOn
             // 
@@ -417,10 +437,12 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // videoThumbnailPreview
             // 
+            this.videoThumbnailPreview.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.videoThumbnailPreview.ImageLocation = "default_image.png";
             this.videoThumbnailPreview.Location = new System.Drawing.Point(16, 43);
             this.videoThumbnailPreview.Name = "videoThumbnailPreview";
             this.videoThumbnailPreview.Size = new System.Drawing.Size(277, 157);
+            this.videoThumbnailPreview.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.videoThumbnailPreview.TabIndex = 0;
             this.videoThumbnailPreview.TabStop = false;
             // 
@@ -429,7 +451,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.playlistNameLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.playlistNameLabel.AutoSize = true;
             this.playlistNameLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.playlistNameLabel.Location = new System.Drawing.Point(851, 425);
+            this.playlistNameLabel.Location = new System.Drawing.Point(973, 417);
             this.playlistNameLabel.Name = "playlistNameLabel";
             this.playlistNameLabel.Size = new System.Drawing.Size(133, 25);
             this.playlistNameLabel.TabIndex = 11;
@@ -440,7 +462,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.totalVideosLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.totalVideosLabel.AutoSize = true;
             this.totalVideosLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.totalVideosLabel.Location = new System.Drawing.Point(851, 354);
+            this.totalVideosLabel.Location = new System.Drawing.Point(966, 341);
             this.totalVideosLabel.Name = "totalVideosLabel";
             this.totalVideosLabel.Size = new System.Drawing.Size(121, 25);
             this.totalVideosLabel.TabIndex = 12;
@@ -459,14 +481,16 @@ namespace Youtube_Playlist_Naukar_Windows
             this.playlistVideosDataView.ReadOnly = true;
             this.playlistVideosDataView.RowHeadersWidth = 62;
             this.playlistVideosDataView.RowTemplate.Height = 84;
-            this.playlistVideosDataView.Size = new System.Drawing.Size(805, 449);
+            this.playlistVideosDataView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.playlistVideosDataView.Size = new System.Drawing.Size(923, 449);
             this.playlistVideosDataView.TabIndex = 13;
+            this.playlistVideosDataView.SelectionChanged += new System.EventHandler(this.playlistVideosDataView__SelectedIndexChanged);
             // 
             // totalVideosValue
             // 
             this.totalVideosValue.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.totalVideosValue.AutoSize = true;
-            this.totalVideosValue.Location = new System.Drawing.Point(860, 388);
+            this.totalVideosValue.Location = new System.Drawing.Point(973, 377);
             this.totalVideosValue.Name = "totalVideosValue";
             this.totalVideosValue.Size = new System.Drawing.Size(19, 25);
             this.totalVideosValue.TabIndex = 39;
@@ -476,22 +500,11 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             this.playlistNameValue.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.playlistNameValue.AutoSize = true;
-            this.playlistNameValue.Location = new System.Drawing.Point(861, 463);
+            this.playlistNameValue.Location = new System.Drawing.Point(975, 452);
             this.playlistNameValue.Name = "playlistNameValue";
             this.playlistNameValue.Size = new System.Drawing.Size(19, 25);
             this.playlistNameValue.TabIndex = 40;
             this.playlistNameValue.Text = "-";
-            // 
-            // viewPrivateVideosButton
-            // 
-            this.viewPrivateVideosButton.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.viewPrivateVideosButton.Location = new System.Drawing.Point(851, 269);
-            this.viewPrivateVideosButton.Name = "viewPrivateVideosButton";
-            this.viewPrivateVideosButton.Size = new System.Drawing.Size(156, 63);
-            this.viewPrivateVideosButton.TabIndex = 41;
-            this.viewPrivateVideosButton.Text = "View Private Videos";
-            this.viewPrivateVideosButton.UseVisualStyleBackColor = true;
-            this.viewPrivateVideosButton.Click += new System.EventHandler(this.button1_Click);
             // 
             // returnHomeButton
             // 
@@ -507,13 +520,62 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // noFilterButton
+            // 
+            this.noFilterButton.AutoSize = true;
+            this.noFilterButton.Location = new System.Drawing.Point(14, 30);
+            this.noFilterButton.Name = "noFilterButton";
+            this.noFilterButton.Size = new System.Drawing.Size(80, 29);
+            this.noFilterButton.TabIndex = 43;
+            this.noFilterButton.TabStop = true;
+            this.noFilterButton.Text = "None";
+            this.noFilterButton.UseVisualStyleBackColor = true;
+            this.noFilterButton.CheckedChanged += new System.EventHandler(this.noFilterButton_CheckedChanged);
+            // 
+            // filterBox
+            // 
+            this.filterBox.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.filterBox.Controls.Add(this.showPrivate);
+            this.filterBox.Controls.Add(this.showDuplicatesButton);
+            this.filterBox.Controls.Add(this.noFilterButton);
+            this.filterBox.Location = new System.Drawing.Point(960, 184);
+            this.filterBox.Name = "filterBox";
+            this.filterBox.Size = new System.Drawing.Size(187, 141);
+            this.filterBox.TabIndex = 44;
+            this.filterBox.TabStop = false;
+            this.filterBox.Text = "Filter";
+            // 
+            // showPrivate
+            // 
+            this.showPrivate.AutoSize = true;
+            this.showPrivate.Location = new System.Drawing.Point(14, 100);
+            this.showPrivate.Name = "showPrivate";
+            this.showPrivate.Size = new System.Drawing.Size(139, 29);
+            this.showPrivate.TabIndex = 45;
+            this.showPrivate.TabStop = true;
+            this.showPrivate.Text = "Show Private";
+            this.showPrivate.UseVisualStyleBackColor = true;
+            this.showPrivate.CheckedChanged += new System.EventHandler(this.showPrivate_CheckedChanged);
+            // 
+            // showDuplicatesButton
+            // 
+            this.showDuplicatesButton.AutoSize = true;
+            this.showDuplicatesButton.Location = new System.Drawing.Point(13, 65);
+            this.showDuplicatesButton.Name = "showDuplicatesButton";
+            this.showDuplicatesButton.Size = new System.Drawing.Size(168, 29);
+            this.showDuplicatesButton.TabIndex = 44;
+            this.showDuplicatesButton.TabStop = true;
+            this.showDuplicatesButton.Text = "Show Duplicates";
+            this.showDuplicatesButton.UseVisualStyleBackColor = true;
+            this.showDuplicatesButton.CheckedChanged += new System.EventHandler(this.showDuplicatesButton_CheckedChanged);
+            // 
             // PlaylistHomePageForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1028, 794);
+            this.ClientSize = new System.Drawing.Size(1159, 794);
+            this.Controls.Add(this.filterBox);
             this.Controls.Add(this.returnHomeButton);
-            this.Controls.Add(this.viewPrivateVideosButton);
             this.Controls.Add(this.playlistNameValue);
             this.Controls.Add(this.totalVideosValue);
             this.Controls.Add(this.playlistVideosDataView);
@@ -523,7 +585,6 @@ namespace Youtube_Playlist_Naukar_Windows
             this.Controls.Add(this.MessageLogger);
             this.Controls.Add(this.addVideosButton);
             this.Controls.Add(this.refreshVideosButton);
-            this.Controls.Add(this.findDuplicatesButton);
             this.Controls.Add(this.searchBar);
             this.Controls.Add(this.searchPanel);
             this.Name = "PlaylistHomePageForm";
@@ -534,6 +595,8 @@ namespace Youtube_Playlist_Naukar_Windows
             this.videoPreviewThumbnail.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.videoThumbnailPreview)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.playlistVideosDataView)).EndInit();
+            this.filterBox.ResumeLayout(false);
+            this.filterBox.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -541,7 +604,6 @@ namespace Youtube_Playlist_Naukar_Windows
 
         #endregion
         private System.Windows.Forms.TextBox searchBar;
-        private System.Windows.Forms.Button findDuplicatesButton;
         private System.Windows.Forms.Button refreshVideosButton;
         private System.Windows.Forms.Button addVideosButton;
         private System.Windows.Forms.Button deleteVideoButton;
@@ -574,12 +636,16 @@ namespace Youtube_Playlist_Naukar_Windows
         private System.Windows.Forms.Label durationValue;
         private System.Windows.Forms.Label totalVideosValue;
         private System.Windows.Forms.Label playlistNameValue;
-        private System.Windows.Forms.Button viewPrivateVideosButton;
         private System.Windows.Forms.Label addedByLabel;
         private System.Windows.Forms.Label privacyStatusValue;
         private System.Windows.Forms.Label playlistPositionValue;
         private System.Windows.Forms.LinkLabel addedByValue;
         private System.Windows.Forms.Button returnHomeButton;
         private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.RadioButton noFilterButton;
+        private System.Windows.Forms.GroupBox filterBox;
+        private System.Windows.Forms.RadioButton showPrivate;
+        private System.Windows.Forms.RadioButton showDuplicatesButton;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }

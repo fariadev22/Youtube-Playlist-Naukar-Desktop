@@ -394,6 +394,44 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     = UserPlayListVideo.ConvertPlayListItemToUserPlayListVideo(
                         playListItem, duration);
             }
+            
+            SaveSession();
+        }
+
+        public void AddNewVideoToUserSessionPlaylist(
+            UserPlayList userPlayList,
+            PlaylistItem playListItem,
+            Dictionary<string, string> playlistItemsVideoDuration)
+        {
+            SavePlaylistVideoToUserSessionPlaylist(
+                userPlayList,
+                playListItem,
+                playlistItemsVideoDuration);
+
+            var newVideo =
+                userPlayList.PlayListVideos[playListItem.Id];
+
+            //update positions of videos
+            if (newVideo.PositionInPlayList != null)
+            {
+                //new video not added at the end so
+                //we need to update positions
+                if (newVideo.PositionInPlayList !=
+                    userPlayList.PlayListVideos.Count - 1)
+                {
+                    foreach (var userPlayListVideo in
+                        userPlayList.PlayListVideos.Values
+                            .Where(v =>
+                                v.UniqueVideoIdInPlaylist !=
+                                newVideo.UniqueVideoIdInPlaylist &&
+                                v.PositionInPlayList >=
+                                newVideo.PositionInPlayList))
+                    {
+                        userPlayListVideo.PositionInPlayList =
+                            userPlayListVideo.PositionInPlayList + 1;
+                    }
+                }
+            }
 
             SaveSession();
         }

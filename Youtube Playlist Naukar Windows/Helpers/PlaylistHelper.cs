@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Google.Apis.YouTube.v3.Data;
 using Youtube_Playlist_Naukar_Windows.Models;
 
 namespace Youtube_Playlist_Naukar_Windows.Helpers
@@ -155,6 +156,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 }
 
                 //load new playlists
+                List<Playlist> newPlaylists = null;
+
                 if (idsOfplaylistsToLoad.Count > 0)
                 {
                     playlistsResult =
@@ -162,17 +165,19 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                             .GetPlayListsData(
                                 cancellationToken,
                                 channelId,
-                                playlistIds: idsOfplaylistsToLoad);
+                                allPlaylistIds: idsOfplaylistsToLoad);
 
-                    var playlists =
+                    newPlaylists =
                         playlistsResult.Item1;
 
                     eTag = playlistsResult.Item2;
-
-                    SessionStorageManager.GetSessionManager.
-                        SaveUserOwnedPlaylistsToUserSession(
-                            newPlaylistsData, playlists, eTag);
                 }
+
+                SessionStorageManager.GetSessionManager.
+                    SaveUserOwnedPlaylistsToUserSession(
+                        newPlaylistsData, 
+                        newPlaylists ?? new List<Playlist>(),
+                        eTag);
             }
         }
 
@@ -206,7 +211,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     await ApiClient.GetApiClient
                         .GetPlayListsData(
                             cancellationToken,
-                            playlistIds:
+                            allPlaylistIds:
                             new List<string> { playListId });
 
                 var playlists =
@@ -241,14 +246,11 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             alreadyLoadedPlaylists ??=
                 new Dictionary<string, UserPlayList>();
 
-            var playlistsResult =
+            var partialPlaylistsData =
                 await ApiClient.GetApiClient
                     .GetUserPlayListsPartialData(
                         alreadyLoadedPlaylists.Keys.ToList(),
                         cancellationToken);
-
-            var partialPlaylistsData =
-                playlistsResult.Item1;
 
             //playlists do not exist anymore
             //so need to update data
@@ -307,11 +309,11 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             //load new playlists
             if (idsOfplaylistsToLoad.Count > 0)
             {
-                playlistsResult =
+                var playlistsResult =
                     await ApiClient.GetApiClient
                         .GetPlayListsData(
                             cancellationToken,
-                            playlistIds: idsOfplaylistsToLoad);
+                            allPlaylistIds: idsOfplaylistsToLoad);
 
                 var playlists =
                     playlistsResult.Item1;

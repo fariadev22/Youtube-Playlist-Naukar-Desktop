@@ -37,6 +37,8 @@ namespace Youtube_Playlist_Naukar_Windows
 
             _activeUserSession = activeUserSession;
 
+            toolTip1 = new ToolTip();
+
             PlaylistHelper.UserOwnedPlaylistThumbnailReady +=
                 updateUserOwnedPlaylistThumbnail;
 
@@ -171,11 +173,11 @@ namespace Youtube_Playlist_Naukar_Windows
         {
             ownerPlaylistsList.Items.Clear();
 
-            ownerPlaylistsList.LargeImageList ??=
-                new ImageList();
-
-            ownerPlaylistsList.LargeImageList.ImageSize
-                = new Size(320, 180);
+            ownerPlaylistsList.LargeImageList =
+                new ImageList
+                {
+                    ImageSize = new Size(320, 180)
+                };
 
             if (_userOwnedPlaylists != null)
             {
@@ -203,10 +205,11 @@ namespace Youtube_Playlist_Naukar_Windows
             contributorPlaylistsList.Items.Clear();
 
             contributorPlaylistsList.LargeImageList
-                ??= new ImageList();
+                = new ImageList
+                {
+                    ImageSize = new Size(320, 180)
+                };
 
-            contributorPlaylistsList.LargeImageList.ImageSize
-                = new Size(320, 180);
 
             if (_userContributorPlaylists != null)
             {
@@ -286,8 +289,19 @@ namespace Youtube_Playlist_Naukar_Windows
                 GetPreviewItemValue(
                     selectedPlaylist?.PrivacyStatus.ToString());
 
+            var description =
+                selectedPlaylist?.Description ?? "-";
+
             descriptionValue.Text =
-                GetPreviewItemValue(selectedPlaylist?.Description);
+                description.Length > 100
+                    ? description.Substring(0, 100) + "..."
+                    : description;
+
+            if (!string.IsNullOrWhiteSpace(description))
+            {
+                toolTip1.SetToolTip(
+                    descriptionValue, description);
+            }
 
             if (selectedPlaylist?.Thumbnail == null ||
                 selectedPlaylist.Thumbnail?.IsDownloaded == false)
@@ -315,22 +329,6 @@ namespace Youtube_Playlist_Naukar_Windows
             return value;
         }
 
-        private void OpenLinkInBrowser(
-            string url)
-        {
-            try
-            {
-                Process.Start(new ProcessStartInfo(
-                    url)
-                {
-                    UseShellExecute = true
-                });
-            }
-            catch
-            {
-                //
-            }
-        }
 
         private void ConvertDefaultThumbnailToBitmap()
         {
@@ -366,6 +364,9 @@ namespace Youtube_Playlist_Naukar_Windows
                     int indexOfKey =
                         ownerPlaylistsList.Items.IndexOfKey(
                             eventArgs.PlaylistId);
+
+                    ownerPlaylistsList.Items[indexOfKey].ImageKey =
+                        "";
 
                     ownerPlaylistsList.Items[indexOfKey].ImageKey =
                         eventArgs.PlaylistId;
@@ -748,13 +749,13 @@ namespace Youtube_Playlist_Naukar_Windows
         private void urlValue_LinkClicked(
             object sender, LinkLabelLinkClickedEventArgs e)
         {
-            OpenLinkInBrowser(urlValue.Text);
+            CommonUtilities.OpenLinkInBrowser(urlValue.Text);
         }
 
         private void ownerValue_LinkClicked(
             object sender, LinkLabelLinkClickedEventArgs e)
         {
-            OpenLinkInBrowser(
+            CommonUtilities.OpenLinkInBrowser(
                 ownerValue.Links[0].LinkData.ToString());
         }
 

@@ -74,76 +74,138 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 CancellationToken cancellationToken,
                 string channelId = null,
                 string pageToken = null,
-                List<string> playlistIds = null)
+                List<string> allPlaylistIds = null)
         {
-            var playListsRequest = 
+            //API does not support more than 50 ids at a 
+            //time.
+            List<List<string>> playlistIdsChunks =
+                new List<List<string>>();
+
+            if (allPlaylistIds != null &&
+                allPlaylistIds.Count > 0)
+            {
+                if (allPlaylistIds.Count < 50)
+                {
+                    playlistIdsChunks.Add(allPlaylistIds);
+                }
+                else
+                {
+                    int chunkSize = 50;
+                    playlistIdsChunks =
+                        allPlaylistIds
+                            .Select((x, i) =>
+                                new { Index = i, Value = x })
+                            .GroupBy(x => x.Index / chunkSize)
+                            .Select(x => x.Select(v => v.Value).ToList())
+                            .ToList();
+                }
+
+                //channel Id not allowed in such cases then
+                channelId = null;
+            }
+
+            var playListsRequest =
                 _youtubeService.Playlists.List(
                     GetPlaylistsRequestPartString());
 
-            if(!string.IsNullOrWhiteSpace(channelId))
+            if (!string.IsNullOrWhiteSpace(channelId))
             {
                 playListsRequest.ChannelId = channelId;
             }
-            
+
             playListsRequest.MaxResults = 50;
-            playListsRequest.Fields = 
+            playListsRequest.Fields =
                 "nextPageToken," +
                 "etag," +
                 "items" +
-                    "(" +
-                        "id," +
-                        "etag," +
-                        "kind," +
-                        "status(privacyStatus)," +
-                        "contentDetails(itemCount)," +
-                        "snippet(" +
-                            "publishedAt," +
-                            "description," +
-                            "title," +
-                            "thumbnails/medium/url," +
-                            "channelId," +
-                            "channelTitle" +
-                        ")" +
-                    ")";
+                "(" +
+                "id," +
+                "etag," +
+                "kind," +
+                "status(privacyStatus)," +
+                "contentDetails(itemCount)," +
+                "snippet(" +
+                "publishedAt," +
+                "description," +
+                "title," +
+                "thumbnails/medium/url," +
+                "channelId," +
+                "channelTitle" +
+                ")" +
+                ")";
 
             if (!string.IsNullOrWhiteSpace(pageToken))
             {
                 playListsRequest.PageToken = pageToken;
             }
 
-            if(playlistIds != null &&
-                playlistIds.Count > 0)
+            if (playlistIdsChunks.Count > 0)
             {
-                playListsRequest.Id =
-                    string.Join(",", playlistIds);
-                //channel Id not allowed in such cases then
-                playListsRequest.ChannelId = null;
-            }
+                List<Playlist> finalPlaylists = 
+                    new List<Playlist>();
 
-            var playListsResponse = 
-                await playListsRequest.ExecuteAsync(
-                    cancellationToken);
-            string eTag = playListsResponse.ETag;
-            var playLists = playListsResponse.Items?.ToList() 
-                            ?? new List<Playlist>();
-
-            if (!string.IsNullOrWhiteSpace(
-                playListsResponse.NextPageToken))
-            {
-                var nextPlayLists =
-                    (await GetPlayListsData(
-                        cancellationToken,
-                        playListsResponse.NextPageToken,
-                        playlistIds: playlistIds)).Item1;
-
-                if (nextPlayLists != null &&
-                   nextPlayLists.Count > 0)
+                foreach (var playlistIds in playlistIdsChunks)
                 {
-                    playLists.AddRange(nextPlayLists);
-                }
-            }
+                    playListsRequest.Id =
+                        string.Join(",", playlistIds);
 
-            return (playLists, eTag);
+                    var playListsResponse =
+                        await playListsRequest.ExecuteAsync(
+                            cancellationToken);
+
+                    var playLists = playListsResponse.Items?.ToList()
+                                    ?? new List<Playlist>();
+
+                    if (!string.IsNullOrWhiteSpace(
+                        playListsResponse.NextPageToken))
+                    {
+                        var nextPlayLists =
+                            (await GetPlayListsData(
+                                cancellationToken,
+                                playListsResponse.NextPageToken,
+                                allPlaylistIds: playlistIds)).Item1;
+
+                        if (nextPlayLists != null &&
+                            nextPlayLists.Count > 0)
+                        {
+                            playLists.AddRange(nextPlayLists);
+                        }
+                    }
+
+                    finalPlaylists.AddRange(playLists);
+                }
+
+                return (finalPlaylists, "");
+            }
+            else //get all channel playlists
+            {
+                var playListsResponse =
+                    await playListsRequest.ExecuteAsync(
+                        cancellationToken);
+
+                string eTag = playListsResponse.ETag;
+
+                var playLists = 
+                    playListsResponse.Items?.ToList()
+                        ?? new List<Playlist>();
+
+                if (!string.IsNullOrWhiteSpace(
+                    playListsResponse.NextPageToken))
+                {
+                    var nextPlayLists =
+                        (await GetPlayListsData(
+                            cancellationToken,
+                            playListsResponse.NextPageToken))
+                        .Item1;
+
+                    if (nextPlayLists != null &&
+                        nextPlayLists.Count > 0)
+                    {
+                        playLists.AddRange(nextPlayLists);
+                    }
+                }
+                return (playLists, eTag);
+            }
         }
 
         public async Task<(List<Playlist>, string)> 
@@ -195,19 +257,46 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             return (playLists, eTag);
         }
 
-        public async Task<(List<Playlist>, string)>
+        public async Task<List<Playlist>>
             GetUserPlayListsPartialData(
-                List<string> playlistIds,
+                List<string> allPlaylistIds,
                 CancellationToken cancellationToken,
                 string pageToken = null)
         {
+            //API does not support more than 50 ids at a 
+            //time.
+            List<List<string>> playlistIdsChunks =
+                new List<List<string>>();
+
+            if (allPlaylistIds != null &&
+                allPlaylistIds.Count > 0)
+            {
+                if (allPlaylistIds.Count < 50)
+                {
+                    playlistIdsChunks.Add(allPlaylistIds);
+                }
+                else
+                {
+                    int chunkSize = 50;
+                    playlistIdsChunks =
+                        allPlaylistIds
+                            .Select((x, i) =>
+                                new { Index = i, Value = x })
+                            .GroupBy(x => x.Index / chunkSize)
+                            .Select(x => x.Select(v => v.Value).ToList())
+                            .ToList();
+                }
+            }
+            else
+            {
+                return new List<Playlist>();
+            }
+
             //part string needs to be same as original request
             //in order to get same etags
             var playListsRequest =
                 _youtubeService.Playlists.List(
                     GetPlaylistsRequestPartString());
-            playListsRequest.Id =
-                string.Join(",", playlistIds);
             playListsRequest.MaxResults = 50;
             playListsRequest.Fields =
                 "nextPageToken, etag, items(id, etag)";
@@ -217,32 +306,42 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 playListsRequest.PageToken = pageToken;
             }
 
-            var playListsResponse =
-                await playListsRequest.ExecuteAsync(
-                    cancellationToken);
+            List<Playlist> finalPlaylists = 
+                new List<Playlist>();
 
-            string eTag = playListsResponse.ETag;
-
-            var playLists = playListsResponse.Items?.ToList()
-                            ?? new List<Playlist>();
-
-            if (!string.IsNullOrWhiteSpace(
-                playListsResponse.NextPageToken))
+            foreach (var playlistIds in playlistIdsChunks)
             {
-                var nextPlayLists =
-                    (await GetUserPlayListsPartialData(
-                        playlistIds,
-                        cancellationToken,
-                        playListsResponse.NextPageToken)).Item1;
+                playListsRequest.Id =
+                    string.Join(",", playlistIds);
 
-                if (nextPlayLists != null &&
-                    nextPlayLists.Count > 0)
+                var playListsResponse =
+                    await playListsRequest.ExecuteAsync(
+                        cancellationToken);
+
+                var playLists = playListsResponse.Items?.ToList()
+                                ?? new List<Playlist>();
+
+                if (!string.IsNullOrWhiteSpace(
+                    playListsResponse.NextPageToken))
                 {
-                    playLists.AddRange(nextPlayLists);
+                    var nextPlayLists =
+                        (await GetUserPlayListsPartialData(
+                            playlistIds,
+                            cancellationToken,
+                            playListsResponse.NextPageToken));
+
+                    if (nextPlayLists != null &&
+                        nextPlayLists.Count > 0)
+                    {
+                        playLists.AddRange(nextPlayLists);
+                    }
                 }
+
+                finalPlaylists.AddRange(playLists);
             }
 
-            return (playLists, eTag);
+            return finalPlaylists;
+
         }
 
         public async Task<(List<PlaylistItem>, string)> 
@@ -250,10 +349,38 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             UserPlayList userPlayList,
             CancellationToken cancellationToken,
             string pageToken = null,
-            List<string> videoIds = null)
+            List<string> allVideoIds = null)
         {
-            List<PlaylistItem> playlistItems = 
-                new List<PlaylistItem>();
+            string playlistId =
+                userPlayList.Id;
+
+            //API does not support more than 50 ids at a 
+            //time.
+            List<List<string>> videoIdsChunks =
+                new List<List<string>>();
+
+            if (allVideoIds != null &&
+                allVideoIds.Count > 0)
+            {
+                if (allVideoIds.Count < 50)
+                {
+                    videoIdsChunks.Add(allVideoIds);
+                }
+                else
+                {
+                    int chunkSize = 50;
+                    videoIdsChunks =
+                        allVideoIds
+                            .Select((x, i) =>
+                                new { Index = i, Value = x })
+                            .GroupBy(x => x.Index / chunkSize)
+                            .Select(x => x.Select(v => v.Value).ToList())
+                            .ToList();
+                }
+
+                //playlist Id not allowed in such cases then
+                playlistId = null;
+            }
             
             var playListItemsRequest = 
                 _youtubeService.PlaylistItems.List(
@@ -267,59 +394,103 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 "videoOwnerChannelId, videoOwnerChannelTitle, " +
                 "position), status(privacyStatus))";
 
-            if(videoIds != null &&
-                videoIds.Count > 0)
-            {
-                playListItemsRequest.Id =
-                    string.Join(",", videoIds);
-            }
-            else
-            {
-                playListItemsRequest.PlaylistId = userPlayList.Id;
-            }
+            playListItemsRequest.PlaylistId =
+                playlistId;
 
             if (!string.IsNullOrWhiteSpace(pageToken))
             {
                 playListItemsRequest.PageToken = pageToken;
             }
 
-            var playListItemsResponse =
-                await playListItemsRequest.ExecuteAsync(
-                    cancellationToken);
-
-            string eTag = string.Empty;
-
-            if (playListItemsResponse != null)
+            if (videoIdsChunks.Count > 0)
             {
-                eTag = playListItemsResponse.ETag;
+                List<PlaylistItem> playlistItems =
+                    new List<PlaylistItem>();
 
-                if (playListItemsResponse.Items != null &&
-                    playListItemsResponse.Items.Count > 0)
+                foreach (var videoIds in videoIdsChunks)
                 {
-                    playlistItems.AddRange(playListItemsResponse.Items);
-                }
+                    playListItemsRequest.Id =
+                        string.Join(",", videoIds);
 
-                if (!string.IsNullOrWhiteSpace(
-                    playListItemsResponse.NextPageToken))
-                {
-                    var nextItemsResult = 
-                        await GetPlaylistVideos(
-                            userPlayList,
-                            cancellationToken,
-                            playListItemsResponse.NextPageToken,
-                            videoIds: videoIds);
+                    var playListItemsResponse =
+                        await playListItemsRequest.ExecuteAsync(
+                            cancellationToken);
 
-                    var nextItems = nextItemsResult.Item1;
-
-                    if (nextItems != null &&
-                        nextItems.Count > 0)
+                    if (playListItemsResponse != null)
                     {
-                        playlistItems.AddRange(nextItems);
+                        if (playListItemsResponse.Items != null &&
+                            playListItemsResponse.Items.Count > 0)
+                        {
+                            playlistItems.AddRange(
+                                playListItemsResponse.Items);
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(
+                            playListItemsResponse.NextPageToken))
+                        {
+                            var nextItemsResult =
+                                await GetPlaylistVideos(
+                                    userPlayList,
+                                    cancellationToken,
+                                    playListItemsResponse.NextPageToken,
+                                    allVideoIds: videoIds);
+
+                            var nextItems = nextItemsResult.Item1;
+
+                            if (nextItems != null &&
+                                nextItems.Count > 0)
+                            {
+                                playlistItems.AddRange(nextItems);
+                            }
+                        }
                     }
                 }
-            }
 
-            return (playlistItems, eTag);
+                return (playlistItems, "");
+            }
+            else
+            {
+                List<PlaylistItem> playlistItems =
+                    new List<PlaylistItem>();
+
+                var playListItemsResponse =
+                    await playListItemsRequest.ExecuteAsync(
+                        cancellationToken);
+
+                string eTag = string.Empty;
+
+                if (playListItemsResponse != null)
+                {
+                    eTag = playListItemsResponse.ETag;
+
+                    if (playListItemsResponse.Items != null &&
+                        playListItemsResponse.Items.Count > 0)
+                    {
+                        playlistItems.AddRange(
+                            playListItemsResponse.Items);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(
+                        playListItemsResponse.NextPageToken))
+                    {
+                        var nextItemsResult =
+                            await GetPlaylistVideos(
+                                userPlayList,
+                                cancellationToken,
+                                playListItemsResponse.NextPageToken);
+
+                        var nextItems = nextItemsResult.Item1;
+
+                        if (nextItems != null &&
+                            nextItems.Count > 0)
+                        {
+                            playlistItems.AddRange(nextItems);
+                        }
+                    }
+                }
+
+                return (playlistItems, eTag);
+            }
         }
 
         public async Task<(List<PlaylistItem>, string)>

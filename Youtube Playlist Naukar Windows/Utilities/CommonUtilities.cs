@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -11,6 +12,23 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
 {
     public static class CommonUtilities
     {
+        public static void OpenLinkInBrowser(
+            string url)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(
+                    url)
+                {
+                    UseShellExecute = true
+                });
+            }
+            catch
+            {
+                //
+            }
+        }
+
         public static void DownloadImageToUserDirectory(
             string userDirectoryPath,
             string imageId,
@@ -36,6 +54,12 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
                     FileMode.Open))
                 {
                     Bitmap bitmap = new Bitmap(imageStream);
+
+                    if (imageList.Images.ContainsKey(imageId))
+                    {
+                        imageList.Images.RemoveByKey(imageId);
+                    }
+
                     imageList.Images.Add(imageId, bitmap);
                 }
             }
@@ -45,6 +69,10 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
                     "default_image.png", FileMode.Open))
                 {
                     var defaultBitmap = new Bitmap(imageStream);
+                    if (imageList.Images.ContainsKey(imageId))
+                    {
+                        imageList.Images.RemoveByKey(imageId);
+                    }
                     imageList.Images.Add(imageId, defaultBitmap);
                 }
             }

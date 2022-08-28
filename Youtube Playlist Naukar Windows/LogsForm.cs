@@ -1,18 +1,33 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
 using System.Windows.Forms;
 
 namespace Youtube_Playlist_Naukar_Windows
 {
     public partial class LogsForm : Form
     {
-        public LogsForm(List<string> logMessages)
+        public LogsForm()
         {
             InitializeComponent();
-            logMessages ??= new List<string>();
+        }
 
-            foreach (var logMessage in logMessages)
+        public void AddRow(string youtubeUrl, string logMessage)
+        {
+            logTable.Rows.Add(youtubeUrl, logMessage);
+        }
+
+        public void UpdateRow(string youtubeUrl, string logMessage)
+        {
+            if (logTable.Rows.Count > 0)
             {
-                logMessagesList.Items.Add(logMessage);
+                var row =
+                    logTable.Rows.Cast<DataGridViewRow>().FirstOrDefault(
+                        r => r.Cells["urlColumn"].Value.ToString() == youtubeUrl);
+
+                if (row != null)
+                {
+                    row.Cells["statusColumn"].Value = logMessage;
+                }
+
             }
         }
     }

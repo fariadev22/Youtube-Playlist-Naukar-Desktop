@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FuzzySharp;
+using Google.Apis.YouTube.v3.Data;
 using Youtube_Playlist_Naukar_Windows.Models;
 using Youtube_Playlist_Naukar_Windows.Utilities;
 
@@ -82,7 +83,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                         cancellationToken);
                 }
             }
-            catch
+            catch(Exception ex)
             {
                 //
             }
@@ -157,6 +158,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 }
 
                 //load new videos
+                List<PlaylistItem> newVideos = null;
+                Dictionary<string, string> videoDurations = null;
                 if (idsOfVideosToLoad.Count > 0)
                 {
                     playlistVideosResult =
@@ -164,26 +167,29 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                             .GetPlaylistVideos(
                                 userPlaylist,
                                 cancellationToken,
-                                videoIds: idsOfVideosToLoad);
+                                allVideoIds: idsOfVideosToLoad);
 
-                    var videos =
+                    newVideos =
                         playlistVideosResult.Item1;
 
                     eTag = playlistVideosResult.Item2;
 
-                    var playlistVideosDurationResult =
+                    videoDurations =
                         await ApiClient.GetApiClient.GetVideosDuration(
-                            videos
+                            newVideos
                                 .Select(v =>
                                     v.Snippet?.ResourceId?.VideoId)
                                 .ToList(),
                             cancellationToken);
-
-                    SessionStorageManager.GetSessionManager.
-                        SavePlaylistVideosToUserSessionPlaylist(
-                            userPlaylist, newVideosData, videos, 
-                            playlistVideosDurationResult, eTag);
                 }
+
+                SessionStorageManager.GetSessionManager.
+                    SavePlaylistVideosToUserSessionPlaylist(
+                        userPlaylist, 
+                        newVideosData, 
+                        newVideos ?? new List<PlaylistItem>(), 
+                        videoDurations ?? new Dictionary<string, string>(),
+                        eTag);
             }
         }
 
@@ -223,81 +229,63 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     v.Value).Select(v => v.Key).ToList();
         }
 
-        public async Task<List<string>> AddVideoOrVideosToPlayList(
-            string youTubeUrlsString,
+        public async Task<(string, UserPlayListVideo)> AddVideoToPlayList(
+            string youTubeUrl,
             UserPlayList userPlayList,
             CancellationToken cancellationToken)
         {
-            List<string> urls =
-                youTubeUrlsString.Split('\n').
-                    Select(url => url.Trim()).ToList();
-
-            List<string> messages = new List<string>();
-
-            foreach (var url in urls)
-            {
-                bool isValidUrl =
+            bool isValidUrl =
                     CommonUtilities.TryGetVideoIdFromYoutubeUrl(
-                        url, out string videoId);
+                        youTubeUrl, out string videoId);
 
-                if (!isValidUrl)
-                {
-                    messages.Add(
-                        "Unable to add video with URL " +
-                        "[" + url + "] -> " +
-                        "Invalid URL");
-
-                    continue;
-                }
-
-                if (userPlayList.PlayListVideos?.Values.ToList()
-                    .Any(v => v.VideoId == videoId) == true)
-                {
-                    messages.Add(
-                        "Video with URL [" + url + "] " +
-                        "already exists in the playlist.");
-                }
-                else
-                {
-                    try
-                    {
-                        var playListItem =
-                            await ApiClient.GetApiClient.AddVideoToPlayList(
-                                videoId, userPlayList, cancellationToken);
-
-                        var playlistVideosDurationResult =
-                            await ApiClient.GetApiClient.GetVideosDuration(
-                                new List<string>
-                                {
-                                    playListItem?.Snippet?.ResourceId?.VideoId
-                                },
-                                cancellationToken);
-
-                        if (playListItem == null)
-                        {
-                            messages.Add(
-                                "Unable to add video with URL [" + url + "]");
-                        }
-                        else
-                        {
-                            messages.Add(
-                                "Successfully added video with URL [" + url + "]");
-
-                            SessionStorageManager.GetSessionManager.
-                                SavePlaylistVideoToUserSessionPlaylist(
-                                    userPlayList, playListItem,
-                                    playlistVideosDurationResult);
-                        }
-                    }
-                    catch
-                    {
-                        messages.Add(
-                            "Unable to add video with URL [" + url + "]");
-                    }
-                }
+            if (!isValidUrl)
+            {
+                return ("Not added. Invalid URL.", null);
             }
 
-            return messages;
+            if (userPlayList.PlayListVideos?.Values.ToList()
+                .Any(v => v.VideoId == videoId) == true)
+            {
+                return ("Not added. " +
+                       "Video already exists in playlist.", null);
+            }
+
+            try
+            {
+                var playListItem =
+                    await ApiClient.GetApiClient.AddVideoToPlayList(
+                        videoId, userPlayList, cancellationToken);
+
+                var playlistVideosDurationResult =
+                    await ApiClient.GetApiClient.GetVideosDuration(
+                        new List<string>
+                        {
+                            playListItem?.Snippet?.ResourceId?.VideoId
+                        },
+                        cancellationToken);
+
+                if (playListItem == null)
+                {
+                    return ("Not added.", null);
+                }
+
+                SessionStorageManager.GetSessionManager.
+                    AddNewVideoToUserSessionPlaylist(
+                        userPlayList, playListItem,
+                        playlistVideosDurationResult);
+
+                var addedVideo =
+                    userPlayList.PlayListVideos?.ContainsKey(
+                        playListItem.Id) == true
+                        ? userPlayList.PlayListVideos[playListItem.Id]
+                        : null;
+
+                return ("Successfully added.", addedVideo);
+            }
+            catch
+            {
+                return ("Not added.", null);
+            }
         }
 
         public List<List<UserPlayListVideo>> GetPlaylistDuplicates(

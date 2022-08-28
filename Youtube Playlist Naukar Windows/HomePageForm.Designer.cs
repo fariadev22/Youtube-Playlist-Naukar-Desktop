@@ -31,6 +31,7 @@ namespace Youtube_Playlist_Naukar_Windows
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.email = new System.Windows.Forms.Label();
             this.playlistsTabs = new System.Windows.Forms.TabControl();
             this.ownerTab = new System.Windows.Forms.TabPage();
@@ -67,6 +68,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.descriptionLabel = new System.Windows.Forms.Label();
             this.ownerValue = new System.Windows.Forms.LinkLabel();
             this.urlValue = new System.Windows.Forms.LinkLabel();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.playlistsTabs.SuspendLayout();
             this.ownerTab.SuspendLayout();
             this.contributorTab.SuspendLayout();
@@ -513,5 +515,6 @@ namespace Youtube_Playlist_Naukar_Windows
         private Label createdOnValue;
         private ListView ownerPlaylistsList;
         private TabPage ownerTab;
+        private ToolTip toolTip1;
     }
 }

@@ -28,8 +28,12 @@ namespace Youtube_Playlist_Naukar_Windows
 
         private const int videoThumbnailHeight = 84;
 
-        private List<DataRow> rows = 
-            new List<DataRow>();
+        private SortedDictionary<long, DataRow> rows =
+            new SortedDictionary<long, DataRow>();
+
+        private Bitmap _defaultImage;
+
+        private DataTable _dataTable;
 
         public PlaylistHomePageForm(
             UserPlayList playlist,
@@ -39,6 +43,11 @@ namespace Youtube_Playlist_Naukar_Windows
             _playlist = playlist;
             _activeUserSession = activeUserSession;
             Text = _playlist.Title;
+            toolTip1 = new ToolTip();
+            MessageLogger.ForeColor = Color.DodgerBlue;
+            _defaultImage =
+                new Bitmap(Image.FromFile("default_image.png"),
+                    videoThumbnailWidth, videoThumbnailHeight);
 
             PlaylistVideosHelper.VideoThumbnailReady +=
                 UpdatePlaylistVideoThumbnail;
@@ -47,6 +56,14 @@ namespace Youtube_Playlist_Naukar_Windows
         public async Task LoadPlaylistVideos(
             CancellationToken token)
         {
+            MessageLogger.Text = "Loading videos...";
+
+            addVideosButton.Enabled = false;
+            refreshVideosButton.Enabled = false;
+            deleteVideoButton.Enabled = false;
+            filterBox.Enabled = false;
+            searchBar.Enabled = false;
+
             await PlaylistVideosHelper.GetPlaylistVideosHelper
                 .LoadPlaylist(_playlist, token);
 
@@ -55,6 +72,16 @@ namespace Youtube_Playlist_Naukar_Windows
                 LoadPlaylistVideosUI(
                     _playlist.PlayListVideos.Values.ToList());
             }
+
+            UpdateTotalVideosCount();
+
+            addVideosButton.Enabled = true;
+            refreshVideosButton.Enabled = true;
+            deleteVideoButton.Enabled = true;
+            filterBox.Enabled = true;
+            searchBar.Enabled = true;
+
+            MessageLogger.Text = "";
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -73,14 +100,15 @@ namespace Youtube_Playlist_Naukar_Windows
         {
             if (_playlist != null)
             {
-                MessageLogger.Text = "Loading videos...";
+               
                 _cancellationTokenSource =
                     new CancellationTokenSource();
 
                 await LoadPlaylistVideos(
                     _cancellationTokenSource.Token);
 
-                MessageLogger.Text = "";
+                playlistNameValue.Text =
+                    _playlist?.Title ?? "-";
             }
             else
             {
@@ -108,11 +136,7 @@ namespace Youtube_Playlist_Naukar_Windows
                 searchBar.Text))
             {
                 playlistVideosDataView.DataSource =
-                    rows
-                    .OrderBy(s =>
-                        int.Parse(Convert.ToString(s["Position"]))
-                    )
-                    .CopyToDataTable();
+                    rows.Values.CopyToDataTable();
 
                 return;
             }
@@ -125,7 +149,7 @@ namespace Youtube_Playlist_Naukar_Windows
                     .ToList();
 
             var rowsFiltered =
-                rows
+                rows.Values
                     .Where(r => filteredVideos.Contains(
                         Convert.ToString(r["VideoId"])));
 
@@ -165,9 +189,7 @@ namespace Youtube_Playlist_Naukar_Windows
             table.Columns.Add(
                 new DataColumn("Owner Name", typeof(string)));
 
-            Bitmap defaultImage =
-                new Bitmap(Image.FromFile("default_image.png"), 
-                    videoThumbnailWidth, videoThumbnailHeight);
+            _dataTable = table;
 
             if (playlistVideos != null &&
                 playlistVideos.Count > 0)
@@ -176,13 +198,7 @@ namespace Youtube_Playlist_Naukar_Windows
                     playlistVideos)
                 {
                     table.Rows.Add(
-                        playlistVideo.UniqueVideoIdInPlaylist,
-                        ((playlistVideo.PositionInPlayList ?? 0) + 1)
-                            .ToString(),
-                        defaultImage,
-                        playlistVideo.Title,
-                        playlistVideo.Duration,
-                        playlistVideo.VideoOwnerChannelTitle);
+                        GetRowFromRowValues(playlistVideo));
                 }
             }
 
@@ -200,7 +216,15 @@ namespace Youtube_Playlist_Naukar_Windows
                 DataGridViewAutoSizeColumnMode.AllCells;
 
             rows.Clear();
-            rows.AddRange(table.Rows.Cast<DataRow>());
+            var tableRows =
+                table.Rows.Cast<DataRow>();
+
+            foreach (var tableRow in tableRows)
+            {
+                var position =
+                    long.Parse(tableRow["Position"].ToString());
+                rows.Add(position, tableRow);
+            }
 
             if (downloadVideoImages)
             {
@@ -210,11 +234,29 @@ namespace Youtube_Playlist_Naukar_Windows
             }
         }
 
+        private object[] GetRowFromRowValues(
+            UserPlayListVideo playlistVideo)
+        {
+            object[] rowValues =
+            {
+                playlistVideo.UniqueVideoIdInPlaylist,
+                ((playlistVideo.PositionInPlayList ?? 0) + 1)
+                .ToString(),
+                _defaultImage,
+                playlistVideo.Title,
+                playlistVideo.Duration,
+                playlistVideo.VideoOwnerChannelTitle
+            };
+            return rowValues;
+        }
+
         private async void addVideos_Click(object sender, EventArgs e)
         {
             var urlInputForm = new AddVideoForm();
             var dialogResult =
                 urlInputForm.ShowDialog(this);
+            List<UserPlayListVideo> newVideos
+                = new List<UserPlayListVideo>();
 
             if (dialogResult == DialogResult.OK)
             {
@@ -227,14 +269,32 @@ namespace Youtube_Playlist_Naukar_Windows
                 }
                 else
                 {
-                    var messages = 
-                        await PlaylistVideosHelper.
-                            GetPlaylistVideosHelper
-                                .AddVideoOrVideosToPlayList(
-                                    urlInput, _playlist, 
-                                    _cancellationTokenSource.Token);
+                    var logsForm = new LogsForm();
+                    logsForm.Show();
 
-                    new LogsForm(messages).Show(this);
+                    List<string> urls =
+                        urlInput.Split('\n').
+                            Select(url => url.Trim()).ToList();
+
+                    foreach (var url in urls)
+                    {
+                        logsForm.AddRow(url, "In Progress");
+
+                        var videoAdditionResult =
+                            await PlaylistVideosHelper.GetPlaylistVideosHelper.
+                                AddVideoToPlayList(
+                                    url, _playlist, _cancellationTokenSource.Token);
+
+                        var message = videoAdditionResult.Item1;
+                        var videoAdded = videoAdditionResult.Item2;
+
+                        if (videoAdded != null)
+                        {
+                            newVideos.Add(videoAdded);
+                        }
+
+                        logsForm.UpdateRow(url, message);
+                    }
                 }
 
                 urlInputForm.Dispose();
@@ -244,8 +304,48 @@ namespace Youtube_Playlist_Naukar_Windows
                 urlInputForm.Dispose();
             }
 
-            LoadPlaylistVideosUI(
-                _playlist.PlayListVideos.Values.ToList());
+            if(!_cancellationTokenSource.IsCancellationRequested)
+            {
+                var newRows =
+                    new SortedDictionary<long, DataRow>();
+
+                foreach (DataRow row in rows.Values)
+                {
+                    var id = row["VideoId"].ToString();
+                    if (_playlist.PlayListVideos.ContainsKey(id))
+                    {
+                        row["Position"] =
+                            (_playlist.PlayListVideos[id].
+                                PositionInPlayList + 1).ToString();
+                    }
+                }
+
+                foreach (DataRow row in rows.Values)
+                {
+                    newRows.Add(long.Parse(row["Position"].ToString()),
+                        row);
+                }
+
+                rows = newRows;
+
+                foreach (var playlistVideo in newVideos)
+                {
+                    var newRow = _dataTable.NewRow();
+                    newRow.ItemArray = GetRowFromRowValues(
+                        playlistVideo);
+                    rows.Add((playlistVideo.PositionInPlayList ?? 0) + 1, 
+                        newRow);
+                }
+
+                playlistVideosDataView.DataSource =
+                    rows.Values.CopyToDataTable();
+
+                PlaylistVideosHelper.GetPlaylistVideosHelper
+                    .DownloadPlaylistVideoThumbnails(
+                        _playlist.Id, newVideos);
+            }
+
+            UpdateTotalVideosCount();
         }
 
         private async void refreshVideos_Click(
@@ -254,25 +354,10 @@ namespace Youtube_Playlist_Naukar_Windows
             await LoadPlaylistVideos(_cancellationTokenSource.Token);
         }
 
-        private void findDuplicates_Click(object sender, EventArgs e)
+        private void UpdateTotalVideosCount()
         {
-            var duplicates = 
-                PlaylistVideosHelper.GetPlaylistVideosHelper
-                    .GetPlaylistDuplicates(_playlist);
-
-            if (duplicates.Count > 0)
-            {
-                MessageBox.Show(duplicates.Count + 
-                                " duplicates found in playlist.");
-                //playlistVideoList.Items.Clear();
-                LoadPlaylistVideosUI(
-                    duplicates.SelectMany(d => d).ToList(),
-                    false);
-            }
-            else
-            {
-                MessageBox.Show("No duplicates in playlist found.");
-            }
+            totalVideosValue.Text =
+                (_playlist?.PlayListVideos?.Count ?? 0).ToString();
         }
 
         private async void deleteVideo_Click(object sender, EventArgs e)
@@ -298,14 +383,37 @@ namespace Youtube_Playlist_Naukar_Windows
                     if (result == DialogResult.Yes)
                     {
                         MessageLogger.Text = "Deleting video...";
+
+                        var videoToRemove =
+                            _playlist.PlayListVideos[videoPlaylistId];
+
                         await PlaylistVideosHelper.GetPlaylistVideosHelper
                             .DeleteVideoFromPlaylist(_playlist,
-                                _playlist.PlayListVideos[videoPlaylistId],
+                                videoToRemove,
                                 _cancellationTokenSource.Token);
 
-                        playlistVideosDataView.Rows.Remove(item);
+                        if (rows.ContainsKey(
+                            videoToRemove.PositionInPlayList.Value + 1))
+                        {
+                            rows.Remove(
+                                videoToRemove.PositionInPlayList.Value + 1);
+                        }
 
                         MessageLogger.Text = "";
+
+                        foreach (DataRow row in rows.Values)
+                        {
+                            var id = row["VideoId"].ToString();
+                            if (_playlist.PlayListVideos.ContainsKey(id))
+                            {
+                                row["Position"] =
+                                    (_playlist.PlayListVideos[id].
+                                        PositionInPlayList + 1).ToString();
+                            }
+                        }
+
+                        playlistVideosDataView.DataSource =
+                            rows.Values.CopyToDataTable();
 
                         MessageBox.Show("Video successfully " +
                                         "removed from your YouTube account.");
@@ -321,6 +429,8 @@ namespace Youtube_Playlist_Naukar_Windows
                 MessageBox.Show(
                     "Select a video to remove.");
             }
+
+            UpdateTotalVideosCount();
         }
 
         private void UpdatePlaylistVideoThumbnail(
@@ -361,26 +471,23 @@ namespace Youtube_Playlist_Naukar_Windows
                 );
 
             var filteredRow =
-                rows.First(r => r["VideoId"].ToString() == 
+                rows.Values.FirstOrDefault(r => r["VideoId"].ToString() == 
                                 eventArgs.VideoId);
-            filteredRow["Preview"] = bitmap;
-
+            if (filteredRow != null)
+            {
+                filteredRow["Preview"] = bitmap;
+            }
+            
             DataGridViewRow row = playlistVideosDataView.Rows
                 .Cast<DataGridViewRow>()
                 .FirstOrDefault(r => r.Cells["VideoId"].Value.ToString() ==
                             eventArgs.VideoId);
 
-            if (row != null)
+            if (row != null &&
+                filteredRow != null)
             {
                 row.SetValues(filteredRow.ItemArray);
             }
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            var privateVideos = 
-                PlaylistVideosHelper.GetPlaylistVideosHelper.GetPrivateVideos(
-                    _playlist.PlayListVideos.Values.ToList());
         }
 
         private void returnHomeButton_Click(object sender, EventArgs e)
@@ -397,6 +504,255 @@ namespace Youtube_Playlist_Naukar_Windows
             _activeUserSession = null;
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource = null;
+        }
+
+        private void noFilterButton_CheckedChanged(object sender, EventArgs e)
+        {
+            if (noFilterButton.Checked &&
+                rows.Count > 0)
+            {
+                playlistVideosDataView.DataSource =
+                    rows.Values.CopyToDataTable();
+            }
+        }
+
+        private void showDuplicatesButton_CheckedChanged(
+            object sender, EventArgs e)
+        {
+            if (!showDuplicatesButton.Checked &&
+                rows.Count > 0)
+            {
+                return;
+            }
+
+            var duplicates =
+                PlaylistVideosHelper.GetPlaylistVideosHelper
+                    .GetPlaylistDuplicates(_playlist);
+
+            if (duplicates.Count > 0)
+            {
+                MessageBox.Show(
+                    duplicates.Count +
+                    " duplicates found in playlist.");
+            }
+
+            var filteredVideos =
+                duplicates
+                    .SelectMany(d => d)
+                    .Select(f => f.UniqueVideoIdInPlaylist)
+                    .ToList();
+
+            var rowsFiltered =
+                rows.Values
+                    .Where(r => filteredVideos.Contains(
+                        Convert.ToString(r["VideoId"])));
+
+            if (rowsFiltered.Any())
+            {
+                playlistVideosDataView.DataSource =
+                    rowsFiltered
+                        .OrderBy(s =>
+                            filteredVideos.IndexOf(
+                                Convert.ToString(s["VideoId"]))
+                        )
+                        .CopyToDataTable();
+            }
+            else
+            {
+                playlistVideosDataView.DataSource =
+                    (playlistVideosDataView.DataSource as DataTable)?.Clone();
+
+                MessageBox.Show("No duplicates in playlist found.");
+            }
+        }
+
+        private void showPrivate_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!showPrivate.Checked &&
+                rows.Count > 0)
+            {
+                return;
+            }
+
+            var filteredVideos =
+                PlaylistVideosHelper.GetPlaylistVideosHelper
+                    .GetPrivateVideos(
+                        _playlist.PlayListVideos.Values.ToList())
+                    .Select(f => f.UniqueVideoIdInPlaylist)
+                    .ToList();
+
+            var rowsFiltered =
+                rows.Values
+                    .Where(r => filteredVideos.Contains(
+                        Convert.ToString(r["VideoId"])));
+
+            if (rowsFiltered.Any())
+            {
+                playlistVideosDataView.DataSource =
+                    rowsFiltered
+                        .OrderBy(s =>
+                            filteredVideos.IndexOf(
+                                Convert.ToString(s["VideoId"]))
+                        )
+                        .CopyToDataTable();
+            }
+            else
+            {
+                MessageBox.Show("No private videos found in playlist.");
+
+                playlistVideosDataView.DataSource =
+                    (playlistVideosDataView.DataSource as DataTable)?.Clone();
+            }
+        }
+
+        private void LoadPlaylistPreviewDetails(
+            UserPlayListVideo selectedVideo)
+        {
+            titleValue.Text =
+                GetPreviewItemValue(selectedVideo?.Title);
+
+            durationValue.Text =
+                GetPreviewItemValue(selectedVideo?.Duration);
+
+            playlistPositionValue.Text =
+                GetPreviewItemValue(
+                    (selectedVideo?.PositionInPlayList + 1)?.ToString());
+
+            var videoUrl =
+                selectedVideo?.VideoId == null
+                ? ""
+                : CommonUtilities.GetYoutubeVideoUrlFromVideoId(
+                    selectedVideo.VideoId);
+
+            urlValue.Text = GetPreviewItemValue(videoUrl);
+
+            urlValue.Links.Clear();
+
+            urlValue.Links.Add(0, urlValue.Text.Length,
+                videoUrl);
+
+            videoOwnerValue.Text =
+                GetPreviewItemValue(
+                    selectedVideo?.VideoOwnerChannelTitle);
+
+            videoOwnerValue.Links.Clear();
+
+            videoOwnerValue.Links.Add(0, videoOwnerValue.Text.Length,
+                selectedVideo == null
+                    ? string.Empty
+                    : CommonUtilities.GetYoutubeChannelUrlFromChannelId(
+                    selectedVideo.VideoOwnerChannelId));
+
+            if (selectedVideo?.VideoAddedToPlaylistOn != null)
+            {
+                addedOnValue.Text =
+                    GetPreviewItemValue(
+                        selectedVideo.VideoAddedToPlaylistOn.Value
+                            .ToString("dd/MM/yyyy HH:mm"));
+            }
+            else
+            {
+                addedOnValue.Text = @"-";
+            }
+
+            addedByValue.Text =
+                GetPreviewItemValue(
+                    selectedVideo?.VideoAddedToPlaylistByChannelTitle);
+
+            addedByValue.Links.Clear();
+
+            addedByValue.Links.Add(0, addedByValue.Text.Length,
+                selectedVideo == null
+                    ? string.Empty
+                    : CommonUtilities.GetYoutubeChannelUrlFromChannelId(
+                        selectedVideo.VideoAddedToPlaylistByChannelId));
+
+            privacyStatusValue.Text =
+                GetPreviewItemValue(
+                    selectedVideo?.PrivacyStatus.ToString());
+
+            var description =
+                selectedVideo?.Description ?? "-";
+
+            descriptionValue.Text =
+                description.Length > 100 
+                    ? description.Substring(0, 100) + "..."
+                    : description;
+
+            if (!string.IsNullOrWhiteSpace(description))
+            {
+                toolTip1.SetToolTip(
+                    descriptionValue, description);
+            }
+
+            if (selectedVideo?.Thumbnail == null ||
+                selectedVideo.Thumbnail?.IsDownloaded == false)
+            {
+                videoThumbnailPreview.ImageLocation =
+                    "default_image.png";
+            }
+            else
+            {
+                videoThumbnailPreview.ImageLocation =
+                    _activeUserSession.UserDirectory +
+                        selectedVideo.
+                        Thumbnail.LocalPathFromUserDirectory;
+            }
+        }
+
+        private string GetPreviewItemValue(
+            string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return "-";
+            }
+
+            return value;
+        }
+
+        private void playlistVideosDataView__SelectedIndexChanged(
+            object sender, EventArgs e)
+        {
+            UserPlayListVideo selectedPlaylistVideo = null;
+
+            if (playlistVideosDataView.SelectedRows.Count > 0)
+            {
+                var selectedItem =
+                    playlistVideosDataView.SelectedRows[0].Cells["VideoId"];
+
+                var selectedItemId =
+                    selectedItem.Value.ToString();
+
+                if (_playlist.PlayListVideos.ContainsKey(
+                    selectedItemId))
+                {
+                    selectedPlaylistVideo =
+                        _playlist.PlayListVideos[selectedItemId];
+                }
+            }
+
+            LoadPlaylistPreviewDetails(selectedPlaylistVideo);
+        }
+
+        private void urlValue_LinkClicked(
+            object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            CommonUtilities.OpenLinkInBrowser(urlValue.Text);
+        }
+
+        private void addedByValue_LinkClicked(
+            object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            CommonUtilities.OpenLinkInBrowser(
+                addedByValue.Links[0].LinkData.ToString());
+        }
+
+        private void videoOwnerValue_LinkClicked(
+            object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            CommonUtilities.OpenLinkInBrowser(
+                videoOwnerValue.Links[0].LinkData.ToString());
         }
     }
 }

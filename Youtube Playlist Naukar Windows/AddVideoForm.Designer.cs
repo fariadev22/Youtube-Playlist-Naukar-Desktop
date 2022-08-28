@@ -37,7 +37,9 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // cancelButton
             // 
-            this.cancelButton.Location = new System.Drawing.Point(186, 219);
+            this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cancelButton.Location = new System.Drawing.Point(186, 346);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(112, 34);
             this.cancelButton.TabIndex = 0;
@@ -46,7 +48,9 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // okButton
             // 
-            this.okButton.Location = new System.Drawing.Point(417, 219);
+            this.okButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.okButton.Location = new System.Drawing.Point(417, 346);
             this.okButton.Name = "okButton";
             this.okButton.Size = new System.Drawing.Size(112, 34);
             this.okButton.TabIndex = 1;
@@ -56,14 +60,20 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // inputVideoUrlBox
             // 
+            this.inputVideoUrlBox.AcceptsReturn = true;
+            this.inputVideoUrlBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.inputVideoUrlBox.Location = new System.Drawing.Point(52, 118);
             this.inputVideoUrlBox.Multiline = true;
             this.inputVideoUrlBox.Name = "inputVideoUrlBox";
-            this.inputVideoUrlBox.Size = new System.Drawing.Size(610, 31);
+            this.inputVideoUrlBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.inputVideoUrlBox.Size = new System.Drawing.Size(610, 158);
             this.inputVideoUrlBox.TabIndex = 2;
             // 
             // addVideoLabel
             // 
+            this.addVideoLabel.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.addVideoLabel.AutoSize = true;
             this.addVideoLabel.Location = new System.Drawing.Point(52, 58);
             this.addVideoLabel.MaximumSize = new System.Drawing.Size(650, 0);
@@ -77,7 +87,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(730, 275);
+            this.ClientSize = new System.Drawing.Size(730, 402);
             this.Controls.Add(this.addVideoLabel);
             this.Controls.Add(this.inputVideoUrlBox);
             this.Controls.Add(this.okButton);

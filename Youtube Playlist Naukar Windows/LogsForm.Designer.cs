@@ -29,32 +29,63 @@ namespace Youtube_Playlist_Naukar_Windows
         /// </summary>
         private void InitializeComponent()
         {
-            this.logMessagesList = new System.Windows.Forms.ListBox();
+            this.logTable = new System.Windows.Forms.DataGridView();
+            this.urlColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.statusColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            ((System.ComponentModel.ISupportInitialize)(this.logTable)).BeginInit();
             this.SuspendLayout();
             // 
-            // logMessagesList
+            // logTable
             // 
-            this.logMessagesList.FormattingEnabled = true;
-            this.logMessagesList.ItemHeight = 25;
-            this.logMessagesList.Location = new System.Drawing.Point(12, 9);
-            this.logMessagesList.Name = "logMessagesList";
-            this.logMessagesList.Size = new System.Drawing.Size(776, 429);
-            this.logMessagesList.TabIndex = 0;
+            this.logTable.AllowUserToAddRows = false;
+            this.logTable.AllowUserToDeleteRows = false;
+            this.logTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.logTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.urlColumn,
+            this.statusColumn});
+            this.logTable.Location = new System.Drawing.Point(23, 35);
+            this.logTable.Name = "logTable";
+            this.logTable.ReadOnly = true;
+            this.logTable.RowHeadersWidth = 62;
+            this.logTable.RowTemplate.Height = 33;
+            this.logTable.Size = new System.Drawing.Size(739, 403);
+            this.logTable.TabIndex = 0;
+            // 
+            // urlColumn
+            // 
+            this.urlColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.urlColumn.Frozen = true;
+            this.urlColumn.HeaderText = "URL";
+            this.urlColumn.MinimumWidth = 8;
+            this.urlColumn.Name = "urlColumn";
+            this.urlColumn.ReadOnly = true;
+            this.urlColumn.Width = 79;
+            // 
+            // statusColumn
+            // 
+            this.statusColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.statusColumn.HeaderText = "Status";
+            this.statusColumn.MinimumWidth = 8;
+            this.statusColumn.Name = "statusColumn";
+            this.statusColumn.ReadOnly = true;
             // 
             // LogsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.logMessagesList);
+            this.Controls.Add(this.logTable);
             this.Name = "LogsForm";
             this.Text = "LogsForm";
+            ((System.ComponentModel.ISupportInitialize)(this.logTable)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.ListBox logMessagesList;
+        private System.Windows.Forms.DataGridView logTable;
+        private System.Windows.Forms.DataGridViewTextBoxColumn urlColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn statusColumn;
     }
 }
