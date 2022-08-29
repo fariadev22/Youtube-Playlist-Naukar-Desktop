@@ -101,7 +101,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
             var playlistsResult =
                 await ApiClient.GetApiClient
-                    .GetUserPlayListsPartialData(channelId,
+                    .GetPlayListsPartialData(channelId,
                         cancellationToken);
 
             var partialPlaylistsData =
@@ -248,7 +248,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
             var partialPlaylistsData =
                 await ApiClient.GetApiClient
-                    .GetUserPlayListsPartialData(
+                    .GetPlayListsPartialData(
                         alreadyLoadedPlaylists.Keys.ToList(),
                         cancellationToken);
 
