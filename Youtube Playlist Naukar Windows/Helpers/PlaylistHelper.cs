@@ -26,7 +26,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         {
             SessionStorageManager.GetSessionManager.
                     PlaylistThumbnailUpdated +=
-                notifyUIForPlaylistThumbnailChange;
+                NotifyUiForPlaylistThumbnailChange;
         }
 
         public static PlaylistHelper GetPlaylistHelper
@@ -187,8 +187,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             {
                 SessionStorageManager.GetSessionManager.
                     DownloadPlaylistThumbnailsInBackgroundAndNotifyMainThread(
-                        userOwnedPlaylists
-                            .Values.ToList(), true);
+                        userOwnedPlaylists.Values.ToList(), true);
             }
         }
 
@@ -270,7 +269,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
             //need to compare playlists data
 
-            List<string> idsOfplaylistsToLoad =
+            List<string> idsOfPlaylistsToLoad =
                 new List<string>();
 
             Dictionary<string, UserPlayList>
@@ -298,7 +297,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 }
                 else
                 {
-                    idsOfplaylistsToLoad.Add(partialPlaylist.Id);
+                    idsOfPlaylistsToLoad.Add(partialPlaylist.Id);
                     newPlaylistsData.Add(
                         partialPlaylist.Id,
                         new UserPlayList
@@ -309,19 +308,21 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             }
 
             //load new playlists
-            if (idsOfplaylistsToLoad.Count > 0)
+            List<Playlist> playlists = null;
+
+            if (idsOfPlaylistsToLoad.Count > 0)
             {
-                var playlists =
+                playlists =
                     await ApiClient.GetApiClient
                         .GetPlayListsData(
                             cancellationToken,
-                            idsOfplaylistsToLoad);
-
-                SessionStorageManager.GetSessionManager
-                    .SaveUserContributorPlaylistsToUserSession(
-                        newPlaylistsData,
-                        playlists);
+                            idsOfPlaylistsToLoad);
             }
+
+            SessionStorageManager.GetSessionManager
+                .SaveUserContributorPlaylistsToUserSession(
+                    newPlaylistsData,
+                    playlists ?? new List<Playlist>());
         }
 
         public void RemoveContributorPlaylistEntry(
@@ -331,7 +332,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 SessionStorageManager.GetSessionManager.
                     GetUserContributorPlaylistsFromSession();
 
-            if (userContributorPlaylists?.ContainsKey(playlistId) == true)
+            if (userContributorPlaylists?.ContainsKey(
+                playlistId) == true)
             {
                 SessionStorageManager.GetSessionManager.
                     DeleteUserContributorPlaylistFromUserSession(
@@ -346,8 +348,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             {
                 SessionStorageManager.GetSessionManager.
                     DownloadPlaylistThumbnailsInBackgroundAndNotifyMainThread(
-                        userContributorPlaylists
-                            .Values.ToList(), false);
+                        userContributorPlaylists.Values.ToList(), false);
             }
         }
 
@@ -363,7 +364,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
         #region  Utilities
 
-        private static void notifyUIForPlaylistThumbnailChange(
+        private static void NotifyUiForPlaylistThumbnailChange(
             object sender,
             PlaylistThumbnailUpdatedEventArgs eventArgs)
         {

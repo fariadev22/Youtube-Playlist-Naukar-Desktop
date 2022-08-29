@@ -219,6 +219,11 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     await playListsRequest.ExecuteAsync(
                         cancellationToken);
 
+                if (playListsResponse == null)
+                {
+                    continue;
+                }
+
                 var playLists = playListsResponse.Items?.ToList()
                                 ?? new List<Playlist>();
 
@@ -354,12 +359,22 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
             foreach (var playlistIds in playlistIdsChunks)
             {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
+
                 playListsRequest.Id =
                     string.Join(",", playlistIds);
 
                 var playListsResponse =
                     await playListsRequest.ExecuteAsync(
                         cancellationToken);
+
+                if (playListsResponse == null)
+                {
+                    continue;
+                }
 
                 var playLists = 
                     playListsResponse.Items?.ToList()
