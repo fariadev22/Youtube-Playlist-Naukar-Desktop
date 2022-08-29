@@ -10,15 +10,24 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 new PlaylistBackgroundWorkerManager();
 
         private Dictionary<string, PlaylistBackgroundWorkerData> 
-            ActiveBackgroundWorkers { get; set; } =
+            ActiveBackgroundWorkers { get; } =
                 new Dictionary<string, PlaylistBackgroundWorkerData>();
 
         private Dictionary<string, PlaylistBackgroundWorkerData>
-            PendingBackgroundWorkers { get; set; } =
+            PendingBackgroundWorkers { get; } =
             new Dictionary<string, PlaylistBackgroundWorkerData>();
 
         static PlaylistBackgroundWorkerManager()
         {
+        }
+
+        public static PlaylistBackgroundWorkerManager 
+            GetBackgroundWorkerManager
+        {
+            get
+            {
+                return BackgroundWorkerInstance;
+            }
         }
 
         public void AddAndStartBackgroundWorker(string playlistId,
@@ -70,14 +79,6 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             }
 
             StartBackgroundWorkerForPlaylist(playlistId);
-        }
-
-        public static PlaylistBackgroundWorkerManager GetBackgroundWorkerManager
-        {
-            get
-            {
-                return BackgroundWorkerInstance;
-            }
         }
 
         private void StartBackgroundWorkerForPlaylist(

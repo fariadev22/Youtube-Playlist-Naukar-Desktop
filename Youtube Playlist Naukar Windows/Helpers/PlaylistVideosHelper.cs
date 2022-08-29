@@ -165,15 +165,11 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 Dictionary<string, string> videoDurations = null;
                 if (idsOfVideosToLoad.Count > 0)
                 {
-                    playlistVideosResult =
+                    newVideos =
                         await ApiClient.GetApiClient
                             .GetPlaylistVideos(
-                                userPlaylist,
-                                cancellationToken,
-                                allVideoIds: idsOfVideosToLoad);
-
-                    newVideos =
-                        playlistVideosResult.Item1;
+                                idsOfVideosToLoad,
+                                cancellationToken);
 
                     eTag = playlistVideosResult.Item2;
 

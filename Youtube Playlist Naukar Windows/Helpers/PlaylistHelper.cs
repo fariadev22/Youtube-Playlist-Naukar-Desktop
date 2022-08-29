@@ -37,6 +37,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             }
         }
 
+        #region User Owned Playlists
+
         public async Task LoadUserOwnedPlaylists(
             string channelId,
             Dictionary<string, UserPlayList> alreadyLoadedPlaylists,
@@ -163,17 +165,11 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
                 if (idsOfplaylistsToLoad.Count > 0)
                 {
-                    playlistsResult =
+                    newPlaylists =
                         await ApiClient.GetApiClient
                             .GetPlayListsData(
                                 cancellationToken,
-                                channelId,
-                                allPlaylistIds: idsOfplaylistsToLoad);
-
-                    newPlaylists =
-                        playlistsResult.Item1;
-
-                    eTag = playlistsResult.Item2;
+                                idsOfplaylistsToLoad);
                 }
 
                 SessionStorageManager.GetSessionManager.
@@ -204,21 +200,21 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     GetUserOwnedPlaylistsFromSession();
         }
 
+        #endregion
+
+        #region Contributor Playlists
+
         public async Task<bool> AddContributorPlaylist(
             string playListId,
             CancellationToken cancellationToken)
         {
             try
             {
-                var playlistResult =
+                var playlists =
                     await ApiClient.GetApiClient
                         .GetPlayListsData(
                             cancellationToken,
-                            allPlaylistIds:
                             new List<string> { playListId });
-
-                var playlists =
-                    playlistResult.Item1;
 
                 if (playlists != null &&
                     playlists.Count > 0 &&
@@ -315,14 +311,11 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             //load new playlists
             if (idsOfplaylistsToLoad.Count > 0)
             {
-                var playlistsResult =
+                var playlists =
                     await ApiClient.GetApiClient
                         .GetPlayListsData(
                             cancellationToken,
-                            allPlaylistIds: idsOfplaylistsToLoad);
-
-                var playlists =
-                    playlistsResult.Item1;
+                            idsOfplaylistsToLoad);
 
                 SessionStorageManager.GetSessionManager
                     .SaveUserContributorPlaylistsToUserSession(
@@ -366,6 +359,10 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     GetUserContributorPlaylistsFromSession();
         }
 
+        #endregion
+
+        #region  Utilities
+
         private static void notifyUIForPlaylistThumbnailChange(
             object sender,
             PlaylistThumbnailUpdatedEventArgs eventArgs)
@@ -380,9 +377,9 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     UserOwnedPlaylistThumbnailReady(null,
                         new UserOwnedPlaylistThumbnailReadyEventArgs
                         {
-                            PlaylistId = 
+                            PlaylistId =
                                 eventArgs.PlaylistId,
-                            PlaylistImagePathFromCustomerDirectory = 
+                            PlaylistImagePathFromCustomerDirectory =
                                 eventArgs.PlaylistImagePathFromCustomerDirectory
                         });
                 }
@@ -394,13 +391,15 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     UserContributorPlaylistThumbnailReady(null,
                         new UserContributorPlaylistThumbnailReadyEventArgs
                         {
-                            PlaylistId = 
+                            PlaylistId =
                                 eventArgs.PlaylistId,
-                            PlaylistImagePathFromCustomerDirectory = 
+                            PlaylistImagePathFromCustomerDirectory =
                                 eventArgs.PlaylistImagePathFromCustomerDirectory
                         });
                 }
             }
         }
+
+        #endregion
     }
 }
