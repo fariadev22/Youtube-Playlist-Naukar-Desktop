@@ -151,7 +151,10 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                         idsOfplaylistsToLoad.Add(partialPlaylist.Id);
                         newPlaylistsData.Add(
                             partialPlaylist.Id,
-                            null);
+                            new UserPlayList
+                            {
+                                Id = partialPlaylist.Id
+                            });
                     }
                 }
 
@@ -302,7 +305,10 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     idsOfplaylistsToLoad.Add(partialPlaylist.Id);
                     newPlaylistsData.Add(
                         partialPlaylist.Id,
-                        null);
+                        new UserPlayList
+                        {
+                            Id = partialPlaylist.Id
+                        });
                 }
             }
 

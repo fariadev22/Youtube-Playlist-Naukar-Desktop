@@ -153,7 +153,10 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                         idsOfVideosToLoad.Add(partialVideo.Id);
                         newVideosData.Add(
                             partialVideo.Id,
-                            null);
+                            new UserPlayListVideo
+                            {
+                                UniqueVideoIdInPlaylist = partialVideo.Id
+                            });
                     }
                 }
 
