@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
 using Youtube_Playlist_Naukar_Windows.Models;
@@ -22,7 +23,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         }
 
         public async Task<UserSession> LoginUser(
-            List<UserSession> availableUserSessions)
+            List<UserSession> availableUserSessions,
+            CancellationToken cancellationToken)
         {
             bool loginSuccessful = false;
 
@@ -36,7 +38,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 {
                     activeUserSession.UserCredential ??=
                         await AuthenticateUser(
-                            activeUserSession.UserIdForTokenStorage);
+                            activeUserSession.UserIdForTokenStorage,
+                            cancellationToken);
 
                     if (!IsUserCredentialTokenValid(
                             activeUserSession.UserCredential))
@@ -45,13 +48,15 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
                         activeUserSession.UserCredential =
                             await AuthenticateUser(
-                                activeUserSession.UserIdForTokenStorage);
+                                activeUserSession.UserIdForTokenStorage,
+                                cancellationToken);
 
                         string emailAddress =
                             await CredentialUtilities.
                                 GetEmailAddressAssociatedWithCredential(
                                     activeUserSession.UserCredential,
-                                    _applicationName);
+                                    _applicationName,
+                                    cancellationToken);
 
                         if (!string.IsNullOrWhiteSpace(emailAddress))
                         {
@@ -100,7 +105,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 else //no user session exists
                 {
                     activeUserSession = 
-                        await LoginNewAccount(availableUserSessions);
+                        await LoginNewAccount(availableUserSessions,
+                            cancellationToken);
                 }
             }
 
@@ -108,15 +114,18 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         }
 
         public async Task<UserSession> LoginNewAccount(
-            List<UserSession> availableUserSessions)
+            List<UserSession> availableUserSessions,
+            CancellationToken cancellationToken)
         {
             UserSession activeUserSession;
             string userId = GenerateUserIdForTokenStorage();
-            var credential = await AuthenticateUser(userId);
+            var credential = await AuthenticateUser(userId, cancellationToken);
             var emailAddress =
-                await CredentialUtilities.GetEmailAddressAssociatedWithCredential(
-                    credential,
-                    _applicationName);
+                await CredentialUtilities.
+                    GetEmailAddressAssociatedWithCredential(
+                        credential,
+                        _applicationName,
+                        cancellationToken);
 
             var existingSession =
                 availableUserSessions.Find(
@@ -191,10 +200,12 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         }
 
         private async Task<UserCredential> AuthenticateUser(
-            string userIdForTokenStorage)
+            string userIdForTokenStorage,
+            CancellationToken cancellationToken)
         {
             return await CredentialUtilities.GenerateCredentialForUser(
-                userIdForTokenStorage, _tokenStorageDirectory);
+                userIdForTokenStorage, _tokenStorageDirectory,
+                cancellationToken);
         }
 
         private UserSession CreateUserSession(

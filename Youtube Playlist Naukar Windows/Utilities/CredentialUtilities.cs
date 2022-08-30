@@ -16,13 +16,15 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
         {
             if (userCredential != null)
             {
-                await userCredential.RevokeTokenAsync(CancellationToken.None);
+                await userCredential.RevokeTokenAsync(
+                    CancellationToken.None);
             }
         }
 
         public static async Task<UserCredential> GenerateCredentialForUser(
             string userIdForTokenStorage,
-            string tokenStorageDirectory)
+            string tokenStorageDirectory,
+            CancellationToken cancellationToken)
         {
             UserCredential credential;
 
@@ -37,7 +39,7 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
                         GmailService.Scope.GmailMetadata
                     },
                     userIdForTokenStorage,
-                    CancellationToken.None,
+                    cancellationToken,
                     new FileDataStore(tokenStorageDirectory));
             }
 
@@ -46,7 +48,8 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
 
         public static async Task<string> GetEmailAddressAssociatedWithCredential(
             UserCredential userCredential,
-            string applicationName)
+            string applicationName,
+            CancellationToken cancellationToken)
         {
             var service = new GmailService(new BaseClientService.Initializer
             {
@@ -58,7 +61,8 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
             {
                 var gmailProfileRequest = service.Users.GetProfile("me");
                 gmailProfileRequest.Fields = "emailAddress";
-                var gmailProfileResponse = await gmailProfileRequest.ExecuteAsync();
+                var gmailProfileResponse =
+                    await gmailProfileRequest.ExecuteAsync(cancellationToken);
                 return gmailProfileResponse.EmailAddress;
             }
             catch

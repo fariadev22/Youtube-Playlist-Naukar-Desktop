@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace Youtube_Playlist_Naukar_Windows.Models
+﻿namespace Youtube_Playlist_Naukar_Windows.Models
 {
     public class Thumbnail
     {

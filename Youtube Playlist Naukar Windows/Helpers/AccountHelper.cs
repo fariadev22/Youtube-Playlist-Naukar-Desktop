@@ -34,7 +34,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             _activeUserSession =
                 userSession ?? 
                 await SessionStorageManager.GetSessionManager
-                    .StartSession();
+                    .StartSession(cancellationToken);
 
             if (_activeUserSession == null)
             {
@@ -82,7 +82,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         {
             _activeUserSession =
                 await SessionStorageManager.GetSessionManager
-                    .ChangeSession(emailAddress);
+                    .ChangeSession(emailAddress, cancellationToken);
 
             return await TryOpenUserAccount(
                 cancellationToken, 

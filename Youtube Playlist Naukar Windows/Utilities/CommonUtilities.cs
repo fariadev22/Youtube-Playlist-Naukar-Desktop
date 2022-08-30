@@ -31,7 +31,6 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
 
         public static void DownloadImageToUserDirectory(
             string userDirectoryPath,
-            string imageId,
             Thumbnail thumbnail)
         {
             WebClient webClient = new WebClient();
@@ -42,16 +41,14 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
         }
 
         public static void ConvertLocalImageToBitmapAndStoreInImageList(
-            string userDirectoryPath, 
+            string imagePath, 
             ImageList imageList, 
-            string imageId,
-            string imageFileName)
+            string imageId)
         {
             try
             {
                 using (FileStream imageStream = new FileStream(
-                    userDirectoryPath + "/" + imageFileName,
-                    FileMode.Open))
+                    imagePath, FileMode.Open))
                 {
                     Bitmap bitmap = new Bitmap(imageStream);
 
@@ -79,16 +76,14 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
         }
 
         public static Bitmap ConvertLocalImageToBitmap(
-            string userDirectoryPath,
-            string imageFileName,
+            string imagePath,
             int width,
             int height)
         {
             try
             {
                 return new Bitmap(
-                    Image.FromFile(
-                        userDirectoryPath + "/" + imageFileName),
+                    Image.FromFile(imagePath),
                     width,
                     height);
             }
@@ -104,11 +99,14 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
 
         public static string Base64EncodeString(string toEncode)
         {
-            var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(toEncode);
-            return System.Convert.ToBase64String(plainTextBytes);
+            var plainTextBytes = 
+                System.Text.Encoding.UTF8.GetBytes(toEncode);
+            
+            return Convert.ToBase64String(plainTextBytes);
         }
 
-        public static void CreateDirectoryIfRequired(string directoryPath)
+        public static void CreateDirectoryIfRequired(
+            string directoryPath)
         {
             if (!Directory.Exists(directoryPath))
             {
@@ -116,22 +114,26 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
             }
         }
 
-        public static void DeleteDirectoryIfExists(string directoryPath)
+        public static void DeleteDirectoryIfExists(
+            string directoryPath)
         {
             if (Directory.Exists(directoryPath))
             {
-                var files = Directory.EnumerateFiles(directoryPath).ToList();
+                var files = Directory.EnumerateFiles(
+                    directoryPath).ToList();
                 files.ForEach(File.Delete);
 
                 var directories =
                     Directory.EnumerateDirectories(directoryPath).ToList();
+
                 directories.ForEach(DeleteDirectoryIfExists);
 
                 Directory.Delete(directoryPath);
             }
         }
 
-        public static bool TryGetVideoIdFromYoutubeUrl(string youtubeUrl,
+        public static bool TryGetVideoIdFromYoutubeUrl(
+            string youtubeUrl,
             out string videoId)
         {
             videoId = string.Empty;
@@ -150,6 +152,32 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
             }
 
             if (string.IsNullOrWhiteSpace(videoId))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool TryGetPlaylistIdFromYoutubeUrl(
+            string youtubeUrl,
+            out string playListId)
+        {
+            playListId = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(youtubeUrl))
+            {
+                return false;
+            }
+
+            if (Uri.TryCreate(youtubeUrl, UriKind.Absolute, 
+                out Uri uri))
+            {
+                playListId = HttpUtility.
+                    ParseQueryString(uri.Query).Get("list");
+            }
+
+            if (string.IsNullOrWhiteSpace(playListId))
             {
                 return false;
             }
@@ -188,29 +216,6 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
             }
 
             return "https://www.youtube.com/playlist?list=" + playlistId;
-        }
-
-        public static bool TryGetPlaylistIdFromYoutubeUrl(string youtubeUrl,
-            out string playListId)
-        {
-            playListId = string.Empty;
-
-            if (string.IsNullOrWhiteSpace(youtubeUrl))
-            {
-                return false;
-            }
-
-            if (Uri.TryCreate(youtubeUrl, UriKind.Absolute, out Uri uri))
-            {
-                playListId = HttpUtility.ParseQueryString(uri.Query).Get("list");
-            }
-
-            if (string.IsNullOrWhiteSpace(playListId))
-            {
-                return false;
-            }
-
-            return true;
         }
     }
 }

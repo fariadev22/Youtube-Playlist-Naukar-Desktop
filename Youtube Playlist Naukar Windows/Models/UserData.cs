@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace Youtube_Playlist_Naukar_Windows.Models
 {

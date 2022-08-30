@@ -15,7 +15,8 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
             string userSessionsFileDirectory)
         {
             string userMetadataFilePath =
-                Path.Combine(userSessionsFileDirectory, UserSessionsBackupFileName);
+                Path.Combine(userSessionsFileDirectory, 
+                    UserSessionsBackupFileName);
 
             if (File.Exists(userMetadataFilePath))
             {

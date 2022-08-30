@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Youtube_Playlist_Naukar_Windows.Models
+﻿namespace Youtube_Playlist_Naukar_Windows.Models
 {
     public static class Constants
     {

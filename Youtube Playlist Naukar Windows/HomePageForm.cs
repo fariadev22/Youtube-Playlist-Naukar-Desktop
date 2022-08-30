@@ -356,10 +356,10 @@ namespace Youtube_Playlist_Naukar_Windows
                 new MethodInvoker(delegate
                 {
                     CommonUtilities.ConvertLocalImageToBitmapAndStoreInImageList(
-                        _activeUserSession.UserDirectory,
+                        _activeUserSession.UserDirectory + "/" +
+                        eventArgs.PlaylistImagePathFromCustomerDirectory,
                         ownerPlaylistsList.LargeImageList,
-                        eventArgs.PlaylistId,
-                        eventArgs.PlaylistImagePathFromCustomerDirectory);
+                        eventArgs.PlaylistId);
 
                     int indexOfKey =
                         ownerPlaylistsList.Items.IndexOfKey(
@@ -386,10 +386,10 @@ namespace Youtube_Playlist_Naukar_Windows
                 new MethodInvoker(delegate
                 {
                     CommonUtilities.ConvertLocalImageToBitmapAndStoreInImageList(
-                        _activeUserSession.UserDirectory,
+                        _activeUserSession.UserDirectory + "/" +
+                            eventArgs.PlaylistImagePathFromCustomerDirectory,
                         contributorPlaylistsList.LargeImageList,
-                        eventArgs.PlaylistId,
-                        eventArgs.PlaylistImagePathFromCustomerDirectory);
+                        eventArgs.PlaylistId);
 
                     int indexOfKey =
                         contributorPlaylistsList.Items.IndexOfKey(

@@ -464,8 +464,9 @@ namespace Youtube_Playlist_Naukar_Windows
 
             var bitmap =
                 CommonUtilities.ConvertLocalImageToBitmap(
-                    _activeUserSession.UserDirectory,
-                    eventArgs.PlaylistVideoImagePathFromCustomerDirectory,
+                    _activeUserSession.UserDirectory + "/" + 
+                        eventArgs.
+                        PlaylistVideoImagePathFromCustomerDirectory,
                     videoThumbnailWidth,
                     videoThumbnailHeight
                 );

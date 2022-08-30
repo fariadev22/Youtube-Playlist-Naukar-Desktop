@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Google.Apis.YouTube.v3.Data;
 using Youtube_Playlist_Naukar_Windows.Models;
@@ -63,10 +64,12 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 Constants.ApplicationName);
         }
 
-        public async Task<UserSession> StartSession()
+        public async Task<UserSession> StartSession(
+            CancellationToken cancellationToken)
         {
             _activeUserSession = 
-                await _loginHelper.LoginUser(_userSessions);
+                await _loginHelper.LoginUser(
+                    _userSessions, cancellationToken);
 
             //no session activated
             if (_activeUserSession == null)
@@ -101,7 +104,9 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             return _activeUserSession;
         }
 
-        public async Task<UserSession> ChangeSession(string emailAddress)
+        public async Task<UserSession> ChangeSession(
+            string emailAddress,
+            CancellationToken cancellationToken)
         {
             var userSessionForProvidedEmail =
                 _userSessions.Find(u => u.EmailAddress == emailAddress);
@@ -110,12 +115,13 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             {
                 _userSessions.ForEach(u => u.IsDefaultUser = false);
                 userSessionForProvidedEmail.IsDefaultUser = true;
-                return await StartSession();
+                return await StartSession(cancellationToken);
             }
 
-            await _loginHelper.LoginNewAccount(_userSessions);
+            await _loginHelper.LoginNewAccount(_userSessions,
+                cancellationToken);
 
-            return await StartSession();
+            return await StartSession(cancellationToken);
         }
 
         public async Task ForgetCurrentUser()
@@ -555,7 +561,6 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 {
                     CommonUtilities.DownloadImageToUserDirectory(
                         directoryPath,
-                        userPlaylist.Id,
                         userPlaylist.Thumbnail);
 
                     userPlaylist.Thumbnail.IsDownloaded = true;
@@ -624,7 +629,6 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 {
                     CommonUtilities.DownloadImageToUserDirectory(
                         directoryPath,
-                        userPlaylistVideo.UniqueVideoIdInPlaylist,
                         userPlaylistVideo.Thumbnail);
 
                     userPlaylistVideo.Thumbnail.IsDownloaded = true;
