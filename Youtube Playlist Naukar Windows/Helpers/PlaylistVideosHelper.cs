@@ -23,7 +23,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         {
             SessionStorageManager.GetSessionManager.
                     PlaylistVideoThumbnailUpdated +=
-                notifyUIForVideoThumbnailChange;
+                NotifyUiForVideoThumbnailChange;
         }
 
         public static PlaylistVideosHelper GetPlaylistVideosHelper
@@ -34,7 +34,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             }
         }
 
-        public async Task LoadPlaylist(
+        public async Task LoadPlaylistVideos(
             UserPlayList userPlaylist,
             CancellationToken cancellationToken)
         {
@@ -83,7 +83,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                         cancellationToken);
                 }
             }
-            catch(Exception ex)
+            catch
             {
                 //
             }
@@ -123,7 +123,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             }
 
             //need to compare playlists data
-            if (eTag != userPlaylist.PlaylistVideosETag)
+            if (eTag != userPlaylist.PlaylistVideosETag &&
+                !cancellationToken.IsCancellationRequested)
             {
                 List<string> idsOfVideosToLoad =
                     new List<string>();
@@ -138,9 +139,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     if (alreadyLoadedVideos
                             .ContainsKey(partialVideo.Id) &&
                         partialVideo.ETag ==
-                        alreadyLoadedVideos[
-                                partialVideo.Id]
-                            ?.ETag)
+                            alreadyLoadedVideos[partialVideo.Id]
+                                ?.ETag)
                     {
                         //same video item so can be 
                         //added directly
@@ -163,6 +163,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 //load new videos
                 List<PlaylistItem> newVideos = null;
                 Dictionary<string, string> videoDurations = null;
+
                 if (idsOfVideosToLoad.Count > 0)
                 {
                     newVideos =
@@ -170,8 +171,6 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                             .GetPlaylistVideos(
                                 idsOfVideosToLoad,
                                 cancellationToken);
-
-                    eTag = playlistVideosResult.Item2;
 
                     videoDurations =
                         await ApiClient.GetApiClient.GetVideosDuration(
@@ -192,50 +191,15 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             }
         }
 
-        public List<UserPlayListVideo> SearchVideoInPlayList(
-            string searchQuery,
-            UserPlayList userPlayList)
-        {
-            if (userPlayList == null ||
-                string.IsNullOrWhiteSpace(searchQuery))
-            {
-                return new List<UserPlayListVideo>();
-            }
-
-            Dictionary<UserPlayListVideo, int> videoAndSearchScores =
-                new Dictionary<UserPlayListVideo, int>();
-
-            if (userPlayList.PlayListVideos?.Values != null)
-            {
-                foreach (var playlistVideo in userPlayList.
-                    PlayListVideos.Values)
-                {
-                    int score = Fuzz.PartialRatio(
-                        searchQuery.ToLower(), 
-                        playlistVideo.Title.ToLower());
-
-                    if (score >= 80)
-                    {
-                        videoAndSearchScores.Add(
-                            playlistVideo, score);
-                    }
-                }
-            }
-
-            //most relevant stuff on top
-            return
-                videoAndSearchScores.OrderByDescending(v =>
-                    v.Value).Select(v => v.Key).ToList();
-        }
-
-        public async Task<(string, UserPlayListVideo)> AddVideoToPlayList(
+        public async Task<(string, UserPlayListVideo)> 
+            AddVideoToPlayList(
             string youTubeUrl,
             UserPlayList userPlayList,
             CancellationToken cancellationToken)
         {
             bool isValidUrl =
-                    CommonUtilities.TryGetVideoIdFromYoutubeUrl(
-                        youTubeUrl, out string videoId);
+                CommonUtilities.TryGetVideoIdFromYoutubeUrl(
+                    youTubeUrl, out string videoId);
 
             if (!isValidUrl)
             {
@@ -287,22 +251,6 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             }
         }
 
-        public List<List<UserPlayListVideo>> GetPlaylistDuplicates(
-            UserPlayList playlist)
-        {
-            if (playlist != null &&
-                playlist.PlayListVideos != null)
-            {
-                return 
-                    playlist.PlayListVideos.Values.GroupBy(v => v.VideoId)
-                        .Select(grp => grp.ToList())
-                        .Where(grp => grp.Count > 1)
-                        .ToList();
-            }
-
-            return new List<List<UserPlayListVideo>>();
-        }
-
         public async Task<bool> DeleteVideoFromPlaylist(
             UserPlayList userPlaylist,
             UserPlayListVideo videoToDelete,
@@ -333,16 +281,40 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             }
         }
 
-        public void DownloadPlaylistVideoThumbnails(
-            string playlistId,
-            List<UserPlayListVideo> playlistVideos)
+        public List<UserPlayListVideo> SearchVideoInPlayList(
+            string searchQuery,
+            UserPlayList userPlayList)
         {
-            if (playlistVideos.Count > 0)
+            if (userPlayList == null ||
+                string.IsNullOrWhiteSpace(searchQuery))
             {
-                SessionStorageManager.GetSessionManager.
-                    DownloadPlaylistVideoThumbnailsInBackgroundAndNotifyMainThread(
-                        playlistId, playlistVideos);
+                return new List<UserPlayListVideo>();
             }
+
+            Dictionary<UserPlayListVideo, int> videoAndSearchScores =
+                new Dictionary<UserPlayListVideo, int>();
+
+            if (userPlayList.PlayListVideos?.Values != null)
+            {
+                foreach (var playlistVideo in userPlayList.
+                    PlayListVideos.Values)
+                {
+                    int score = Fuzz.PartialRatio(
+                        searchQuery.ToLower(),
+                        playlistVideo.Title.ToLower());
+
+                    if (score >= 80)
+                    {
+                        videoAndSearchScores.Add(
+                            playlistVideo, score);
+                    }
+                }
+            }
+
+            //most relevant stuff on top
+            return
+                videoAndSearchScores.OrderByDescending(v =>
+                    v.Value).Select(v => v.Key).ToList();
         }
 
         public List<UserPlayListVideo> GetPrivateVideos(
@@ -357,7 +329,37 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             return new List<UserPlayListVideo>();
         }
 
-        private static void notifyUIForVideoThumbnailChange(
+        public List<List<UserPlayListVideo>>
+            GetPlaylistDuplicates(
+                UserPlayList playlist)
+        {
+            if (playlist != null &&
+                playlist.PlayListVideos != null)
+            {
+                return
+                    playlist.PlayListVideos.Values
+                        .GroupBy(v => v.VideoId)
+                        .Select(grp => grp.ToList())
+                        .Where(grp => grp.Count > 1)
+                        .ToList();
+            }
+
+            return new List<List<UserPlayListVideo>>();
+        }
+
+        public void DownloadPlaylistVideoThumbnails(
+            string playlistId,
+            List<UserPlayListVideo> playlistVideos)
+        {
+            if (playlistVideos.Count > 0)
+            {
+                SessionStorageManager.GetSessionManager.
+                    DownloadPlaylistVideoThumbnailsInBackgroundAndNotifyMainThread(
+                        playlistId, playlistVideos);
+            }
+        }
+
+        private static void NotifyUiForVideoThumbnailChange(
             object sender,
             PlaylistVideoThumbnailUpdatedEventArgs eventArgs)
         {

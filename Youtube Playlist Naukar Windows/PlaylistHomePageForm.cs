@@ -65,7 +65,7 @@ namespace Youtube_Playlist_Naukar_Windows
             searchBar.Enabled = false;
 
             await PlaylistVideosHelper.GetPlaylistVideosHelper
-                .LoadPlaylist(_playlist, token);
+                .LoadPlaylistVideos(_playlist, token);
 
             if (!token.IsCancellationRequested)
             {
