@@ -30,10 +30,10 @@ namespace Youtube_Playlist_Naukar_Windows
         private void InitializeComponent()
         {
             this.Message = new System.Windows.Forms.Label();
-            this.Label = new System.Windows.Forms.Label();
+            this.urlLabel = new System.Windows.Forms.Label();
             this.urlBox = new System.Windows.Forms.TextBox();
-            this.Ok = new System.Windows.Forms.Button();
-            this.Cancel = new System.Windows.Forms.Button();
+            this.okButton = new System.Windows.Forms.Button();
+            this.cancelButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // Message
@@ -44,14 +44,14 @@ namespace Youtube_Playlist_Naukar_Windows
             this.Message.Size = new System.Drawing.Size(0, 25);
             this.Message.TabIndex = 0;
             // 
-            // Label
+            // urlLabel
             // 
-            this.Label.AutoSize = true;
-            this.Label.Location = new System.Drawing.Point(43, 82);
-            this.Label.Name = "Label";
-            this.Label.Size = new System.Drawing.Size(426, 25);
-            this.Label.TabIndex = 1;
-            this.Label.Text = "Enter URL of YouTube playlist that you contribute to:";
+            this.urlLabel.AutoSize = true;
+            this.urlLabel.Location = new System.Drawing.Point(43, 71);
+            this.urlLabel.Name = "urlLabel";
+            this.urlLabel.Size = new System.Drawing.Size(426, 25);
+            this.urlLabel.TabIndex = 1;
+            this.urlLabel.Text = "Enter URL of YouTube playlist that you contribute to:";
             // 
             // urlBox
             // 
@@ -60,37 +60,39 @@ namespace Youtube_Playlist_Naukar_Windows
             this.urlBox.Size = new System.Drawing.Size(638, 31);
             this.urlBox.TabIndex = 2;
             // 
-            // Ok
+            // okButton
             // 
-            this.Ok.Location = new System.Drawing.Point(227, 229);
-            this.Ok.Name = "Ok";
-            this.Ok.Size = new System.Drawing.Size(112, 34);
-            this.Ok.TabIndex = 3;
-            this.Ok.Text = "Ok";
-            this.Ok.UseVisualStyleBackColor = true;
-            this.Ok.Click += new System.EventHandler(this.Ok_Click);
+            this.okButton.Location = new System.Drawing.Point(227, 214);
+            this.okButton.Name = "okButton";
+            this.okButton.Size = new System.Drawing.Size(112, 34);
+            this.okButton.TabIndex = 3;
+            this.okButton.Text = "Ok";
+            this.okButton.UseVisualStyleBackColor = true;
+            this.okButton.Click += new System.EventHandler(this.Ok_Click);
             // 
-            // Cancel
+            // cancelButton
             // 
-            this.Cancel.Location = new System.Drawing.Point(395, 229);
-            this.Cancel.Name = "Cancel";
-            this.Cancel.Size = new System.Drawing.Size(112, 34);
-            this.Cancel.TabIndex = 4;
-            this.Cancel.Text = "Cancel";
-            this.Cancel.UseVisualStyleBackColor = true;
+            this.cancelButton.Location = new System.Drawing.Point(396, 214);
+            this.cancelButton.Name = "cancelButton";
+            this.cancelButton.Size = new System.Drawing.Size(112, 34);
+            this.cancelButton.TabIndex = 4;
+            this.cancelButton.Text = "Cancel";
+            this.cancelButton.UseVisualStyleBackColor = true;
             // 
             // AddPlaylistForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(730, 275);
-            this.Controls.Add(this.Cancel);
-            this.Controls.Add(this.Ok);
+            this.Controls.Add(this.cancelButton);
+            this.Controls.Add(this.okButton);
             this.Controls.Add(this.urlBox);
-            this.Controls.Add(this.Label);
+            this.Controls.Add(this.urlLabel);
             this.Controls.Add(this.Message);
+            this.MaximumSize = new System.Drawing.Size(752, 331);
+            this.MinimumSize = new System.Drawing.Size(752, 331);
             this.Name = "AddPlaylistForm";
-            this.Text = "AddPlaylistForm";
+            this.Text = "Add Contributor Playlist";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -99,9 +101,9 @@ namespace Youtube_Playlist_Naukar_Windows
         #endregion
 
         private System.Windows.Forms.Label Message;
-        private System.Windows.Forms.Label Label;
+        private System.Windows.Forms.Label urlLabel;
         private System.Windows.Forms.TextBox urlBox;
-        private System.Windows.Forms.Button Ok;
-        private System.Windows.Forms.Button Cancel;
+        private System.Windows.Forms.Button okButton;
+        private System.Windows.Forms.Button cancelButton;
     }
 }

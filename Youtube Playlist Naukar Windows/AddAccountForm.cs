@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 namespace Youtube_Playlist_Naukar_Windows
@@ -15,10 +10,10 @@ namespace Youtube_Playlist_Naukar_Windows
         public AddAccountForm()
         {
             InitializeComponent();
-            EmailOk.DialogResult = DialogResult.OK;
-            EmailCancel.DialogResult = DialogResult.Cancel;
-            AcceptButton = EmailOk;
-            CancelButton = EmailCancel;
+            AcceptButton = emailOkButton;
+            emailOkButton.DialogResult = DialogResult.OK;
+            CancelButton = emailCancelButton;
+            emailCancelButton.DialogResult = DialogResult.Cancel;
         }
 
         private void EmailOk_Click(object sender, EventArgs e)

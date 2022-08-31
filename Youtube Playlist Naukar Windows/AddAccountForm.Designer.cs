@@ -29,39 +29,39 @@ namespace Youtube_Playlist_Naukar_Windows
         /// </summary>
         private void InitializeComponent()
         {
-            this.EmailCancel = new System.Windows.Forms.Button();
-            this.EmailOk = new System.Windows.Forms.Button();
-            this.Label = new System.Windows.Forms.Label();
+            this.emailCancelButton = new System.Windows.Forms.Button();
+            this.emailOkButton = new System.Windows.Forms.Button();
+            this.emailLabel = new System.Windows.Forms.Label();
             this.emailInputBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
-            // EmailCancel
+            // emailCancelButton
             // 
-            this.EmailCancel.Location = new System.Drawing.Point(398, 194);
-            this.EmailCancel.Name = "EmailCancel";
-            this.EmailCancel.Size = new System.Drawing.Size(112, 34);
-            this.EmailCancel.TabIndex = 8;
-            this.EmailCancel.Text = "Cancel";
-            this.EmailCancel.UseVisualStyleBackColor = true;
+            this.emailCancelButton.Location = new System.Drawing.Point(390, 194);
+            this.emailCancelButton.Name = "emailCancelButton";
+            this.emailCancelButton.Size = new System.Drawing.Size(112, 34);
+            this.emailCancelButton.TabIndex = 8;
+            this.emailCancelButton.Text = "Cancel";
+            this.emailCancelButton.UseVisualStyleBackColor = true;
             // 
-            // EmailOk
+            // emailOkButton
             // 
-            this.EmailOk.Location = new System.Drawing.Point(230, 194);
-            this.EmailOk.Name = "EmailOk";
-            this.EmailOk.Size = new System.Drawing.Size(112, 34);
-            this.EmailOk.TabIndex = 7;
-            this.EmailOk.Text = "Ok";
-            this.EmailOk.UseVisualStyleBackColor = true;
-            this.EmailOk.Click += new System.EventHandler(this.EmailOk_Click);
+            this.emailOkButton.Location = new System.Drawing.Point(230, 194);
+            this.emailOkButton.Name = "emailOkButton";
+            this.emailOkButton.Size = new System.Drawing.Size(112, 34);
+            this.emailOkButton.TabIndex = 7;
+            this.emailOkButton.Text = "Ok";
+            this.emailOkButton.UseVisualStyleBackColor = true;
+            this.emailOkButton.Click += new System.EventHandler(this.EmailOk_Click);
             // 
-            // Label
+            // emailLabel
             // 
-            this.Label.AutoSize = true;
-            this.Label.Location = new System.Drawing.Point(46, 47);
-            this.Label.Name = "Label";
-            this.Label.Size = new System.Drawing.Size(207, 25);
-            this.Label.TabIndex = 5;
-            this.Label.Text = "Enter new email address:";
+            this.emailLabel.AutoSize = true;
+            this.emailLabel.Location = new System.Drawing.Point(56, 49);
+            this.emailLabel.Name = "emailLabel";
+            this.emailLabel.Size = new System.Drawing.Size(207, 25);
+            this.emailLabel.TabIndex = 5;
+            this.emailLabel.Text = "Enter new email address:";
             // 
             // emailInputBox
             // 
@@ -76,11 +76,13 @@ namespace Youtube_Playlist_Naukar_Windows
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(730, 275);
             this.Controls.Add(this.emailInputBox);
-            this.Controls.Add(this.EmailCancel);
-            this.Controls.Add(this.EmailOk);
-            this.Controls.Add(this.Label);
+            this.Controls.Add(this.emailCancelButton);
+            this.Controls.Add(this.emailOkButton);
+            this.Controls.Add(this.emailLabel);
+            this.MaximumSize = new System.Drawing.Size(752, 331);
+            this.MinimumSize = new System.Drawing.Size(752, 331);
             this.Name = "AddAccountForm";
-            this.Text = "AddAccountForm";
+            this.Text = "Add Account";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -88,9 +90,9 @@ namespace Youtube_Playlist_Naukar_Windows
 
         #endregion
 
-        private System.Windows.Forms.Button EmailCancel;
-        private System.Windows.Forms.Button EmailOk;
-        private System.Windows.Forms.Label Label;
+        private System.Windows.Forms.Button emailCancelButton;
+        private System.Windows.Forms.Button emailOkButton;
+        private System.Windows.Forms.Label emailLabel;
         private System.Windows.Forms.TextBox emailInputBox;
     }
 }

@@ -10,10 +10,10 @@ namespace Youtube_Playlist_Naukar_Windows
         public AddPlaylistForm()
         {
             InitializeComponent();
-            Ok.DialogResult = DialogResult.OK;
-            Cancel.DialogResult = DialogResult.Cancel;
-            AcceptButton = Ok;
-            CancelButton = Cancel;
+            AcceptButton = okButton;
+            okButton.DialogResult = DialogResult.OK;
+            CancelButton = cancelButton;
+            cancelButton.DialogResult = DialogResult.Cancel;
         }
 
         private void Ok_Click(object sender, EventArgs e)

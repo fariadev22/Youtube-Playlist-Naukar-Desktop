@@ -13,7 +13,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 {
     public class SessionStorageManager
     {
-        private static readonly SessionStorageManager SessionManagerInstance =
+        private static readonly SessionStorageManager 
+            SessionManagerInstance =
             new SessionStorageManager();
 
         public event EventHandler<PlaylistThumbnailUpdatedEventArgs> 
@@ -64,6 +65,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 Constants.ApplicationName);
         }
 
+        #region Users
+
         public async Task<UserSession> StartSession(
             CancellationToken cancellationToken)
         {
@@ -74,13 +77,15 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             //no session activated
             if (_activeUserSession == null)
             {
-                throw new ArgumentException("Error starting a user session.");
+                throw new ArgumentException(
+                    "Error starting a user session.");
             }
 
             string activeUserSessionDirectoryPath =
-                SessionStorageUtilities.SetupUserMetadataSessionDirectory(
-                    _applicationDirectory,
-                    _activeUserSession.EmailAddress);
+                SessionStorageUtilities.
+                    SetupUserMetadataSessionDirectory(
+                        _applicationDirectory,
+                        _activeUserSession.EmailAddress);
 
             _activeUserSession.UserDirectory =
                 activeUserSessionDirectoryPath;
@@ -136,8 +141,9 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 _activeUserSession.EmailAddress);
 
             var userSessionToDelete =
-                _userSessions.Find(u => u.EmailAddress == 
-                                        _activeUserSession.EmailAddress);
+                _userSessions.Find(
+                    u => u.EmailAddress == 
+                        _activeUserSession.EmailAddress);
 
             if (userSessionToDelete != null)
             {
@@ -152,11 +158,25 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             _activeUserSession = null;
         }
 
-        private void SaveSession()
+        public void SaveChannelIdInUserSession(
+            string channelId)
         {
-            SessionStorageUtilities.SaveSessionsData(_userSessions,
-                _applicationDirectory);
+            _activeUserSession.UserData.ChannelId = channelId;
+
+            SaveSession();
         }
+
+        public List<string> GetUserSessionEmails()
+        {
+            return
+                _userSessions?.Select(s => s.EmailAddress ?? "")
+                    .Distinct().ToList()
+                ?? new List<string>();
+        }
+
+        #endregion
+
+        #region Playlists
 
         public void SaveUserOwnedPlaylistsToUserSession(
             List<Playlist> playLists,
@@ -164,6 +184,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         {
             _activeUserSession.UserData.UserOwnedPlayLists
                 ??= new Dictionary<string, UserPlayList>();
+
             _activeUserSession.UserData.UserOwnedPlaylistsETag =
                 etag;
 
@@ -200,6 +221,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
             _activeUserSession.UserData.UserOwnedPlayLists
                 = alreadyLoadedPlaylists;
+
             _activeUserSession.UserData.UserOwnedPlaylistsETag =
                 etag;
 
@@ -293,10 +315,13 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         public void DeleteUserContributorPlaylistFromUserSession(
             UserPlayList playList)
         {
-            if (playList != null)
+            if (playList != null &&
+                _activeUserSession.UserData.
+                    UserContributorPlayLists.ContainsKey(playList.Id))
             {
-                _activeUserSession.UserData.UserContributorPlayLists.Remove(
-                    playList.Id);
+                _activeUserSession.UserData.
+                    UserContributorPlayLists.Remove(
+                        playList.Id);
             }
 
             SaveSession();
@@ -313,6 +338,24 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         {
             return _activeUserSession.UserData?.UserContributorPlayLists;
         }
+
+        public void DownloadPlaylistThumbnailsInBackgroundAndNotifyMainThread(
+            List<UserPlayList> userPlaylists,
+            bool isUserOwnedPlaylists)
+        {
+            BackgroundWorker imageBackgroundDownloadWorker =
+                new BackgroundWorker();
+
+            imageBackgroundDownloadWorker.DoWork +=
+                DownloadPlaylistsThumbnailsToUserDirectory;
+
+            imageBackgroundDownloadWorker.RunWorkerAsync(
+                (userPlaylists, isUserOwnedPlaylists));
+        }
+
+        #endregion
+
+        #region Playlist Videos
 
         public void SavePlaylistVideosToUserSessionPlaylist(
             UserPlayList userPlayList,
@@ -366,44 +409,6 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             SaveSession();
         }
 
-        public void SavePlaylistVideoToUserSessionPlaylist(
-            UserPlayList userPlayList,
-            PlaylistItem playListItem,
-            Dictionary<string, string> playlistItemsVideoDuration)
-        {
-            if (userPlayList == null ||
-                playListItem?.Id == null)
-            {
-                return;
-            }
-
-            var videoId =
-                playListItem.Snippet?.ResourceId?.VideoId;
-
-            var duration =
-                !string.IsNullOrWhiteSpace(videoId) &&
-                playlistItemsVideoDuration?.ContainsKey(videoId) == true
-                    ? playlistItemsVideoDuration[videoId]
-                    : null;
-
-            if (!userPlayList.PlayListVideos.ContainsKey(
-                    playListItem.Id))
-            {
-                userPlayList.PlayListVideos.Add(
-                    playListItem.Id,
-                    UserPlayListVideo.ConvertPlayListItemToUserPlayListVideo(
-                        playListItem, duration));
-            }
-            else
-            {
-                userPlayList.PlayListVideos[playListItem.Id]
-                    = UserPlayListVideo.ConvertPlayListItemToUserPlayListVideo(
-                        playListItem, duration);
-            }
-            
-            SaveSession();
-        }
-
         public void AddNewVideoToUserSessionPlaylist(
             UserPlayList userPlayList,
             PlaylistItem playListItem,
@@ -442,7 +447,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             SaveSession();
         }
 
-        public void DeleteVideoFromUserSessionPlaylist(UserPlayList userPlaylist,
+        public void DeleteVideoFromUserSessionPlaylist(
+            UserPlayList userPlaylist,
             UserPlayListVideo videoToDelete)
         {
             if (userPlaylist == null ||
@@ -466,7 +472,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 {
                     foreach (var userPlayListVideo in
                         userPlaylist.PlayListVideos.Values
-                            .Where(v => v.PositionInPlayList > videoToDeletePosition))
+                            .Where(v => 
+                                v.PositionInPlayList > videoToDeletePosition))
                     {
                         userPlayListVideo.PositionInPlayList =
                             userPlayListVideo.PositionInPlayList - 1;
@@ -475,35 +482,6 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             }
 
             SaveSession();
-        }
-
-        public void SaveChannelIdInUserSession(string channelId)
-        {
-            _activeUserSession.UserData.ChannelId = channelId;
-
-            SaveSession();
-        }
-
-        public List<string> GetUserSessionEmails()
-        {
-            return 
-                _userSessions?.Select(s => s.EmailAddress ?? "")
-                .Distinct().ToList()
-                   ?? new List<string>();
-        }
-
-        public void DownloadPlaylistThumbnailsInBackgroundAndNotifyMainThread(
-            List<UserPlayList> userPlaylists,
-            bool isUserOwnedPlaylists)
-        {
-            BackgroundWorker imageBackgroundDownloadWorker =
-                new BackgroundWorker();
-
-            imageBackgroundDownloadWorker.DoWork +=
-                DownloadPlaylistsThumbnailsToUserDirectory;
-
-            imageBackgroundDownloadWorker.RunWorkerAsync(
-                (userPlaylists, isUserOwnedPlaylists));
         }
 
         public void DownloadPlaylistVideoThumbnailsInBackgroundAndNotifyMainThread(
@@ -530,7 +508,48 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     });
         }
 
-        public void DownloadPlaylistsThumbnailsToUserDirectory(
+        #endregion
+
+        #region Helpers
+        private void SavePlaylistVideoToUserSessionPlaylist(
+            UserPlayList userPlayList,
+            PlaylistItem playListItem,
+            Dictionary<string, string> playlistItemsVideoDuration)
+        {
+            if (userPlayList == null ||
+                playListItem?.Id == null)
+            {
+                return;
+            }
+
+            var videoId =
+                playListItem.Snippet?.ResourceId?.VideoId;
+
+            var duration =
+                !string.IsNullOrWhiteSpace(videoId) &&
+                playlistItemsVideoDuration?.ContainsKey(videoId) == true
+                    ? playlistItemsVideoDuration[videoId]
+                    : null;
+
+            if (!userPlayList.PlayListVideos.ContainsKey(
+                playListItem.Id))
+            {
+                userPlayList.PlayListVideos.Add(
+                    playListItem.Id,
+                    UserPlayListVideo.ConvertPlayListItemToUserPlayListVideo(
+                        playListItem, duration));
+            }
+            else
+            {
+                userPlayList.PlayListVideos[playListItem.Id]
+                    = UserPlayListVideo.ConvertPlayListItemToUserPlayListVideo(
+                        playListItem, duration);
+            }
+
+            SaveSession();
+        }
+
+        private void DownloadPlaylistsThumbnailsToUserDirectory(
             object sender, DoWorkEventArgs e)
         {
             (List<UserPlayList>, bool) userPlaylistThumbnailsData =
@@ -556,8 +575,9 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 }
 
                 if (!userPlaylist.Thumbnail.IsDownloaded ||
-                    !File.Exists(directoryPath + "/" + 
-                                userPlaylist.Thumbnail.LocalPathFromUserDirectory))
+                    !File.Exists(
+                        directoryPath + "/" + 
+                        userPlaylist.Thumbnail.LocalPathFromUserDirectory))
                 {
                     CommonUtilities.DownloadImageToUserDirectory(
                         directoryPath,
@@ -584,7 +604,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             }
         }
 
-        public void DownloadPlaylistVideosThumbnailsToUserDirectory(
+        private void DownloadPlaylistVideosThumbnailsToUserDirectory(
             object sender, DoWorkEventArgs e)
         {
             (string, List<UserPlayListVideo>) userPlaylistVideosRequest =
@@ -617,9 +637,6 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 if (backgroundWorkerState != null &&
                     backgroundWorkerState.BackgroundWorker.CancellationPending)
                 {
-                    PlaylistBackgroundWorkerManager.GetBackgroundWorkerManager.
-                        RemoveActiveBackgroundWorkerForPlaylistId(
-                            userPlaylistVideosRequest.Item1);
                     break;
                 }
 
@@ -657,9 +674,18 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 }
             }
 
+            //download task completed or stopped midway
             PlaylistBackgroundWorkerManager.GetBackgroundWorkerManager.
                 RemoveActiveBackgroundWorkerForPlaylistId(
                 userPlaylistVideosRequest.Item1);
         }
+
+        private void SaveSession()
+        {
+            SessionStorageUtilities.SaveSessionsData(_userSessions,
+                _applicationDirectory);
+        }
+
+        #endregion
     }
 }
