@@ -17,17 +17,22 @@ namespace Youtube_Playlist_Naukar_Windows
 
         public void UpdateRow(string youtubeUrl, string logMessage)
         {
-            if (logTable.Rows.Count > 0)
+            if (logTable.Rows.Count <= 0)
             {
-                var row =
-                    logTable.Rows.Cast<DataGridViewRow>().FirstOrDefault(
-                        r => r.Cells["urlColumn"].Value.ToString() == youtubeUrl);
+                return;
+            }
 
-                if (row != null)
-                {
-                    row.Cells["statusColumn"].Value = logMessage;
-                }
+            var row =
+                logTable.Rows
+                    .Cast<DataGridViewRow>()
+                    .FirstOrDefault(
+                        r => 
+                            r.Cells["urlColumn"].Value
+                                .ToString() == youtubeUrl);
 
+            if (row != null)
+            {
+                row.Cells["statusColumn"].Value = logMessage;
             }
         }
     }

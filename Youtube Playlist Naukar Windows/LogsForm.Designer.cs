@@ -75,8 +75,10 @@ namespace Youtube_Playlist_Naukar_Windows
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.logTable);
+            this.MaximumSize = new System.Drawing.Size(822, 506);
+            this.MinimumSize = new System.Drawing.Size(822, 506);
             this.Name = "LogsForm";
-            this.Text = "LogsForm";
+            this.Text = "Video Insertion Progress";
             ((System.ComponentModel.ISupportInitialize)(this.logTable)).EndInit();
             this.ResumeLayout(false);
 

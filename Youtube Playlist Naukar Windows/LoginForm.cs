@@ -46,7 +46,8 @@ namespace Youtube_Playlist_Naukar_Windows
             }
         }
 
-        protected override void OnFormClosing(FormClosingEventArgs e)
+        protected override void OnFormClosing(
+            FormClosingEventArgs e)
         {
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource = null;

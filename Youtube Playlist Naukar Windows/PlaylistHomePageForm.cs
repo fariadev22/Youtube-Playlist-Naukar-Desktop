@@ -270,7 +270,7 @@ namespace Youtube_Playlist_Naukar_Windows
                 else
                 {
                     var logsForm = new LogsForm();
-                    logsForm.Show();
+                    logsForm.Show(this);
 
                     List<string> urls =
                         urlInput.Split('\n').

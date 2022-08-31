@@ -29,40 +29,43 @@ namespace Youtube_Playlist_Naukar_Windows
         /// </summary>
         private void InitializeComponent()
         {
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
+            this.intro = new System.Windows.Forms.Label();
+            this.versionDetails = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
-            // label1
+            // intro
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(93, 130);
-            this.label1.MaximumSize = new System.Drawing.Size(510, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(457, 50);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "This application was developed by Faria Rehman. Please contact her directly for a" +
+            this.intro.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.intro.AutoSize = true;
+            this.intro.Location = new System.Drawing.Point(93, 130);
+            this.intro.MaximumSize = new System.Drawing.Size(510, 0);
+            this.intro.Name = "intro";
+            this.intro.Size = new System.Drawing.Size(452, 50);
+            this.intro.TabIndex = 0;
+            this.intro.Text = "This application was developed by Faria Rehman. Please contact her directly for a" +
     "ny issues.";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.intro.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // label2
+            // versionDetails
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(193, 301);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(258, 25);
-            this.label2.TabIndex = 1;
-            this.label2.Text = "Version 1.0, Developed in 2022";
+            this.versionDetails.AutoSize = true;
+            this.versionDetails.Location = new System.Drawing.Point(193, 301);
+            this.versionDetails.Name = "versionDetails";
+            this.versionDetails.Size = new System.Drawing.Size(258, 25);
+            this.versionDetails.TabIndex = 1;
+            this.versionDetails.Text = "Version 1.0, Developed in 2022";
             // 
             // DetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(633, 335);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.versionDetails);
+            this.Controls.Add(this.intro);
+            this.MaximumSize = new System.Drawing.Size(655, 391);
+            this.MinimumSize = new System.Drawing.Size(655, 391);
             this.Name = "DetailsForm";
-            this.Text = "DetailsForm";
+            this.Text = "About";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -70,7 +73,7 @@ namespace Youtube_Playlist_Naukar_Windows
 
         #endregion
 
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label intro;
+        private System.Windows.Forms.Label versionDetails;
     }
 }
