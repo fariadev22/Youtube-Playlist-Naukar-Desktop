@@ -32,6 +32,7 @@ namespace Youtube_Playlist_Naukar_Windows
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HomePageForm));
             this.email = new System.Windows.Forms.Label();
             this.playlistsTabs = new System.Windows.Forms.TabControl();
             this.ownerTab = new System.Windows.Forms.TabPage();
@@ -461,6 +462,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.Controls.Add(this.email);
             this.Controls.Add(this.menuStrip);
             this.Controls.Add(this.playlistDetailsPanel);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(1090, 850);
             this.Name = "HomePageForm";
             this.Text = "Home";

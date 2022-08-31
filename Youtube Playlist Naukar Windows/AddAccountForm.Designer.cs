@@ -29,6 +29,7 @@ namespace Youtube_Playlist_Naukar_Windows
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AddAccountForm));
             this.emailCancelButton = new System.Windows.Forms.Button();
             this.emailOkButton = new System.Windows.Forms.Button();
             this.emailLabel = new System.Windows.Forms.Label();
@@ -79,6 +80,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.Controls.Add(this.emailCancelButton);
             this.Controls.Add(this.emailOkButton);
             this.Controls.Add(this.emailLabel);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximumSize = new System.Drawing.Size(752, 331);
             this.MinimumSize = new System.Drawing.Size(752, 331);
             this.Name = "AddAccountForm";

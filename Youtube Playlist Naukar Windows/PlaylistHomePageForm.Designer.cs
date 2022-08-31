@@ -32,6 +32,7 @@ namespace Youtube_Playlist_Naukar_Windows
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PlaylistHomePageForm));
             this.searchBar = new System.Windows.Forms.TextBox();
             this.refreshVideosButton = new System.Windows.Forms.Button();
             this.addVideosButton = new System.Windows.Forms.Button();
@@ -587,6 +588,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.Controls.Add(this.refreshVideosButton);
             this.Controls.Add(this.searchBar);
             this.Controls.Add(this.searchPanel);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "PlaylistHomePageForm";
             this.Text = "PlaylistHomePageForm";
             this.searchPanel.ResumeLayout(false);

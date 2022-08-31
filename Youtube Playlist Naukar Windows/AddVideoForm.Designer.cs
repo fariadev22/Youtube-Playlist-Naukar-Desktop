@@ -29,6 +29,7 @@ namespace Youtube_Playlist_Naukar_Windows
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AddVideoForm));
             this.cancelButton = new System.Windows.Forms.Button();
             this.okButton = new System.Windows.Forms.Button();
             this.inputVideoUrlBox = new System.Windows.Forms.TextBox();
@@ -91,6 +92,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.Controls.Add(this.okButton);
             this.Controls.Add(this.cancelButton);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximumSize = new System.Drawing.Size(750, 480);
             this.MinimumSize = new System.Drawing.Size(750, 480);
             this.Name = "AddVideoForm";

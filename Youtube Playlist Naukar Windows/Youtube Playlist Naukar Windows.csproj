@@ -5,12 +5,16 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Youtube_Playlist_Naukar_Windows</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
+    <Platforms>AnyCPU;x86</Platforms>
+    <ApplicationIcon>YoutubePlaylistNaukar.ico</ApplicationIcon>
+    <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="client_secrets.json" />
     <None Remove="default_image.png" />
     <None Remove="search.png" />
+    <None Remove="YoutubePlaylistNaukar.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,6 +34,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Resource Include="search.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="YoutubePlaylistNaukar.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

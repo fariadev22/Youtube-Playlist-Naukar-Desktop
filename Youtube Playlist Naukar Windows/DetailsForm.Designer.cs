@@ -29,6 +29,7 @@ namespace Youtube_Playlist_Naukar_Windows
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DetailsForm));
             this.intro = new System.Windows.Forms.Label();
             this.versionDetails = new System.Windows.Forms.Label();
             this.SuspendLayout();
@@ -62,6 +63,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.ClientSize = new System.Drawing.Size(633, 335);
             this.Controls.Add(this.versionDetails);
             this.Controls.Add(this.intro);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximumSize = new System.Drawing.Size(655, 391);
             this.MinimumSize = new System.Drawing.Size(655, 391);
             this.Name = "DetailsForm";
