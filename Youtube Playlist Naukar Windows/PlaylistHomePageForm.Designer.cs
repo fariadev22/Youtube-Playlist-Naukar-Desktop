@@ -71,12 +71,12 @@ namespace Youtube_Playlist_Naukar_Windows
             this.totalVideosValue = new System.Windows.Forms.Label();
             this.playlistNameValue = new System.Windows.Forms.Label();
             this.returnHomeButton = new System.Windows.Forms.Button();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.timer = new System.Windows.Forms.Timer(this.components);
             this.noFilterButton = new System.Windows.Forms.RadioButton();
             this.filterBox = new System.Windows.Forms.GroupBox();
             this.showPrivate = new System.Windows.Forms.RadioButton();
             this.showDuplicatesButton = new System.Windows.Forms.RadioButton();
-            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.descriptionToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.searchPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.searchIcon)).BeginInit();
             this.videoPreviewThumbnail.SuspendLayout();
@@ -94,7 +94,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.searchBar.PlaceholderText = "Enter query to search playlist videos.";
             this.searchBar.Size = new System.Drawing.Size(846, 31);
             this.searchBar.TabIndex = 1;
-            this.searchBar.TextChanged += new System.EventHandler(this.searchBar_TextChanged);
+            this.searchBar.TextChanged += new System.EventHandler(this.SearchBar_TextChanged);
             // 
             // refreshVideosButton
             // 
@@ -105,7 +105,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.refreshVideosButton.TabIndex = 4;
             this.refreshVideosButton.Text = "Refresh Videos";
             this.refreshVideosButton.UseVisualStyleBackColor = true;
-            this.refreshVideosButton.Click += new System.EventHandler(this.refreshVideos_Click);
+            this.refreshVideosButton.Click += new System.EventHandler(this.RefreshVideos_Click);
             // 
             // addVideosButton
             // 
@@ -116,7 +116,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.addVideosButton.TabIndex = 5;
             this.addVideosButton.Text = "Add Video(s)";
             this.addVideosButton.UseVisualStyleBackColor = true;
-            this.addVideosButton.Click += new System.EventHandler(this.addVideos_Click);
+            this.addVideosButton.Click += new System.EventHandler(this.AddVideos_Click);
             // 
             // deleteVideoButton
             // 
@@ -127,7 +127,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.deleteVideoButton.TabIndex = 6;
             this.deleteVideoButton.Text = "Delete Video";
             this.deleteVideoButton.UseVisualStyleBackColor = true;
-            this.deleteVideoButton.Click += new System.EventHandler(this.deleteVideo_Click);
+            this.deleteVideoButton.Click += new System.EventHandler(this.DeleteVideo_Click);
             // 
             // MessageLogger
             // 
@@ -205,7 +205,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.addedByValue.TabIndex = 44;
             this.addedByValue.TabStop = true;
             this.addedByValue.Text = "-";
-            this.addedByValue.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.addedByValue_LinkClicked);
+            this.addedByValue.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.AddedByValue_LinkClicked);
             // 
             // playlistPositionValue
             // 
@@ -386,7 +386,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.urlValue.TabIndex = 17;
             this.urlValue.TabStop = true;
             this.urlValue.Text = "-";
-            this.urlValue.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.urlValue_LinkClicked);
+            this.urlValue.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.UrlValue_LinkClicked);
             // 
             // title
             // 
@@ -416,7 +416,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.videoOwnerValue.TabIndex = 18;
             this.videoOwnerValue.TabStop = true;
             this.videoOwnerValue.Text = "-";
-            this.videoOwnerValue.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.videoOwnerValue_LinkClicked);
+            this.videoOwnerValue.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.VideoOwnerValue_LinkClicked);
             // 
             // createdOn
             // 
@@ -485,7 +485,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.playlistVideosDataView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.playlistVideosDataView.Size = new System.Drawing.Size(923, 449);
             this.playlistVideosDataView.TabIndex = 13;
-            this.playlistVideosDataView.SelectionChanged += new System.EventHandler(this.playlistVideosDataView__SelectedIndexChanged);
+            this.playlistVideosDataView.SelectionChanged += new System.EventHandler(this.PlaylistVideosDataView__SelectedIndexChanged);
             // 
             // totalVideosValue
             // 
@@ -515,11 +515,11 @@ namespace Youtube_Playlist_Naukar_Windows
             this.returnHomeButton.TabIndex = 42;
             this.returnHomeButton.Text = "Return to Home";
             this.returnHomeButton.UseVisualStyleBackColor = true;
-            this.returnHomeButton.Click += new System.EventHandler(this.returnHomeButton_Click);
+            this.returnHomeButton.Click += new System.EventHandler(this.ReturnHomeButton_Click);
             // 
-            // timer1
+            // timer
             // 
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            this.timer.Tick += new System.EventHandler(this.Timer_Tick);
             // 
             // noFilterButton
             // 
@@ -531,7 +531,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.noFilterButton.TabStop = true;
             this.noFilterButton.Text = "None";
             this.noFilterButton.UseVisualStyleBackColor = true;
-            this.noFilterButton.CheckedChanged += new System.EventHandler(this.noFilterButton_CheckedChanged);
+            this.noFilterButton.CheckedChanged += new System.EventHandler(this.NoFilterButton_CheckedChanged);
             // 
             // filterBox
             // 
@@ -556,7 +556,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.showPrivate.TabStop = true;
             this.showPrivate.Text = "Show Private";
             this.showPrivate.UseVisualStyleBackColor = true;
-            this.showPrivate.CheckedChanged += new System.EventHandler(this.showPrivate_CheckedChanged);
+            this.showPrivate.CheckedChanged += new System.EventHandler(this.ShowPrivate_CheckedChanged);
             // 
             // showDuplicatesButton
             // 
@@ -568,7 +568,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.showDuplicatesButton.TabStop = true;
             this.showDuplicatesButton.Text = "Show Duplicates";
             this.showDuplicatesButton.UseVisualStyleBackColor = true;
-            this.showDuplicatesButton.CheckedChanged += new System.EventHandler(this.showDuplicatesButton_CheckedChanged);
+            this.showDuplicatesButton.CheckedChanged += new System.EventHandler(this.ShowDuplicatesButton_CheckedChanged);
             // 
             // PlaylistHomePageForm
             // 
@@ -643,11 +643,11 @@ namespace Youtube_Playlist_Naukar_Windows
         private System.Windows.Forms.Label playlistPositionValue;
         private System.Windows.Forms.LinkLabel addedByValue;
         private System.Windows.Forms.Button returnHomeButton;
-        private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Timer timer;
         private System.Windows.Forms.RadioButton noFilterButton;
         private System.Windows.Forms.GroupBox filterBox;
         private System.Windows.Forms.RadioButton showPrivate;
         private System.Windows.Forms.RadioButton showDuplicatesButton;
-        private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.ToolTip descriptionToolTip;
     }
 }

@@ -62,7 +62,6 @@ namespace Youtube_Playlist_Naukar_Windows
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             _cancellationTokenSource.Cancel();
-            _cancellationTokenSource = null;
         }
 
         #region Helpers
@@ -123,7 +122,8 @@ namespace Youtube_Playlist_Naukar_Windows
                         GetStoredUserContributorPlaylists();
             }
 
-            if (_cancellationTokenSource.IsCancellationRequested)
+            if (_cancellationTokenSource.
+                IsCancellationRequested)
             {
                 return;
             }
@@ -161,7 +161,8 @@ namespace Youtube_Playlist_Naukar_Windows
                 PlaylistHelper.GetPlaylistHelper.
                     GetStoredUserContributorPlaylists();
 
-            if (_cancellationTokenSource.IsCancellationRequested)
+            if (_cancellationTokenSource.
+                IsCancellationRequested)
             {
                 return;
             }
@@ -542,7 +543,8 @@ namespace Youtube_Playlist_Naukar_Windows
 
                             MessageBox.Show(@"Playlist added successfully.");
                         }
-                        else
+                        else if(!_cancellationTokenSource.
+                                IsCancellationRequested)
                         {
                             MessageBox.Show(@"An error occurred while trying to " +
                                             @"add the new playlist entry.");
@@ -676,7 +678,8 @@ namespace Youtube_Playlist_Naukar_Windows
 
                 MessageBox.Show(@"Account switched to " + selectedEmail);
             }
-            else
+            else if(!_cancellationTokenSource.
+                IsCancellationRequested)
             {
                 MessageBox.Show(@"Unable to switch account to: " + 
                                 selectedEmail);
@@ -726,7 +729,9 @@ namespace Youtube_Playlist_Naukar_Windows
                                         email.Text + 
                                         @" added.");
                     }
-                    else
+                    else if(
+                        !_cancellationTokenSource.
+                            IsCancellationRequested)
                     {
                         MessageBox.Show(
                             @"Unable to add account with email" +

@@ -20,43 +20,82 @@ namespace Youtube_Playlist_Naukar_Windows
 
         private CancellationTokenSource _cancellationTokenSource;
 
-        private int timerTicks;
+        private int _timerTicks;
         
         private int waitUntil = 10;
 
-        private const int videoThumbnailWidth = 150;
+        private const int VideoThumbnailWidth = 150;
 
-        private const int videoThumbnailHeight = 84;
+        private const int VideoThumbnailHeight = 84;
 
-        private SortedDictionary<long, DataRow> rows =
+        private SortedDictionary<long, DataRow> _rows =
             new SortedDictionary<long, DataRow>();
 
         private Bitmap _defaultImage;
 
         private DataTable _dataTable;
 
+        private VideoFilter _activeVideoFilter =
+            VideoFilter.None;
+
         public PlaylistHomePageForm(
             UserPlayList playlist,
             UserSession activeUserSession)
         {
             InitializeComponent();
+            
             _playlist = playlist;
-            _activeUserSession = activeUserSession;
             Text = _playlist.Title;
-            toolTip1 = new ToolTip();
-            MessageLogger.ForeColor = Color.DodgerBlue;
+            _activeUserSession = activeUserSession;
+            descriptionToolTip = new ToolTip();
             _defaultImage =
                 new Bitmap(Image.FromFile("default_image.png"),
-                    videoThumbnailWidth, videoThumbnailHeight);
+                    VideoThumbnailWidth, VideoThumbnailHeight);
 
             PlaylistVideosHelper.VideoThumbnailReady +=
                 UpdatePlaylistVideoThumbnail;
         }
 
-        public async Task LoadPlaylistVideos(
-            CancellationToken token)
+        protected override async void OnLoad(
+            EventArgs e)
         {
-            MessageLogger.Text = "Loading videos...";
+            if (_playlist != null)
+            {
+                _cancellationTokenSource =
+                    new CancellationTokenSource();
+
+                await LoadPlaylistVideos();
+
+                if (!_cancellationTokenSource.
+                    IsCancellationRequested)
+                {
+                    playlistNameValue.Text =
+                        _playlist.Title ?? "-";
+                }
+            }
+            else
+            {
+                Close();
+            }
+        }
+
+        protected override void OnFormClosing(
+            FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+            PlaylistBackgroundWorkerManager.GetBackgroundWorkerManager.
+                CancelBackgroundWorkerForPlaylistId(_playlist.Id);
+            _playlist = null;
+            _activeUserSession = null;
+            _cancellationTokenSource.Cancel();
+        }
+
+        #region Helpers
+
+        private async Task LoadPlaylistVideos()
+        {
+            MessageLogger.ForeColor = Color.DodgerBlue;
+            MessageLogger.Text = @"Loading videos...";
 
             addVideosButton.Enabled = false;
             refreshVideosButton.Enabled = false;
@@ -65,15 +104,16 @@ namespace Youtube_Playlist_Naukar_Windows
             searchBar.Enabled = false;
 
             await PlaylistVideosHelper.GetPlaylistVideosHelper
-                .LoadPlaylistVideos(_playlist, token);
+                .LoadPlaylistVideos(_playlist, 
+                    _cancellationTokenSource.Token);
 
-            if (!token.IsCancellationRequested)
+            if (!_cancellationTokenSource.
+                IsCancellationRequested)
             {
-                LoadPlaylistVideosUI(
+                LoadPlaylistVideosUi(
                     _playlist.PlayListVideos.Values.ToList());
+                UpdateTotalVideosCount();
             }
-
-            UpdateTotalVideosCount();
 
             addVideosButton.Enabled = true;
             refreshVideosButton.Enabled = true;
@@ -83,96 +123,9 @@ namespace Youtube_Playlist_Naukar_Windows
 
             MessageLogger.Text = "";
         }
-
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            timerTicks++;
-
-            if (timerTicks > waitUntil)
-            {
-                //Stop the timer and begin the search in a background thread.
-                timer1.Stop();
-                DisplaySearchResults();
-            }
-        }
-
-        protected override async void OnLoad(EventArgs e)
-        {
-            if (_playlist != null)
-            {
-               
-                _cancellationTokenSource =
-                    new CancellationTokenSource();
-
-                await LoadPlaylistVideos(
-                    _cancellationTokenSource.Token);
-
-                playlistNameValue.Text =
-                    _playlist?.Title ?? "-";
-            }
-            else
-            {
-                Close();
-            }
-        }
-
-        private void searchBar_TextChanged(
-            object sender, EventArgs e)
-        {
-            if (!timer1.Enabled)
-                timer1.Start();
-            //Reset the timer when a character is entered
-            timerTicks = 0;
-        }
-
-        private void DisplaySearchResults()
-        {
-            if (playlistVideosDataView.DataSource == null)
-            {
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(
-                searchBar.Text))
-            {
-                playlistVideosDataView.DataSource =
-                    rows.Values.CopyToDataTable();
-
-                return;
-            }
-
-            var filteredVideos =
-                PlaylistVideosHelper.GetPlaylistVideosHelper
-                    .SearchVideoInPlayList(
-                        searchBar.Text, _playlist)
-                    .Select(f => f.UniqueVideoIdInPlaylist)
-                    .ToList();
-
-            var rowsFiltered =
-                rows.Values
-                    .Where(r => filteredVideos.Contains(
-                        Convert.ToString(r["VideoId"])));
-
-            if (rowsFiltered.Any())
-            {
-                playlistVideosDataView.DataSource =
-                    rowsFiltered
-                        .OrderBy(s =>
-                        filteredVideos.IndexOf(
-                            Convert.ToString(s["VideoId"]))
-                    )
-                    .CopyToDataTable();
-            }
-            else
-            {
-                playlistVideosDataView.DataSource =
-                    (playlistVideosDataView.DataSource as DataTable)?.Clone();
-            }
-        }
-
-        private void LoadPlaylistVideosUI(
-            List<UserPlayListVideo> playlistVideos,
-            bool downloadVideoImages = true)
+        
+        private void LoadPlaylistVideosUi(
+            List<UserPlayListVideo> playlistVideos)
         {
             DataTable table = new DataTable();
 
@@ -194,7 +147,7 @@ namespace Youtube_Playlist_Naukar_Windows
             if (playlistVideos != null &&
                 playlistVideos.Count > 0)
             {
-                foreach (var playlistVideo in 
+                foreach (var playlistVideo in
                     playlistVideos)
                 {
                     table.Rows.Add(
@@ -215,395 +168,51 @@ namespace Youtube_Playlist_Naukar_Windows
             playlistVideosDataView.Columns[5].AutoSizeMode =
                 DataGridViewAutoSizeColumnMode.AllCells;
 
-            rows.Clear();
-            var tableRows =
-                table.Rows.Cast<DataRow>();
+            _rows.Clear();
 
-            foreach (var tableRow in tableRows)
+            if (table.Rows.Count > 0)
             {
-                var position =
-                    long.Parse(tableRow["Position"].ToString());
-                rows.Add(position, tableRow);
+                foreach (var tableRow in 
+                    table.Rows.Cast<DataRow>())
+                {
+                    if (tableRow?["Position"] != null &&
+                        long.TryParse(tableRow["Position"].ToString(),
+                            out var position))
+                    {
+                        _rows.Add(position, tableRow);
+                    }
+                }
             }
 
-            if (downloadVideoImages)
-            {
-                PlaylistVideosHelper.GetPlaylistVideosHelper
-                    .DownloadPlaylistVideoThumbnails(
-                        _playlist.Id, playlistVideos);
-            }
+            PlaylistVideosHelper.GetPlaylistVideosHelper
+                .DownloadPlaylistVideoThumbnails(
+                    _playlist.Id, playlistVideos);
         }
 
         private object[] GetRowFromRowValues(
             UserPlayListVideo playlistVideo)
         {
-            object[] rowValues =
+            if (playlistVideo == null)
+            {
+                return new object[] { };
+            }
+
+            return new object[]
             {
                 playlistVideo.UniqueVideoIdInPlaylist,
                 ((playlistVideo.PositionInPlayList ?? 0) + 1)
-                .ToString(),
+                    .ToString(),
                 _defaultImage,
                 playlistVideo.Title,
                 playlistVideo.Duration,
                 playlistVideo.VideoOwnerChannelTitle
             };
-            return rowValues;
-        }
-
-        private async void addVideos_Click(object sender, EventArgs e)
-        {
-            var urlInputForm = new AddVideoForm();
-            var dialogResult =
-                urlInputForm.ShowDialog(this);
-            List<UserPlayListVideo> newVideos
-                = new List<UserPlayListVideo>();
-
-            if (dialogResult == DialogResult.OK)
-            {
-                string urlInput =
-                    urlInputForm.VideoUrlOrUrls;
-
-                if (string.IsNullOrWhiteSpace(urlInput))
-                {
-                    MessageBox.Show("No video URL provided.");
-                }
-                else
-                {
-                    var logsForm = new LogsForm();
-                    logsForm.Show(this);
-
-                    List<string> urls =
-                        urlInput.Split('\n').
-                            Select(url => url.Trim()).ToList();
-
-                    foreach (var url in urls)
-                    {
-                        logsForm.AddRow(url, "In Progress");
-
-                        var videoAdditionResult =
-                            await PlaylistVideosHelper.GetPlaylistVideosHelper.
-                                AddVideoToPlayList(
-                                    url, _playlist, _cancellationTokenSource.Token);
-
-                        var message = videoAdditionResult.Item1;
-                        var videoAdded = videoAdditionResult.Item2;
-
-                        if (videoAdded != null)
-                        {
-                            newVideos.Add(videoAdded);
-                        }
-
-                        logsForm.UpdateRow(url, message);
-                    }
-                }
-
-                urlInputForm.Dispose();
-            }
-            else if (dialogResult == DialogResult.Cancel)
-            {
-                urlInputForm.Dispose();
-            }
-
-            if(!_cancellationTokenSource.IsCancellationRequested)
-            {
-                var newRows =
-                    new SortedDictionary<long, DataRow>();
-
-                foreach (DataRow row in rows.Values)
-                {
-                    var id = row["VideoId"].ToString();
-                    if (_playlist.PlayListVideos.ContainsKey(id))
-                    {
-                        row["Position"] =
-                            (_playlist.PlayListVideos[id].
-                                PositionInPlayList + 1).ToString();
-                    }
-                }
-
-                foreach (DataRow row in rows.Values)
-                {
-                    newRows.Add(long.Parse(row["Position"].ToString()),
-                        row);
-                }
-
-                rows = newRows;
-
-                foreach (var playlistVideo in newVideos)
-                {
-                    var newRow = _dataTable.NewRow();
-                    newRow.ItemArray = GetRowFromRowValues(
-                        playlistVideo);
-                    rows.Add((playlistVideo.PositionInPlayList ?? 0) + 1, 
-                        newRow);
-                }
-
-                playlistVideosDataView.DataSource =
-                    rows.Values.CopyToDataTable();
-
-                PlaylistVideosHelper.GetPlaylistVideosHelper
-                    .DownloadPlaylistVideoThumbnails(
-                        _playlist.Id, newVideos);
-            }
-
-            UpdateTotalVideosCount();
-        }
-
-        private async void refreshVideos_Click(
-            object sender, EventArgs e)
-        {
-            await LoadPlaylistVideos(_cancellationTokenSource.Token);
         }
 
         private void UpdateTotalVideosCount()
         {
             totalVideosValue.Text =
                 (_playlist?.PlayListVideos?.Count ?? 0).ToString();
-        }
-
-        private async void deleteVideo_Click(object sender, EventArgs e)
-        {
-            if (playlistVideosDataView.SelectedRows.Count > 0)
-            {
-                var item =
-                    playlistVideosDataView.SelectedRows[0];
-
-                var videoPlaylistId =
-                    item.Cells[0].Value.ToString() ?? "";
-
-                if (_playlist.PlayListVideos.ContainsKey(
-                        videoPlaylistId))
-                {
-                    var result = MessageBox.Show(
-                        "Are you sure you want to delete the selected " +
-                            "playlist video from your YouTube account? " +
-                            "This action cannot be undone.",
-                        "Confirm Deletion",
-                        MessageBoxButtons.YesNo);
-
-                    if (result == DialogResult.Yes)
-                    {
-                        MessageLogger.Text = "Deleting video...";
-
-                        var videoToRemove =
-                            _playlist.PlayListVideos[videoPlaylistId];
-
-                        await PlaylistVideosHelper.GetPlaylistVideosHelper
-                            .DeleteVideoFromPlaylist(_playlist,
-                                videoToRemove,
-                                _cancellationTokenSource.Token);
-
-                        if (rows.ContainsKey(
-                            videoToRemove.PositionInPlayList.Value + 1))
-                        {
-                            rows.Remove(
-                                videoToRemove.PositionInPlayList.Value + 1);
-                        }
-
-                        MessageLogger.Text = "";
-
-                        foreach (DataRow row in rows.Values)
-                        {
-                            var id = row["VideoId"].ToString();
-                            if (_playlist.PlayListVideos.ContainsKey(id))
-                            {
-                                row["Position"] =
-                                    (_playlist.PlayListVideos[id].
-                                        PositionInPlayList + 1).ToString();
-                            }
-                        }
-
-                        playlistVideosDataView.DataSource =
-                            rows.Values.CopyToDataTable();
-
-                        MessageBox.Show("Video successfully " +
-                                        "removed from your YouTube account.");
-                    }
-                    else
-                    {
-                        MessageBox.Show("Video not removed.");
-                    }
-                }
-            }
-            else
-            {
-                MessageBox.Show(
-                    "Select a video to remove.");
-            }
-
-            UpdateTotalVideosCount();
-        }
-
-        private void UpdatePlaylistVideoThumbnail(
-            object sender, VideoThumbnailReadyEventArgs eventArgs)
-        {
-            if (!playlistVideosDataView.InvokeRequired)
-            {
-                UpdatePlaylistThumbnailInDataView(
-                    eventArgs);
-                return;
-            }
-
-            playlistVideosDataView.Invoke(
-                new MethodInvoker(delegate
-                    {
-                        UpdatePlaylistThumbnailInDataView(
-                            eventArgs);
-                    }));
-        }
-
-        private void UpdatePlaylistThumbnailInDataView(
-            VideoThumbnailReadyEventArgs eventArgs)
-        {
-            //disposed
-            if (_playlist == null ||
-                _activeUserSession == null ||
-                _playlist.Id != eventArgs.PlaylistId)
-            {
-                return;
-            }
-
-            var bitmap =
-                CommonUtilities.ConvertLocalImageToBitmap(
-                    _activeUserSession.UserDirectory + "/" + 
-                        eventArgs.
-                        PlaylistVideoImagePathFromCustomerDirectory,
-                    videoThumbnailWidth,
-                    videoThumbnailHeight
-                );
-
-            var filteredRow =
-                rows.Values.FirstOrDefault(r => r["VideoId"].ToString() == 
-                                eventArgs.VideoId);
-            if (filteredRow != null)
-            {
-                filteredRow["Preview"] = bitmap;
-            }
-            
-            DataGridViewRow row = playlistVideosDataView.Rows
-                .Cast<DataGridViewRow>()
-                .FirstOrDefault(r => r.Cells["VideoId"].Value.ToString() ==
-                            eventArgs.VideoId);
-
-            if (row != null &&
-                filteredRow != null)
-            {
-                row.SetValues(filteredRow.ItemArray);
-            }
-        }
-
-        private void returnHomeButton_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
-
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            base.OnFormClosing(e);
-            PlaylistBackgroundWorkerManager.GetBackgroundWorkerManager.
-                CancelBackgroundWorkerForPlaylistId(_playlist.Id);
-            _playlist = null;
-            _activeUserSession = null;
-            _cancellationTokenSource.Cancel();
-            _cancellationTokenSource = null;
-        }
-
-        private void noFilterButton_CheckedChanged(object sender, EventArgs e)
-        {
-            if (noFilterButton.Checked &&
-                rows.Count > 0)
-            {
-                playlistVideosDataView.DataSource =
-                    rows.Values.CopyToDataTable();
-            }
-        }
-
-        private void showDuplicatesButton_CheckedChanged(
-            object sender, EventArgs e)
-        {
-            if (!showDuplicatesButton.Checked &&
-                rows.Count > 0)
-            {
-                return;
-            }
-
-            var duplicates =
-                PlaylistVideosHelper.GetPlaylistVideosHelper
-                    .GetPlaylistDuplicates(_playlist);
-
-            if (duplicates.Count > 0)
-            {
-                MessageBox.Show(
-                    duplicates.Count +
-                    " duplicates found in playlist.");
-            }
-
-            var filteredVideos =
-                duplicates
-                    .SelectMany(d => d)
-                    .Select(f => f.UniqueVideoIdInPlaylist)
-                    .ToList();
-
-            var rowsFiltered =
-                rows.Values
-                    .Where(r => filteredVideos.Contains(
-                        Convert.ToString(r["VideoId"])));
-
-            if (rowsFiltered.Any())
-            {
-                playlistVideosDataView.DataSource =
-                    rowsFiltered
-                        .OrderBy(s =>
-                            filteredVideos.IndexOf(
-                                Convert.ToString(s["VideoId"]))
-                        )
-                        .CopyToDataTable();
-            }
-            else
-            {
-                playlistVideosDataView.DataSource =
-                    (playlistVideosDataView.DataSource as DataTable)?.Clone();
-
-                MessageBox.Show("No duplicates in playlist found.");
-            }
-        }
-
-        private void showPrivate_CheckedChanged(object sender, EventArgs e)
-        {
-            if (!showPrivate.Checked &&
-                rows.Count > 0)
-            {
-                return;
-            }
-
-            var filteredVideos =
-                PlaylistVideosHelper.GetPlaylistVideosHelper
-                    .GetPrivateVideos(
-                        _playlist.PlayListVideos.Values.ToList())
-                    .Select(f => f.UniqueVideoIdInPlaylist)
-                    .ToList();
-
-            var rowsFiltered =
-                rows.Values
-                    .Where(r => filteredVideos.Contains(
-                        Convert.ToString(r["VideoId"])));
-
-            if (rowsFiltered.Any())
-            {
-                playlistVideosDataView.DataSource =
-                    rowsFiltered
-                        .OrderBy(s =>
-                            filteredVideos.IndexOf(
-                                Convert.ToString(s["VideoId"]))
-                        )
-                        .CopyToDataTable();
-            }
-            else
-            {
-                MessageBox.Show("No private videos found in playlist.");
-
-                playlistVideosDataView.DataSource =
-                    (playlistVideosDataView.DataSource as DataTable)?.Clone();
-            }
         }
 
         private void LoadPlaylistPreviewDetails(
@@ -617,32 +226,29 @@ namespace Youtube_Playlist_Naukar_Windows
 
             playlistPositionValue.Text =
                 GetPreviewItemValue(
-                    (selectedVideo?.PositionInPlayList + 1)?.ToString());
+                    (selectedVideo?.PositionInPlayList + 1)?
+                    .ToString());
 
             var videoUrl =
                 selectedVideo?.VideoId == null
                 ? ""
                 : CommonUtilities.GetYoutubeVideoUrlFromVideoId(
                     selectedVideo.VideoId);
-
             urlValue.Text = GetPreviewItemValue(videoUrl);
-
             urlValue.Links.Clear();
-
             urlValue.Links.Add(0, urlValue.Text.Length,
                 videoUrl);
 
             videoOwnerValue.Text =
                 GetPreviewItemValue(
                     selectedVideo?.VideoOwnerChannelTitle);
-
             videoOwnerValue.Links.Clear();
-
-            videoOwnerValue.Links.Add(0, videoOwnerValue.Text.Length,
+            videoOwnerValue.Links.Add(
+                0, videoOwnerValue.Text.Length,
                 selectedVideo == null
                     ? string.Empty
                     : CommonUtilities.GetYoutubeChannelUrlFromChannelId(
-                    selectedVideo.VideoOwnerChannelId));
+                        selectedVideo.VideoOwnerChannelId));
 
             if (selectedVideo?.VideoAddedToPlaylistOn != null)
             {
@@ -659,10 +265,9 @@ namespace Youtube_Playlist_Naukar_Windows
             addedByValue.Text =
                 GetPreviewItemValue(
                     selectedVideo?.VideoAddedToPlaylistByChannelTitle);
-
             addedByValue.Links.Clear();
-
-            addedByValue.Links.Add(0, addedByValue.Text.Length,
+            addedByValue.Links.Add(0, 
+                addedByValue.Text.Length,
                 selectedVideo == null
                     ? string.Empty
                     : CommonUtilities.GetYoutubeChannelUrlFromChannelId(
@@ -674,15 +279,13 @@ namespace Youtube_Playlist_Naukar_Windows
 
             var description =
                 selectedVideo?.Description ?? "-";
-
             descriptionValue.Text =
-                description.Length > 100 
+                description.Length > 100
                     ? description.Substring(0, 100) + "..."
                     : description;
-
             if (!string.IsNullOrWhiteSpace(description))
             {
-                toolTip1.SetToolTip(
+                descriptionToolTip.SetToolTip(
                     descriptionValue, description);
             }
 
@@ -690,7 +293,7 @@ namespace Youtube_Playlist_Naukar_Windows
                 selectedVideo.Thumbnail?.IsDownloaded == false)
             {
                 videoThumbnailPreview.ImageLocation =
-                    "default_image.png";
+                    @"default_image.png";
             }
             else
             {
@@ -712,7 +315,558 @@ namespace Youtube_Playlist_Naukar_Windows
             return value;
         }
 
-        private void playlistVideosDataView__SelectedIndexChanged(
+        private void DisplaySearchResults()
+        {
+            if (playlistVideosDataView.DataSource == null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(
+                searchBar.Text))
+            {
+                if (_rows.Count > 0)
+                {
+                    playlistVideosDataView.DataSource =
+                        _rows.Values.CopyToDataTable();
+                }
+
+                return;
+            }
+
+            var filteredVideos =
+                PlaylistVideosHelper.GetPlaylistVideosHelper
+                    .SearchVideoInPlayList(
+                        searchBar.Text, _playlist)
+                    .Select(f => f.UniqueVideoIdInPlaylist)
+                    .ToList();
+
+            var rowsFiltered =
+                _rows.Values
+                    .Where(r => filteredVideos.Contains(
+                        Convert.ToString(r["VideoId"])))
+                    .ToList();
+
+            if (rowsFiltered.Any())
+            {
+                playlistVideosDataView.DataSource =
+                    rowsFiltered
+                        .OrderBy(s =>
+                            filteredVideos.IndexOf(
+                                Convert.ToString(s["VideoId"]))
+                        )
+                        .CopyToDataTable();
+
+                ApplyFilterToRows();
+            }
+            else
+            {
+                // a way to empty the table without affecting references
+                playlistVideosDataView.DataSource =
+                    (playlistVideosDataView.DataSource as DataTable)?.Clone();
+            }
+        }
+
+        private void ApplyFilterToRows()
+        {
+            if (_activeVideoFilter ==
+                VideoFilter.None ||
+                _rows.Count <= 0)
+            {
+                return;
+            }
+
+            VideoFilter activeFilterStore =
+                _activeVideoFilter;
+
+            RadioButton radioButton =
+                filterBox.Controls
+                    .OfType<RadioButton>()
+                    .FirstOrDefault(x =>
+                        x.Name == "noFilterButton");
+
+            if (radioButton != null)
+            {
+                radioButton.Checked = true;
+            }
+
+
+            if (activeFilterStore ==
+                VideoFilter.Duplicate)
+            {
+                radioButton =
+                    filterBox.Controls
+                        .OfType<RadioButton>()
+                        .FirstOrDefault(x =>
+                            x.Name == "showDuplicatesButton");
+
+                if (radioButton != null)
+                {
+                    radioButton.Checked = true;
+                }
+            }
+            else if (activeFilterStore ==
+                     VideoFilter.Private)
+            {
+                radioButton =
+                    filterBox.Controls
+                        .OfType<RadioButton>()
+                        .FirstOrDefault(x =>
+                            x.Name == "showPrivate");
+
+                if (radioButton != null)
+                {
+                    radioButton.Checked = true;
+                }
+            }
+        }
+
+        #endregion
+
+        #region Events
+
+        private void ReturnHomeButton_Click(
+            object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void Timer_Tick(
+            object sender, EventArgs e)
+        {
+            _timerTicks++;
+
+            if (_timerTicks > waitUntil)
+            {
+                //Stop the timer and begin the
+                //search in a background thread.
+                timer.Stop();
+                DisplaySearchResults();
+            }
+        }
+
+        private void SearchBar_TextChanged(
+            object sender, EventArgs e)
+        {
+            if (!timer.Enabled)
+                timer.Start();
+            //Reset the timer when a character is entered
+            _timerTicks = 0;
+        }
+        
+        private async void AddVideos_Click(
+            object sender, EventArgs e)
+        {
+            var urlInputForm = new AddVideoForm();
+            var dialogResult =
+                urlInputForm.ShowDialog(this);
+            List<UserPlayListVideo> newVideos
+                = new List<UserPlayListVideo>();
+
+            if (dialogResult == DialogResult.OK)
+            {
+                string urlInput =
+                    urlInputForm.VideoUrlOrUrls;
+
+                if (string.IsNullOrWhiteSpace(urlInput))
+                {
+                    MessageBox.Show(@"No video URL provided.");
+                }
+                else
+                {
+                    var logsForm = new LogsForm();
+                    logsForm.Show(this);
+
+                    List<string> urls =
+                        urlInput.Split('\n').
+                            Select(url => url.Trim()).ToList();
+
+                    foreach (var url in urls)
+                    {
+                        logsForm.AddRow(url, "In Progress");
+
+                        var videoAdditionResult =
+                            await PlaylistVideosHelper.GetPlaylistVideosHelper.
+                                AddVideoToPlayList(
+                                    url, _playlist,
+                                    _cancellationTokenSource.Token);
+
+                        var message = videoAdditionResult.Item1;
+                        var videoAdded = videoAdditionResult.Item2;
+
+                        if (videoAdded != null)
+                        {
+                            newVideos.Add(videoAdded);
+                        }
+
+                        logsForm.UpdateRow(url, message);
+                    }
+                }
+
+                urlInputForm.Dispose();
+            }
+            else if (dialogResult == DialogResult.Cancel)
+            {
+                urlInputForm.Dispose();
+            }
+
+            if(!_cancellationTokenSource.
+                IsCancellationRequested)
+            {
+                var newRows =
+                    new SortedDictionary<long, DataRow>();
+
+                //update positions of existing video rows
+                foreach (DataRow row in _rows.Values)
+                {
+                    var id = row["VideoId"].ToString();
+                    if (id != null &&
+                        _playlist.PlayListVideos.ContainsKey(id))
+                    {
+                        row["Position"] =
+                            (_playlist.PlayListVideos[id].
+                                PositionInPlayList + 1).ToString();
+                    }
+                }
+
+                //build a new dictionary to hold rows against 
+                //new positions
+                foreach (DataRow row in _rows.Values)
+                {
+                    if (row?["Position"] != null &&
+                        long.TryParse(row["Position"].ToString(), 
+                            out var position))
+                    {
+                        newRows.Add(position, row);
+                    }
+                }
+
+                _rows = newRows;
+
+                //add new videos to rows
+                foreach (var playlistVideo in newVideos)
+                {
+                    var newRow = _dataTable.NewRow();
+                    newRow.ItemArray = GetRowFromRowValues(
+                        playlistVideo);
+                    _rows.Add((playlistVideo.PositionInPlayList ?? 0) + 1, 
+                        newRow);
+                }
+
+                if (_rows.Any())
+                {
+                    playlistVideosDataView.DataSource =
+                        _rows.Values.CopyToDataTable();
+
+                    ApplyFilterToRows();
+                }
+
+                //download thumbnails of new videos
+                PlaylistVideosHelper.GetPlaylistVideosHelper
+                    .DownloadPlaylistVideoThumbnails(
+                        _playlist.Id, newVideos);
+
+                UpdateTotalVideosCount();
+            }
+        }
+
+        private async void RefreshVideos_Click(
+            object sender, EventArgs e)
+        {
+            await LoadPlaylistVideos();
+            ApplyFilterToRows();
+        }
+        
+        private async void DeleteVideo_Click(
+            object sender, EventArgs e)
+        {
+            if (playlistVideosDataView.SelectedRows.Count > 0)
+            {
+                var item =
+                    playlistVideosDataView.SelectedRows[0];
+
+                var videoPlaylistId =
+                    item.Cells[0].Value.ToString() ?? "";
+
+                if (_playlist.PlayListVideos.ContainsKey(
+                        videoPlaylistId))
+                {
+                    var result = MessageBox.Show(
+                        @"Are you sure you want to delete the selected " +
+                        @"playlist video from your YouTube account? " +
+                        @"This action cannot be undone.",
+                        @"Confirm Deletion",
+                        MessageBoxButtons.YesNo);
+
+                    if (result == DialogResult.Yes)
+                    {
+                        MessageLogger.ForeColor = Color.DodgerBlue;
+                        MessageLogger.Text = @"Deleting video...";
+
+                        var videoToRemove =
+                            _playlist.PlayListVideos[videoPlaylistId];
+
+                        await PlaylistVideosHelper.GetPlaylistVideosHelper
+                            .DeleteVideoFromPlaylist(_playlist,
+                                videoToRemove,
+                                _cancellationTokenSource.Token);
+
+                        //delete row tied to video
+                        if (videoToRemove.PositionInPlayList != null &&
+                            _rows.ContainsKey(
+                                videoToRemove.PositionInPlayList.Value + 1))
+                        {
+                            _rows.Remove(
+                                videoToRemove.PositionInPlayList.Value + 1);
+                        }
+
+                        MessageLogger.Text = "";
+                        var newRows =
+                            new SortedDictionary<long, DataRow>();
+
+                        //update existing video positions
+                        foreach (DataRow row in _rows.Values)
+                        {
+                            var id = row["VideoId"].ToString();
+                            if (id != null &&
+                                _playlist.PlayListVideos.ContainsKey(id))
+                            {
+                                row["Position"] =
+                                    (_playlist.PlayListVideos[id].
+                                        PositionInPlayList + 1).ToString();
+                            }
+                        }
+
+                        //build a new dictionary to hold rows against 
+                        //new positions
+                        foreach (DataRow row in _rows.Values)
+                        {
+                            if (row?["Position"] != null &&
+                                long.TryParse(row["Position"].ToString(),
+                                    out var position))
+                            {
+                                newRows.Add(position, row);
+                            }
+                        }
+
+                        _rows = newRows;
+
+                        if (_rows.Any())
+                        {
+                            playlistVideosDataView.DataSource =
+                                _rows.Values.CopyToDataTable();
+
+                            ApplyFilterToRows();
+                        }
+
+                        MessageBox.Show(@"Video successfully " +
+                                        @"removed from your YouTube account.");
+                    }
+                    else
+                    {
+                        MessageBox.Show(@"Video not removed.");
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show(
+                    @"Select a video to remove.");
+            }
+
+            if (!_cancellationTokenSource.IsCancellationRequested)
+            {
+                UpdateTotalVideosCount();
+            }
+        }
+
+        private void UpdatePlaylistVideoThumbnail(
+            object sender, 
+            VideoThumbnailReadyEventArgs eventArgs)
+        {
+            if (!playlistVideosDataView.InvokeRequired)
+            {
+                UpdatePlaylistThumbnailInDataView(
+                    eventArgs);
+                return;
+            }
+
+            playlistVideosDataView.Invoke(
+                new MethodInvoker(delegate
+                    {
+                        UpdatePlaylistThumbnailInDataView(
+                            eventArgs);
+                    }));
+        }
+
+        private void UpdatePlaylistThumbnailInDataView(
+            VideoThumbnailReadyEventArgs eventArgs)
+        {
+            //disposed
+            if (_cancellationTokenSource.
+                    IsCancellationRequested ||
+                _playlist == null ||
+                _activeUserSession == null ||
+                _playlist.Id != eventArgs.PlaylistId)
+            {
+                return;
+            }
+
+            var bitmap =
+                CommonUtilities.ConvertLocalImageToBitmap(
+                    _activeUserSession.UserDirectory + "/" + 
+                        eventArgs.
+                        PlaylistVideoImagePathFromCustomerDirectory,
+                    VideoThumbnailWidth,
+                    VideoThumbnailHeight
+                );
+
+            //filtered row is row of the DataTable not DataGridView
+            var dataTableRow =
+                _rows.Values.FirstOrDefault(
+                    r => r["VideoId"].ToString() == 
+                        eventArgs.VideoId);
+
+            if (dataTableRow != null)
+            {
+                //this alone won't update the Datagridview
+                dataTableRow["Preview"] = bitmap;
+            }
+            
+            DataGridViewRow dataGridViewRow = 
+                playlistVideosDataView.Rows
+                    .Cast<DataGridViewRow>()
+                    .FirstOrDefault(r => 
+                        r.Cells["VideoId"].Value.ToString() ==
+                            eventArgs.VideoId);
+
+            //this helps trigger the datagridview that a row has changed
+            if (dataGridViewRow != null &&
+                dataTableRow != null)
+            {
+                dataGridViewRow.SetValues(dataTableRow.ItemArray);
+            }
+        }
+
+        private void NoFilterButton_CheckedChanged(
+            object sender, EventArgs e)
+        {
+            if (noFilterButton.Checked)
+            {
+                _activeVideoFilter =
+                    VideoFilter.None;
+
+                if(_rows.Count > 0)
+                {
+                    playlistVideosDataView.DataSource =
+                        _rows.Values.CopyToDataTable();
+                }
+            }
+        }
+
+        private void ShowDuplicatesButton_CheckedChanged(
+            object sender, EventArgs e)
+        {
+            if (!showDuplicatesButton.Checked)
+            {
+                return;
+            }
+
+            _activeVideoFilter =
+                VideoFilter.Duplicate;
+
+            if (_rows.Count > 0)
+            {
+                var duplicates =
+                    PlaylistVideosHelper.GetPlaylistVideosHelper
+                        .GetPlaylistDuplicates(_playlist);
+
+                if (duplicates.Count > 0)
+                {
+                    MessageBox.Show(
+                        duplicates.Count +
+                        @" duplicates found in playlist.");
+                }
+
+                var filteredVideos =
+                    duplicates
+                        .SelectMany(d => d)
+                        .Select(f => f.UniqueVideoIdInPlaylist)
+                        .ToList();
+
+                var rowsFiltered =
+                    _rows.Values
+                        .Where(r => filteredVideos.Contains(
+                            Convert.ToString(r["VideoId"])))
+                        .ToList();
+
+                if (rowsFiltered.Any())
+                {
+                    playlistVideosDataView.DataSource =
+                        rowsFiltered
+                            .OrderBy(s =>
+                                filteredVideos.IndexOf(
+                                    Convert.ToString(s["VideoId"]))
+                            )
+                            .CopyToDataTable();
+                }
+                else
+                {
+                    playlistVideosDataView.DataSource =
+                        (playlistVideosDataView.DataSource as DataTable)?.Clone();
+
+                    MessageBox.Show(@"No duplicates in playlist found.");
+                }
+            }
+        }
+
+        private void ShowPrivate_CheckedChanged(
+            object sender, EventArgs e)
+        {
+            if (!showPrivate.Checked)
+            {
+                return;
+            }
+
+            _activeVideoFilter =
+                VideoFilter.Private;
+
+            if (_rows.Count > 0)
+            {
+                var filteredVideos =
+                    PlaylistVideosHelper.GetPlaylistVideosHelper
+                        .GetPrivateVideos(
+                            _playlist.PlayListVideos.Values.ToList())
+                        .Select(f => f.UniqueVideoIdInPlaylist)
+                        .ToList();
+
+                var rowsFiltered =
+                    _rows.Values
+                        .Where(r => filteredVideos.Contains(
+                            Convert.ToString(r["VideoId"])))
+                        .ToList();
+
+                if (rowsFiltered.Any())
+                {
+                    playlistVideosDataView.DataSource =
+                        rowsFiltered
+                            .OrderBy(s =>
+                                filteredVideos.IndexOf(
+                                    Convert.ToString(s["VideoId"]))
+                            )
+                            .CopyToDataTable();
+                }
+                else
+                {
+                    MessageBox.Show(@"No private videos found in playlist.");
+
+                    playlistVideosDataView.DataSource =
+                        (playlistVideosDataView.DataSource as DataTable)?.Clone();
+                }
+            }
+        }
+
+        private void PlaylistVideosDataView__SelectedIndexChanged(
             object sender, EventArgs e)
         {
             UserPlayListVideo selectedPlaylistVideo = null;
@@ -725,8 +879,9 @@ namespace Youtube_Playlist_Naukar_Windows
                 var selectedItemId =
                     selectedItem.Value.ToString();
 
-                if (_playlist.PlayListVideos.ContainsKey(
-                    selectedItemId))
+                if (selectedItemId != null &&
+                    _playlist.PlayListVideos.ContainsKey(
+                        selectedItemId))
                 {
                     selectedPlaylistVideo =
                         _playlist.PlayListVideos[selectedItemId];
@@ -736,24 +891,26 @@ namespace Youtube_Playlist_Naukar_Windows
             LoadPlaylistPreviewDetails(selectedPlaylistVideo);
         }
 
-        private void urlValue_LinkClicked(
+        private void UrlValue_LinkClicked(
             object sender, LinkLabelLinkClickedEventArgs e)
         {
             CommonUtilities.OpenLinkInBrowser(urlValue.Text);
         }
 
-        private void addedByValue_LinkClicked(
+        private void AddedByValue_LinkClicked(
             object sender, LinkLabelLinkClickedEventArgs e)
         {
             CommonUtilities.OpenLinkInBrowser(
                 addedByValue.Links[0].LinkData.ToString());
         }
 
-        private void videoOwnerValue_LinkClicked(
+        private void VideoOwnerValue_LinkClicked(
             object sender, LinkLabelLinkClickedEventArgs e)
         {
             CommonUtilities.OpenLinkInBrowser(
                 videoOwnerValue.Links[0].LinkData.ToString());
         }
+
+        #endregion
     }
 }
