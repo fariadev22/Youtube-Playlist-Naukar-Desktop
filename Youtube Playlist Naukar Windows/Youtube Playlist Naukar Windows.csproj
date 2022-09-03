@@ -15,6 +15,7 @@
     <None Remove="default_image.png" />
     <None Remove="search.png" />
     <None Remove="YoutubePlaylistNaukar.ico" />
+    <None Remove="YoutubePlaylistNaukar.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,6 +38,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="YoutubePlaylistNaukar.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="YoutubePlaylistNaukar.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
