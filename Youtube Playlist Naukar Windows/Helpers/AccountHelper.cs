@@ -82,7 +82,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         {
             _activeUserSession =
                 await SessionStorageManager.GetSessionManager
-                    .ChangeSession(emailAddress, cancellationToken);
+                    .ChangeSession(cancellationToken, emailAddress);
 
             if (_activeUserSession == null)
             {

@@ -689,61 +689,32 @@ namespace Youtube_Playlist_Naukar_Windows
         private async void AddNewAccountMenuItem_Click(
             object sender, EventArgs e)
         {
-            var emailInputForm = new AddAccountForm();
-            var dialogResult =
-                emailInputForm.ShowDialog(this);
+            var addAccountResult =
+                await AccountHelper.GetAccountHelper.
+                    ChangeAccount(
+                        null,
+                        _cancellationTokenSource.Token);
 
-            if (dialogResult == DialogResult.OK)
+            if (addAccountResult.Item1)
             {
-                string emailInput =
-                    emailInputForm.UserEmailAddress;
+                _activeUserSession =
+                    AccountHelper.GetAccountHelper.
+                        GetActiveUserSession();
 
-                if (string.IsNullOrWhiteSpace(emailInput))
-                {
-                    MessageBox.Show(@"No email provided.");
-                }
-                else if (switchAccountMenuItem.DropDownItems.
-                    ContainsKey(emailInput))
-                {
-                    MessageBox.Show(@"Account already added.");
-                }
-                else
-                {
-                    var addAccountResult =
-                        await AccountHelper.GetAccountHelper.
-                            ChangeAccount(
-                                emailInput,
-                                _cancellationTokenSource.Token);
+                LoadActiveUsersAccountInfo();
 
-                    if (addAccountResult.Item1)
-                    {
-                        _activeUserSession =
-                            AccountHelper.GetAccountHelper.
-                                GetActiveUserSession();
+                await LoadUserPlaylists();
 
-                        LoadActiveUsersAccountInfo();
-
-                        await LoadUserPlaylists();
-
-                        MessageBox.Show(@"Account with email " +
-                                        email.Text + 
-                                        @" added.");
-                    }
-                    else if(
-                        !_cancellationTokenSource.
-                            IsCancellationRequested)
-                    {
-                        MessageBox.Show(
-                            @"Unable to add account with email" +
-                            @" -> " + emailInput);
-                    }
-                }
-
-                emailInputForm.Dispose();
+                MessageBox.Show(
+                    @"Account with email " + email.Text +
+                    @" added.");
             }
-            else if (dialogResult == DialogResult.Cancel)
+            else if (
+                !_cancellationTokenSource.
+                    IsCancellationRequested)
             {
-                emailInputForm.Dispose();
+                MessageBox.Show(
+                    @"Unable to add account");
             }
         }
 

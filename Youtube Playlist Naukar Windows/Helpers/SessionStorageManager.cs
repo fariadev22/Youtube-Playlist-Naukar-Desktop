@@ -114,11 +114,14 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         }
 
         public async Task<UserSession> ChangeSession(
-            string emailAddress,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            string emailAddress = null)
         {
             var userSessionForProvidedEmail =
-                _userSessions.Find(u => u.EmailAddress == emailAddress);
+                string.IsNullOrWhiteSpace(emailAddress)
+                    ? null
+                    : _userSessions.Find(u => 
+                        u.EmailAddress == emailAddress);
 
             if (userSessionForProvidedEmail != null)
             {
