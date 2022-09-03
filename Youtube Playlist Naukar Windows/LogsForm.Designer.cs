@@ -31,6 +31,7 @@ namespace Youtube_Playlist_Naukar_Windows
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LogsForm));
             this.logTable = new System.Windows.Forms.DataGridView();
+            this.Id = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.urlColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.statusColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.logTable)).BeginInit();
@@ -42,6 +43,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.logTable.AllowUserToDeleteRows = false;
             this.logTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.logTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Id,
             this.urlColumn,
             this.statusColumn});
             this.logTable.Location = new System.Drawing.Point(23, 35);
@@ -51,6 +53,16 @@ namespace Youtube_Playlist_Naukar_Windows
             this.logTable.RowTemplate.Height = 33;
             this.logTable.Size = new System.Drawing.Size(739, 403);
             this.logTable.TabIndex = 0;
+            // 
+            // Id
+            // 
+            this.Id.Frozen = true;
+            this.Id.HeaderText = "Id";
+            this.Id.MinimumWidth = 8;
+            this.Id.Name = "Id";
+            this.Id.ReadOnly = true;
+            this.Id.Visible = false;
+            this.Id.Width = 150;
             // 
             // urlColumn
             // 
@@ -89,6 +101,7 @@ namespace Youtube_Playlist_Naukar_Windows
         #endregion
 
         private System.Windows.Forms.DataGridView logTable;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Id;
         private System.Windows.Forms.DataGridViewTextBoxColumn urlColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn statusColumn;
     }

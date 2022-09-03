@@ -484,9 +484,14 @@ namespace Youtube_Playlist_Naukar_Windows
                         urlInput.Split('\n').
                             Select(url => url.Trim()).ToList();
 
+                    List<string> urlIds =
+                        new List<string>();
+
                     foreach (var url in urls)
                     {
-                        logsForm.AddRow(url, "In Progress");
+                        string urlId = Guid.NewGuid().ToString();
+
+                        logsForm.AddRow(urlId, url, "In Progress");
 
                         var videoAdditionResult =
                             await PlaylistVideosHelper.GetPlaylistVideosHelper.
@@ -502,7 +507,8 @@ namespace Youtube_Playlist_Naukar_Windows
                             newVideos.Add(videoAdded);
                         }
 
-                        logsForm.UpdateRow(url, message);
+                        logsForm.UpdateRow(urlId, url, message,
+                            videoAdded != null);
                     }
                 }
 
