@@ -18,7 +18,17 @@ namespace Youtube_Playlist_Naukar_Windows
 
         private void okButton_Click(object sender, EventArgs e)
         {
+            DialogResult = DialogResult.None;
             VideoUrlOrUrls = inputVideoUrlBox.Text;
+
+            if (string.IsNullOrWhiteSpace(VideoUrlOrUrls))
+            {
+                urlValidator.Text = @"No input URL(s) provided.";
+            }
+            else
+            {
+                DialogResult = DialogResult.OK;
+            }
         }
     }
 }

@@ -471,45 +471,36 @@ namespace Youtube_Playlist_Naukar_Windows
                 string urlInput =
                     urlInputForm.VideoUrlOrUrls;
 
-                if (string.IsNullOrWhiteSpace(urlInput))
+                var logsForm = new LogsForm();
+
+                logsForm.Show(this);
+
+                List<string> urls =
+                    urlInput.Split('\n').
+                        Select(url => url.Trim()).ToList();
+
+                foreach (var url in urls)
                 {
-                    MessageBox.Show(@"No video URL provided.");
-                }
-                else
-                {
-                    var logsForm = new LogsForm();
-                    logsForm.Show(this);
+                    string urlId = Guid.NewGuid().ToString();
 
-                    List<string> urls =
-                        urlInput.Split('\n').
-                            Select(url => url.Trim()).ToList();
+                    logsForm.AddRow(urlId, url, "In Progress");
 
-                    List<string> urlIds =
-                        new List<string>();
+                    var videoAdditionResult =
+                        await PlaylistVideosHelper.GetPlaylistVideosHelper.
+                            AddVideoToPlayList(
+                                url, _playlist,
+                                _cancellationTokenSource.Token);
 
-                    foreach (var url in urls)
+                    var message = videoAdditionResult.Item1;
+                    var videoAdded = videoAdditionResult.Item2;
+
+                    if (videoAdded != null)
                     {
-                        string urlId = Guid.NewGuid().ToString();
-
-                        logsForm.AddRow(urlId, url, "In Progress");
-
-                        var videoAdditionResult =
-                            await PlaylistVideosHelper.GetPlaylistVideosHelper.
-                                AddVideoToPlayList(
-                                    url, _playlist,
-                                    _cancellationTokenSource.Token);
-
-                        var message = videoAdditionResult.Item1;
-                        var videoAdded = videoAdditionResult.Item2;
-
-                        if (videoAdded != null)
-                        {
-                            newVideos.Add(videoAdded);
-                        }
-
-                        logsForm.UpdateRow(urlId, url, message,
-                            videoAdded != null);
+                        newVideos.Add(videoAdded);
                     }
+
+                    logsForm.UpdateRow(urlId, url, message,
+                        videoAdded != null);
                 }
 
                 urlInputForm.Dispose();

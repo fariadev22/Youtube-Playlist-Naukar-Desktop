@@ -501,7 +501,8 @@ namespace Youtube_Playlist_Naukar_Windows
         private async void AddContributorPlaylistButton_Click(
             object sender, EventArgs e)
         {
-            var urlInputForm = new AddPlaylistForm();
+            var urlInputForm = new AddPlaylistForm(
+                _userContributorPlaylists);
             var dialogResult =
                 urlInputForm.ShowDialog(this);
 
@@ -510,48 +511,28 @@ namespace Youtube_Playlist_Naukar_Windows
                 string urlInput =
                     urlInputForm.PlaylistUrlFromUser;
 
-                if (string.IsNullOrWhiteSpace(urlInput))
+                CommonUtilities.TryGetPlaylistIdFromYoutubeUrl(
+                        urlInput, out string playListId);
+
+                var added =
+                    await PlaylistHelper.
+                        GetPlaylistHelper.AddContributorPlaylist(
+                            playListId,
+                            _cancellationTokenSource.Token);
+
+                if (added)
                 {
-                    MessageBox.Show(@"No URL provided.");
+                    LoadContributorPlaylistsUi();
+
+                    MessageBox.Show(@"Playlist added successfully.");
                 }
-                else
+                else if (!_cancellationTokenSource.
+                    IsCancellationRequested)
                 {
-                    bool isValidUrl =
-                        CommonUtilities.TryGetPlaylistIdFromYoutubeUrl(
-                            urlInput, out string playListId);
-
-                    if (!isValidUrl)
-                    {
-                        MessageBox.Show(@"URL is invalid.");
-                    }
-                    else if (_userContributorPlaylists.ContainsKey(
-                        playListId))
-                    {
-                        MessageBox.Show(@"Playlist already exists.");
-                    }
-                    else
-                    {
-                        var added =
-                            await PlaylistHelper.
-                                GetPlaylistHelper.AddContributorPlaylist(
-                                    playListId,
-                                    _cancellationTokenSource.Token);
-
-                        if (added)
-                        {
-                            LoadContributorPlaylistsUi();
-
-                            MessageBox.Show(@"Playlist added successfully.");
-                        }
-                        else if(!_cancellationTokenSource.
-                                IsCancellationRequested)
-                        {
-                            MessageBox.Show(@"An error occurred while trying to " +
-                                            @"add the new playlist entry.");
-                        }
-                    }
+                    MessageBox.Show(@"An error occurred while trying to " +
+                                    @"add the new playlist entry.");
                 }
-
+                
                 urlInputForm.Dispose();
             }
             else if (dialogResult == DialogResult.Cancel)

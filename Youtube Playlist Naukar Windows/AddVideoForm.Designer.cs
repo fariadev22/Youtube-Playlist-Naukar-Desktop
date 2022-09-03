@@ -34,12 +34,13 @@ namespace Youtube_Playlist_Naukar_Windows
             this.okButton = new System.Windows.Forms.Button();
             this.inputVideoUrlBox = new System.Windows.Forms.TextBox();
             this.addVideoLabel = new System.Windows.Forms.Label();
+            this.urlValidator = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // cancelButton
             // 
             this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.cancelButton.Location = new System.Drawing.Point(183, 364);
+            this.cancelButton.Location = new System.Drawing.Point(191, 372);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(112, 34);
             this.cancelButton.TabIndex = 0;
@@ -49,7 +50,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // okButton
             // 
             this.okButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.okButton.Location = new System.Drawing.Point(418, 364);
+            this.okButton.Location = new System.Drawing.Point(426, 372);
             this.okButton.Name = "okButton";
             this.okButton.Size = new System.Drawing.Size(112, 34);
             this.okButton.TabIndex = 1;
@@ -82,11 +83,21 @@ namespace Youtube_Playlist_Naukar_Windows
             this.addVideoLabel.Text = "Enter URL of YouTube video you want to add to your playlist. To add multiple vide" +
     "os, you can add multiple YouTube video URLs in separate lines.";
             // 
+            // urlValidator
+            // 
+            this.urlValidator.AutoSize = true;
+            this.urlValidator.ForeColor = System.Drawing.Color.Red;
+            this.urlValidator.Location = new System.Drawing.Point(52, 335);
+            this.urlValidator.Name = "urlValidator";
+            this.urlValidator.Size = new System.Drawing.Size(0, 25);
+            this.urlValidator.TabIndex = 4;
+            // 
             // AddVideoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(728, 424);
+            this.Controls.Add(this.urlValidator);
             this.Controls.Add(this.addVideoLabel);
             this.Controls.Add(this.inputVideoUrlBox);
             this.Controls.Add(this.okButton);
@@ -108,5 +119,6 @@ namespace Youtube_Playlist_Naukar_Windows
         private System.Windows.Forms.Button okButton;
         private System.Windows.Forms.TextBox inputVideoUrlBox;
         private System.Windows.Forms.Label addVideoLabel;
+        private System.Windows.Forms.Label urlValidator;
     }
 }

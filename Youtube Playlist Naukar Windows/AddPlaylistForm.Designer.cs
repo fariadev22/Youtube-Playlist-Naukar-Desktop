@@ -35,6 +35,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.urlBox = new System.Windows.Forms.TextBox();
             this.okButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
+            this.urlValidator = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // Message
@@ -80,11 +81,21 @@ namespace Youtube_Playlist_Naukar_Windows
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             // 
+            // urlValidator
+            // 
+            this.urlValidator.AutoSize = true;
+            this.urlValidator.ForeColor = System.Drawing.Color.Red;
+            this.urlValidator.Location = new System.Drawing.Point(43, 172);
+            this.urlValidator.Name = "urlValidator";
+            this.urlValidator.Size = new System.Drawing.Size(0, 25);
+            this.urlValidator.TabIndex = 5;
+            // 
             // AddPlaylistForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(730, 275);
+            this.Controls.Add(this.urlValidator);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.okButton);
             this.Controls.Add(this.urlBox);
@@ -107,5 +118,6 @@ namespace Youtube_Playlist_Naukar_Windows
         private System.Windows.Forms.TextBox urlBox;
         private System.Windows.Forms.Button okButton;
         private System.Windows.Forms.Button cancelButton;
+        private System.Windows.Forms.Label urlValidator;
     }
 }
