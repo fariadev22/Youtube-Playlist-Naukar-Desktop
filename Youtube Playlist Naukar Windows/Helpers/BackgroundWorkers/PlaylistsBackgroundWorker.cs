@@ -40,10 +40,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers.BackgroundWorkers
 
             _backgroundWorker.RunWorkerAsync(
                 (userPlaylists, isUserOwnedPlaylists));
-
-            _backgroundWorker.RunWorkerCompleted +=
-                RemoveBackgroundWorker;
         }
+
         public override void CancelBackgroundWork()
         {
             _backgroundWorker?.CancelAsync();
@@ -51,12 +49,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers.BackgroundWorkers
 
         public bool IsBackgroundWorkCancelled()
         {
-            if (_backgroundWorker == null)
-            {
-                return true;
-            }
-
-            if (_backgroundWorker.CancellationPending)
+            if (_backgroundWorker == null ||
+                _backgroundWorker.CancellationPending)
             {
                 return true;
             }
@@ -67,12 +61,6 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers.BackgroundWorkers
         public override bool IsBusy()
         {
             return _backgroundWorker?.IsBusy == true;
-        }
-
-        private void RemoveBackgroundWorker(
-            object sender, RunWorkerCompletedEventArgs e)
-        {
-            _backgroundWorker = null;
         }
     }
 }

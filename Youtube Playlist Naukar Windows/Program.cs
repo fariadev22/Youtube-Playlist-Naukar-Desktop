@@ -20,6 +20,9 @@ namespace Youtube_Playlist_Naukar_Windows
 
         private static void RunApplication()
         {
+            var backgroundManager =
+                BackgroundWorkersManager.GetBackgroundWorkerManager;
+
             var loginForm = new LoginForm();
             Application.Run(loginForm);
 
@@ -37,8 +40,7 @@ namespace Youtube_Playlist_Naukar_Windows
             }
 
             //cancel background tasks and wait for them to end
-            BackgroundWorkersManager.GetBackgroundWorkerManager
-                .CancelAllBackgroundWork();
+            backgroundManager.CancelAllBackgroundWork();
 
             Application.Exit();
         }
