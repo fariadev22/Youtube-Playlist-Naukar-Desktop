@@ -32,7 +32,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 UpdateActiveUserSession(
                     availableUserSessions);
 
-            while (!loginSuccessful)
+            while (!loginSuccessful &&
+                   !cancellationToken.IsCancellationRequested)
             {
                 if (activeUserSession != null)
                 {

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Apis.YouTube.v3.Data;
+using Youtube_Playlist_Naukar_Windows.Helpers.BackgroundWorkers;
 using Youtube_Playlist_Naukar_Windows.Models;
 using Youtube_Playlist_Naukar_Windows.Utilities;
 
@@ -63,6 +64,10 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             _loginHelper = new LoginHelper(
                 _applicationDirectory,
                 Constants.ApplicationName);
+
+            SessionStorageBackgroundWorker.
+                GetSessionStorageBackgroundWorker.
+                SetApplicationDirectory(_applicationDirectory);
         }
 
         #region Users
@@ -77,8 +82,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             //no session activated
             if (_activeUserSession == null)
             {
-                throw new ArgumentException(
-                    "Error starting a user session.");
+                return null;
             }
 
             string activeUserSessionDirectoryPath =
@@ -203,7 +207,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     }
                     else
                     {
-                        Console.WriteLine("Playlist already added.");
+                        Console.WriteLine(@"Playlist already added.");
                     }
                 }
             }
@@ -271,7 +275,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 }
                 else
                 {
-                    Console.WriteLine("Playlist already added.");
+                    Console.WriteLine(@"Playlist already added.");
                 }
             }
 
@@ -343,14 +347,11 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             List<UserPlayList> userPlaylists,
             bool isUserOwnedPlaylists)
         {
-            BackgroundWorker imageBackgroundDownloadWorker =
-                new BackgroundWorker();
-
-            imageBackgroundDownloadWorker.DoWork +=
-                DownloadPlaylistsThumbnailsToUserDirectory;
-
-            imageBackgroundDownloadWorker.RunWorkerAsync(
-                (userPlaylists, isUserOwnedPlaylists));
+            PlaylistsBackgroundWorker.GetPlaylistsBackgroundWorker.
+                RunPlaylistsBackgroundWorker(
+                    DownloadPlaylistsThumbnailsToUserDirectory,
+                    userPlaylists,
+                    isUserOwnedPlaylists);
         }
 
         #endregion
@@ -488,23 +489,15 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             string playlistId,
             List<UserPlayListVideo> playlistVideos)
         {
-            BackgroundWorker imageBackgroundDownloadWorker =
-                new BackgroundWorker();
-
-            imageBackgroundDownloadWorker.DoWork +=
-                DownloadPlaylistVideosThumbnailsToUserDirectory;
-
-            imageBackgroundDownloadWorker.
-                WorkerSupportsCancellation = true;
-
-            PlaylistBackgroundWorkerManager.GetBackgroundWorkerManager.
+            PlaylistBackgroundWorker.GetPlaylistBackgroundWorker.
                 AddAndStartBackgroundWorker(
                     playlistId,
                     new PlaylistBackgroundWorkerData
                     {
-                        BackgroundWorker = imageBackgroundDownloadWorker,
                         PlaylistId = playlistId,
-                        UserPlaylistVideos = playlistVideos
+                        UserPlaylistVideos = playlistVideos,
+                        PlaylistWorkHander = 
+                            DownloadPlaylistVideosThumbnailsToUserDirectory
                     });
         }
 
@@ -574,6 +567,12 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     continue;
                 }
 
+                if (PlaylistsBackgroundWorker.
+                    GetPlaylistsBackgroundWorker.IsBackgroundWorkCancelled())
+                {
+                    break;
+                }
+
                 if (!userPlaylist.Thumbnail.IsDownloaded ||
                     !File.Exists(
                         directoryPath + "/" + 
@@ -610,6 +609,9 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             (string, List<UserPlayListVideo>) userPlaylistVideosRequest =
                 ((string, List<UserPlayListVideo>)) e.Argument;
 
+            string playlistId =
+                userPlaylistVideosRequest.Item1;
+
             List<UserPlayListVideo> userPlaylistVideos =
                 userPlaylistVideosRequest.Item2;
 
@@ -628,20 +630,17 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 {
                     continue;
                 }
-
-                var backgroundWorkerState =
-                    PlaylistBackgroundWorkerManager.GetBackgroundWorkerManager.
-                        GetActiveBackgroundWorker(
-                            userPlaylistVideosRequest.Item1);
-
-                if (backgroundWorkerState != null &&
-                    backgroundWorkerState.BackgroundWorker.CancellationPending)
+                
+                if (PlaylistBackgroundWorker.GetPlaylistBackgroundWorker.
+                    IsBackgroundWorkForPlaylistCancelled(
+                        playlistId))
                 {
                     break;
                 }
 
                 if (!userPlaylistVideo.Thumbnail.IsDownloaded ||
-                    !File.Exists(directoryPath + "/" +
+                    !File.Exists(
+                        directoryPath + "/" +
                         userPlaylistVideo.Thumbnail.LocalPathFromUserDirectory))
                 {
                     CommonUtilities.DownloadImageToUserDirectory(
@@ -660,7 +659,7 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                         PlaylistVideoThumbnailUpdated(null,
                             new PlaylistVideoThumbnailUpdatedEventArgs
                             {
-                                PlaylistId = userPlaylistVideosRequest.Item1,
+                                PlaylistId = playlistId,
                                 VideoId = userPlaylistVideo.UniqueVideoIdInPlaylist,
                                 PlaylistVideoImagePathFromCustomerDirectory = 
                                     userPlaylistVideo.Thumbnail.
@@ -674,16 +673,14 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 }
             }
 
-            //download task completed or stopped midway
-            PlaylistBackgroundWorkerManager.GetBackgroundWorkerManager.
-                RemoveActiveBackgroundWorkerForPlaylistId(
-                userPlaylistVideosRequest.Item1);
+            e.Result = playlistId;
         }
 
         private void SaveSession()
         {
-            SessionStorageUtilities.SaveSessionsData(_userSessions,
-                _applicationDirectory);
+            SessionStorageBackgroundWorker.
+                GetSessionStorageBackgroundWorker.UpdateUserSessions(
+                    _userSessions);
         }
 
         #endregion

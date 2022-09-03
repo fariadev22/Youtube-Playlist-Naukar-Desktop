@@ -1,5 +1,6 @@
 using System;
 using System.Windows.Forms;
+using Youtube_Playlist_Naukar_Windows.Helpers.BackgroundWorkers;
 
 namespace Youtube_Playlist_Naukar_Windows
 {
@@ -34,7 +35,11 @@ namespace Youtube_Playlist_Naukar_Windows
                     RunApplication();
                 }
             }
-            
+
+            //cancel background tasks and wait for them to end
+            BackgroundWorkersManager.GetBackgroundWorkerManager
+                .CancelAllBackgroundWork();
+
             Application.Exit();
         }
     }

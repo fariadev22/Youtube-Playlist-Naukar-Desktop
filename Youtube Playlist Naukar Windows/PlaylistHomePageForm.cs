@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Youtube_Playlist_Naukar_Windows.Helpers;
+using Youtube_Playlist_Naukar_Windows.Helpers.BackgroundWorkers;
 using Youtube_Playlist_Naukar_Windows.Models;
 using Youtube_Playlist_Naukar_Windows.Utilities;
 
@@ -83,7 +84,7 @@ namespace Youtube_Playlist_Naukar_Windows
             FormClosingEventArgs e)
         {
             base.OnFormClosing(e);
-            PlaylistBackgroundWorkerManager.GetBackgroundWorkerManager.
+            PlaylistBackgroundWorker.GetPlaylistBackgroundWorker.
                 CancelBackgroundWorkerForPlaylistId(_playlist.Id);
             _playlist = null;
             _activeUserSession = null;

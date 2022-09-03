@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
@@ -26,21 +27,28 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
             string tokenStorageDirectory,
             CancellationToken cancellationToken)
         {
-            UserCredential credential;
+            UserCredential credential = null;
 
             using (var stream = new FileStream(
                 "client_secrets.json", FileMode.Open, FileAccess.Read))
             {
-                credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
-                    GoogleClientSecrets.FromStream(stream).Secrets,
-                    new[]
-                    {
-                        YouTubeService.Scope.Youtube,
-                        GmailService.Scope.GmailMetadata
-                    },
-                    userIdForTokenStorage,
-                    cancellationToken,
-                    new FileDataStore(tokenStorageDirectory));
+                try
+                {
+                    credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
+                        GoogleClientSecrets.FromStream(stream).Secrets,
+                        new[]
+                        {
+                            YouTubeService.Scope.Youtube,
+                            GmailService.Scope.GmailMetadata
+                        },
+                        userIdForTokenStorage,
+                        cancellationToken,
+                        new FileDataStore(tokenStorageDirectory));
+                }
+                catch
+                {
+                    //
+                }
             }
 
             return credential;

@@ -10,5 +10,7 @@ namespace Youtube_Playlist_Naukar_Windows.Models
         public List<UserPlayListVideo> UserPlaylistVideos { get; set; }
 
         public BackgroundWorker BackgroundWorker { get; set; }
+
+        public DoWorkEventHandler PlaylistWorkHander { get; set; }
     }
 }

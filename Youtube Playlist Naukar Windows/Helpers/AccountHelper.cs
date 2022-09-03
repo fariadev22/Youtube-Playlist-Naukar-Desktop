@@ -84,6 +84,11 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 await SessionStorageManager.GetSessionManager
                     .ChangeSession(emailAddress, cancellationToken);
 
+            if (_activeUserSession == null)
+            {
+                return (false, "Login failed.");
+            }
+
             return await TryOpenUserAccount(
                 cancellationToken, 
                 _activeUserSession);
