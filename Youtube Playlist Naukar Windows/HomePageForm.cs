@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -86,8 +87,6 @@ namespace Youtube_Playlist_Naukar_Windows
         {
             LoggerLabel.Text = @"Loading playlists....";
 
-            LoggerLabel.ForeColor = Color.DodgerBlue;
-
             //load user owned playlists data from api
             await PlaylistHelper.GetPlaylistHelper
                 .LoadUserOwnedPlaylists(
@@ -138,8 +137,7 @@ namespace Youtube_Playlist_Naukar_Windows
         private async Task RefreshPlaylists()
         {
             LoggerLabel.Text = @"Refreshing....";
-            LoggerLabel.ForeColor = Color.DodgerBlue;
-
+            
             await PlaylistHelper.GetPlaylistHelper
                 .RefreshUserOwnedPlaylists(
                     _youtubeChannelId,
@@ -294,7 +292,9 @@ namespace Youtube_Playlist_Naukar_Windows
                 selectedPlaylist?.Description ?? "-";
             descriptionValue.Text =
                 description.Length > 100
-                    ? description.Substring(0, 100) + "..."
+                    ? Regex.Replace(description, 
+                        @"\t|\n|\r", "").Substring(0, 100) + 
+                      "..."
                     : description;
             if (!string.IsNullOrWhiteSpace(description))
             {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -95,7 +96,6 @@ namespace Youtube_Playlist_Naukar_Windows
 
         private async Task LoadPlaylistVideos()
         {
-            MessageLogger.ForeColor = Color.DodgerBlue;
             MessageLogger.Text = @"Loading videos...";
 
             addVideosButton.Enabled = false;
@@ -282,7 +282,9 @@ namespace Youtube_Playlist_Naukar_Windows
                 selectedVideo?.Description ?? "-";
             descriptionValue.Text =
                 description.Length > 100
-                    ? description.Substring(0, 100) + "..."
+                    ? Regex.Replace(description,
+                          @"\t|\n|\r", "").Substring(0, 100) +
+                      "..."
                     : description;
             if (!string.IsNullOrWhiteSpace(description))
             {
@@ -601,7 +603,6 @@ namespace Youtube_Playlist_Naukar_Windows
 
                     if (result == DialogResult.Yes)
                     {
-                        MessageLogger.ForeColor = Color.DodgerBlue;
                         MessageLogger.Text = @"Deleting video...";
 
                         var videoToRemove =

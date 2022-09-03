@@ -132,8 +132,9 @@ namespace Youtube_Playlist_Naukar_Windows
             // MessageLogger
             // 
             this.MessageLogger.AutoSize = true;
+            this.MessageLogger.BackColor = System.Drawing.Color.Brown;
             this.MessageLogger.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.MessageLogger.ForeColor = System.Drawing.SystemColors.Highlight;
+            this.MessageLogger.ForeColor = System.Drawing.SystemColors.HighlightText;
             this.MessageLogger.Location = new System.Drawing.Point(973, 506);
             this.MessageLogger.Name = "MessageLogger";
             this.MessageLogger.Size = new System.Drawing.Size(19, 25);

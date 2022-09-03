@@ -191,9 +191,9 @@ namespace Youtube_Playlist_Naukar_Windows
             this.choosePlaylistLabel.AutoSize = true;
             this.choosePlaylistLabel.Location = new System.Drawing.Point(16, 77);
             this.choosePlaylistLabel.Name = "choosePlaylistLabel";
-            this.choosePlaylistLabel.Size = new System.Drawing.Size(241, 25);
+            this.choosePlaylistLabel.Size = new System.Drawing.Size(442, 25);
             this.choosePlaylistLabel.TabIndex = 3;
-            this.choosePlaylistLabel.Text = "Choose a playlist to manage:";
+            this.choosePlaylistLabel.Text = "Select a playlist to view details. Double click to open it:";
             // 
             // menuStrip
             // 
@@ -272,6 +272,8 @@ namespace Youtube_Playlist_Naukar_Windows
             // LoggerLabel
             // 
             this.LoggerLabel.AutoSize = true;
+            this.LoggerLabel.BackColor = System.Drawing.Color.Brown;
+            this.LoggerLabel.ForeColor = System.Drawing.SystemColors.HighlightText;
             this.LoggerLabel.Location = new System.Drawing.Point(516, 115);
             this.LoggerLabel.Name = "LoggerLabel";
             this.LoggerLabel.Size = new System.Drawing.Size(0, 25);
@@ -450,12 +452,12 @@ namespace Youtube_Playlist_Naukar_Windows
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1068, 794);
+            this.Controls.Add(this.LoggerLabel);
             this.Controls.Add(this.totalVideosLabel);
             this.Controls.Add(this.urlLabel);
             this.Controls.Add(this.titleLabel);
             this.Controls.Add(this.ownerLabel);
             this.Controls.Add(this.createdOnLabel);
-            this.Controls.Add(this.LoggerLabel);
             this.Controls.Add(this.choosePlaylistLabel);
             this.Controls.Add(this.refreshPlaylistsButton);
             this.Controls.Add(this.playlistsTabs);
