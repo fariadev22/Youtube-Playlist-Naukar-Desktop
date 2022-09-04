@@ -536,19 +536,45 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     ? playlistItemsVideoDuration[videoId]
                     : null;
 
+            var userPlaylistVideo =
+                UserPlayListVideo.ConvertPlayListItemToUserPlayListVideo(
+                    playListItem, duration);
+
             if (!userPlayList.PlayListVideos.ContainsKey(
                 playListItem.Id))
             {
                 userPlayList.PlayListVideos.Add(
                     playListItem.Id,
-                    UserPlayListVideo.ConvertPlayListItemToUserPlayListVideo(
-                        playListItem, duration));
+                    userPlaylistVideo);
             }
             else
             {
                 userPlayList.PlayListVideos[playListItem.Id]
-                    = UserPlayListVideo.ConvertPlayListItemToUserPlayListVideo(
-                        playListItem, duration);
+                    = userPlaylistVideo;
+            }
+
+            //it is null for deleted/private videos
+            if (userPlaylistVideo.PositionInPlayList == null)
+            {
+                var userPlaylistVideos =
+                    userPlayList.PlayListVideos.Values.ToList();
+
+                int currentVideoIndex = 
+                    userPlaylistVideos.IndexOf(userPlaylistVideo);
+
+                if (currentVideoIndex == 0)
+                {
+                    userPlaylistVideo.PositionInPlayList = 0;
+                }
+                else if (currentVideoIndex > 0 &&
+                         (currentVideoIndex - 1) > 0)
+                {
+                    userPlaylistVideo.PositionInPlayList =
+                        userPlaylistVideos.
+                            ElementAt(currentVideoIndex - 1)?.
+                            PositionInPlayList;
+                }
+                    
             }
 
             SaveSession();
