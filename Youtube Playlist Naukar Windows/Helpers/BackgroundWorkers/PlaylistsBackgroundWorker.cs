@@ -10,7 +10,9 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers.BackgroundWorkers
             BackgroundWorkerInstance =
                 new PlaylistsBackgroundWorker();
 
-        private BackgroundWorker _backgroundWorker;
+        private BackgroundWorker _ownedPlaylistsBackgroundWorker;
+
+        private BackgroundWorker _contributorPlaylistsBackgroundWorker;
 
         static PlaylistsBackgroundWorker()
         {
@@ -25,32 +27,57 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers.BackgroundWorkers
             }
         }
 
-        public void RunPlaylistsBackgroundWorker(
+        public void RunOwnedPlaylistsBackgroundWorker(
             DoWorkEventHandler workHandler,
-            List<UserPlayList> userPlaylists,
-            bool isUserOwnedPlaylists)
+            List<UserPlayList> userPlaylists)
         {
-            _backgroundWorker = new BackgroundWorker
+            _ownedPlaylistsBackgroundWorker = new BackgroundWorker
             {
                 WorkerSupportsCancellation = true
             };
 
-            _backgroundWorker.DoWork +=
+            _ownedPlaylistsBackgroundWorker.DoWork +=
                 workHandler;
 
-            _backgroundWorker.RunWorkerAsync(
-                (userPlaylists, isUserOwnedPlaylists));
+            _ownedPlaylistsBackgroundWorker.RunWorkerAsync(
+                (userPlaylists, true));
+
+            _ownedPlaylistsBackgroundWorker.RunWorkerCompleted +=
+                RemoveOwnedBackgroundWorkerForPlaylistId;
         }
 
-        public override void CancelBackgroundWork()
+        public void RunContributorPlaylistsBackgroundWorker(
+            DoWorkEventHandler workHandler,
+            List<UserPlayList> userPlaylists)
         {
-            _backgroundWorker?.CancelAsync();
+            _contributorPlaylistsBackgroundWorker = new BackgroundWorker
+            {
+                WorkerSupportsCancellation = true
+            };
+
+            _contributorPlaylistsBackgroundWorker.DoWork +=
+                workHandler;
+
+            _contributorPlaylistsBackgroundWorker.RunWorkerAsync(
+                (userPlaylists, false));
+
+            _contributorPlaylistsBackgroundWorker.RunWorkerCompleted +=
+                RemoveContributorBackgroundWorkerForPlaylistId;
         }
 
-        public bool IsBackgroundWorkCancelled()
+        public bool IsBackgroundWorkForPlaylistsCancelled(
+            bool areUserOwnedPlaylists)
         {
-            if (_backgroundWorker == null ||
-                _backgroundWorker.CancellationPending)
+            if (areUserOwnedPlaylists &&
+                (_ownedPlaylistsBackgroundWorker == null ||
+                 _ownedPlaylistsBackgroundWorker.CancellationPending))
+            {
+                return true;
+            }
+
+            if (!areUserOwnedPlaylists &&
+                (_contributorPlaylistsBackgroundWorker == null ||
+                _contributorPlaylistsBackgroundWorker.CancellationPending))
             {
                 return true;
             }
@@ -58,9 +85,29 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers.BackgroundWorkers
             return false;
         }
 
+        public override void CancelBackgroundWork()
+        {
+            _ownedPlaylistsBackgroundWorker?.CancelAsync();
+            _contributorPlaylistsBackgroundWorker?.CancelAsync();
+        }
+
         public override bool IsBusy()
         {
-            return _backgroundWorker?.IsBusy == true;
+            return 
+                _ownedPlaylistsBackgroundWorker?.IsBusy == true ||
+                _contributorPlaylistsBackgroundWorker?.IsBusy == true;
+        }
+
+        private void RemoveOwnedBackgroundWorkerForPlaylistId(
+            object sender, RunWorkerCompletedEventArgs e)
+        {
+            _ownedPlaylistsBackgroundWorker = null;
+        }
+
+        private void RemoveContributorBackgroundWorkerForPlaylistId(
+            object sender, RunWorkerCompletedEventArgs e)
+        {
+            _contributorPlaylistsBackgroundWorker = null;
         }
     }
 }

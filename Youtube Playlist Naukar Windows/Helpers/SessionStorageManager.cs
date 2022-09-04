@@ -350,11 +350,20 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             List<UserPlayList> userPlaylists,
             bool isUserOwnedPlaylists)
         {
-            PlaylistsBackgroundWorker.GetPlaylistsBackgroundWorker.
-                RunPlaylistsBackgroundWorker(
-                    DownloadPlaylistsThumbnailsToUserDirectory,
-                    userPlaylists,
-                    isUserOwnedPlaylists);
+            if (isUserOwnedPlaylists)
+            {
+                PlaylistsBackgroundWorker.GetPlaylistsBackgroundWorker.
+                    RunOwnedPlaylistsBackgroundWorker(
+                        DownloadPlaylistsThumbnailsToUserDirectory,
+                        userPlaylists);
+            }
+            else
+            {
+                PlaylistsBackgroundWorker.GetPlaylistsBackgroundWorker.
+                    RunContributorPlaylistsBackgroundWorker(
+                        DownloadPlaylistsThumbnailsToUserDirectory,
+                        userPlaylists);
+            }
         }
 
         #endregion
@@ -559,6 +568,9 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             var userPlaylists =
                 userPlaylistThumbnailsData.Item1;
 
+            var areUserOwnedPlaylists =
+                userPlaylistThumbnailsData.Item2;
+
             string directoryPath =
                 _activeUserSession.UserDirectory;
 
@@ -571,7 +583,9 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 }
 
                 if (PlaylistsBackgroundWorker.
-                    GetPlaylistsBackgroundWorker.IsBackgroundWorkCancelled())
+                    GetPlaylistsBackgroundWorker.
+                        IsBackgroundWorkForPlaylistsCancelled(
+                            areUserOwnedPlaylists))
                 {
                     break;
                 }
@@ -599,8 +613,8 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                             PlaylistImagePathFromCustomerDirectory =
                                 userPlaylist.Thumbnail.
                                     LocalPathFromUserDirectory,
-                            IsOwnerPlaylist = 
-                                userPlaylistThumbnailsData.Item2
+                            IsOwnerPlaylist =
+                                areUserOwnedPlaylists
                         });
                 }
             }
