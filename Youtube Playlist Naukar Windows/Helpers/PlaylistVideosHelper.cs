@@ -97,11 +97,24 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 userPlaylist.PlayListVideos ??
                 new Dictionary<string, UserPlayListVideo>();
 
-            var playlistVideosResult =
-                await ApiClient.GetApiClient.
-                    GetPlaylistVideosPartialData(
-                        userPlaylist, cancellationToken);
+            (List<PlaylistItem>, string) playlistVideosResult =
+                (null, null);
 
+            try
+            {
+                playlistVideosResult =
+                    await ApiClient.GetApiClient.
+                        GetPlaylistVideosPartialData(
+                            userPlaylist, cancellationToken);
+            }
+            catch
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+            }
+            
             var partialVideosData =
                 playlistVideosResult.Item1;
 
@@ -166,19 +179,29 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
                 if (idsOfVideosToLoad.Count > 0)
                 {
-                    newVideos =
-                        await ApiClient.GetApiClient
-                            .GetPlaylistVideos(
-                                idsOfVideosToLoad,
-                                cancellationToken);
+                    try
+                    {
+                        newVideos =
+                            await ApiClient.GetApiClient
+                                .GetPlaylistVideos(
+                                    idsOfVideosToLoad,
+                                    cancellationToken);
 
-                    videoDurations =
-                        await ApiClient.GetApiClient.GetVideosDuration(
-                            newVideos
-                                .Select(v =>
-                                    v.Snippet?.ResourceId?.VideoId)
-                                .ToList(),
-                            cancellationToken);
+                        videoDurations =
+                            await ApiClient.GetApiClient.GetVideosDuration(
+                                newVideos
+                                    .Select(v =>
+                                        v.Snippet?.ResourceId?.VideoId)
+                                    .ToList(),
+                                cancellationToken);
+                    }
+                    catch
+                    {
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            return;
+                        }
+                    }
                 }
 
                 SessionStorageManager.GetSessionManager.
@@ -247,6 +270,11 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             }
             catch
             {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return ("", null);
+                }
+
                 return ("Not added.", null);
             }
         }

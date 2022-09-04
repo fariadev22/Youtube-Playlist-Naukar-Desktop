@@ -50,8 +50,9 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     await ApiClient.GetApiClient.GetUserChannelId(
                         cancellationToken);
 
-                SessionStorageManager.GetSessionManager.SaveChannelIdInUserSession(
-                    channelId);
+                SessionStorageManager.GetSessionManager.
+                    SaveChannelIdInUserSession(
+                        channelId);
 
                 return (true, string.Empty);
             }

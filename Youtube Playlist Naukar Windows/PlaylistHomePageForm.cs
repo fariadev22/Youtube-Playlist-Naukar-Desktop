@@ -605,10 +605,22 @@ namespace Youtube_Playlist_Naukar_Windows
                         var videoToRemove =
                             _playlist.PlayListVideos[videoPlaylistId];
 
-                        await PlaylistVideosHelper.GetPlaylistVideosHelper
-                            .DeleteVideoFromPlaylist(_playlist,
-                                videoToRemove,
-                                _cancellationTokenSource.Token);
+                        bool videoDeleted = 
+                            await PlaylistVideosHelper.GetPlaylistVideosHelper
+                                .DeleteVideoFromPlaylist(_playlist,
+                                    videoToRemove,
+                                    _cancellationTokenSource.Token);
+
+                        if (_cancellationTokenSource.IsCancellationRequested)
+                        {
+                            return;
+                        }
+
+                        if (!videoDeleted)
+                        {
+                            MessageBox.Show(@"Video not removed.");
+                            return;
+                        }
 
                         //delete row tied to video
                         if (videoToRemove.PositionInPlayList != null &&

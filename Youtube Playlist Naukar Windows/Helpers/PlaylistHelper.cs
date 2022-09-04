@@ -101,10 +101,22 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             alreadyLoadedPlaylists ??= 
                 new Dictionary<string, UserPlayList>();
 
-            var playlistsResult =
-                await ApiClient.GetApiClient
-                    .GetPlayListsPartialData(channelId,
-                        cancellationToken);
+            (List<Playlist>, string) playlistsResult = (null, null);
+
+            try
+            {
+                playlistsResult =
+                    await ApiClient.GetApiClient
+                        .GetPlayListsPartialData(channelId,
+                            cancellationToken);
+            }
+            catch
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+            }
 
             var partialPlaylistsData =
                 playlistsResult.Item1;
@@ -165,11 +177,21 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
                 if (idsOfplaylistsToLoad.Count > 0)
                 {
-                    newPlaylists =
-                        await ApiClient.GetApiClient
-                            .GetPlayListsData(
-                                cancellationToken,
-                                idsOfplaylistsToLoad);
+                    try
+                    {
+                        newPlaylists =
+                            await ApiClient.GetApiClient
+                                .GetPlayListsData(
+                                    cancellationToken,
+                                    idsOfplaylistsToLoad);
+                    }
+                    catch
+                    {
+                        if(cancellationToken.IsCancellationRequested)
+                        {
+                            return;
+                        }
+                    }
                 }
 
                 SessionStorageManager.GetSessionManager.
@@ -244,12 +266,24 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             alreadyLoadedPlaylists ??=
                 new Dictionary<string, UserPlayList>();
 
-            var partialPlaylistsData =
-                await ApiClient.GetApiClient
-                    .GetPlayListsPartialData(
-                        alreadyLoadedPlaylists.Keys.ToList(),
-                        cancellationToken);
+            List<Playlist> partialPlaylistsData = null;
 
+            try
+            {
+                partialPlaylistsData =
+                    await ApiClient.GetApiClient
+                        .GetPlayListsPartialData(
+                            alreadyLoadedPlaylists.Keys.ToList(),
+                            cancellationToken);
+            }
+            catch
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+            }
+            
             //playlists do not exist anymore
             //so need to update data
             if (partialPlaylistsData == null ||
@@ -312,11 +346,21 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
             if (idsOfPlaylistsToLoad.Count > 0)
             {
-                playlists =
-                    await ApiClient.GetApiClient
-                        .GetPlayListsData(
-                            cancellationToken,
-                            idsOfPlaylistsToLoad);
+                try
+                {
+                    playlists =
+                        await ApiClient.GetApiClient
+                            .GetPlayListsData(
+                                cancellationToken,
+                                idsOfPlaylistsToLoad);
+                }
+                catch
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return;
+                    }
+                }
             }
 
             SessionStorageManager.GetSessionManager

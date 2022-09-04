@@ -128,15 +128,15 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                         _applicationName,
                         cancellationToken);
 
-            var existingSession =
-                availableUserSessions.Find(
-                    s => s.EmailAddress == emailAddress);
-
             if (string.IsNullOrWhiteSpace(emailAddress))
             {
                 Console.WriteLine("ERROR: Login for new account failed.");
                 return null;
             }
+
+            var existingSession =
+                availableUserSessions.Find(
+                    s => s.EmailAddress == emailAddress);
 
             var newSession =
                 CreateUserSession(emailAddress, credential, userId);
