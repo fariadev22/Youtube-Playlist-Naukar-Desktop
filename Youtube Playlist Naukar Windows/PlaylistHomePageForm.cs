@@ -249,17 +249,7 @@ namespace Youtube_Playlist_Naukar_Windows
             }
 
             playlistVideosDataView.DataSource = _dataTable;
-            playlistVideosDataView.Columns[0].Visible = false;
-            playlistVideosDataView.Columns[1].AutoSizeMode =
-                DataGridViewAutoSizeColumnMode.AllCells;
-            playlistVideosDataView.Columns[2].AutoSizeMode =
-                DataGridViewAutoSizeColumnMode.AllCells;
-            playlistVideosDataView.Columns[3].AutoSizeMode =
-                DataGridViewAutoSizeColumnMode.Fill;
-            playlistVideosDataView.Columns[4].AutoSizeMode =
-                DataGridViewAutoSizeColumnMode.AllCells;
-            playlistVideosDataView.Columns[5].AutoSizeMode =
-                DataGridViewAutoSizeColumnMode.AllCells;
+            AddDataGridViewConfigurations();
 
             if (newRows.Count > 0)
             {
@@ -273,6 +263,21 @@ namespace Youtube_Playlist_Naukar_Windows
                     }
                 }
             }
+        }
+
+        private void AddDataGridViewConfigurations()
+        {
+            playlistVideosDataView.Columns[0].Visible = false;
+            playlistVideosDataView.Columns[1].AutoSizeMode =
+                DataGridViewAutoSizeColumnMode.AllCells;
+            playlistVideosDataView.Columns[2].AutoSizeMode =
+                DataGridViewAutoSizeColumnMode.AllCells;
+            playlistVideosDataView.Columns[3].AutoSizeMode =
+                DataGridViewAutoSizeColumnMode.Fill;
+            playlistVideosDataView.Columns[4].AutoSizeMode =
+                DataGridViewAutoSizeColumnMode.AllCells;
+            playlistVideosDataView.Columns[5].AutoSizeMode =
+                DataGridViewAutoSizeColumnMode.AllCells;
         }
 
         private static DataTable InitializeVideoTable()
@@ -620,6 +625,9 @@ namespace Youtube_Playlist_Naukar_Windows
                 var newRows =
                     new SortedDictionary<long, DataRow>();
 
+                //helps improve performance
+                playlistVideosDataView.DataSource = null;
+
                 //update positions of existing video rows
                 foreach (DataRow row in _rows.Values)
                 {
@@ -664,6 +672,13 @@ namespace Youtube_Playlist_Naukar_Windows
 
                     ApplyFilterToRows();
                 }
+                else
+                {
+                    playlistVideosDataView.DataSource =
+                        (playlistVideosDataView.DataSource as DataTable)?.Clone();
+                }
+
+                AddDataGridViewConfigurations();
 
                 //download thumbnails of new videos
                 PlaylistVideosHelper.GetPlaylistVideosHelper
@@ -750,6 +765,9 @@ namespace Youtube_Playlist_Naukar_Windows
                         var newRows =
                             new SortedDictionary<long, DataRow>();
 
+                        //helps improve performance
+                        playlistVideosDataView.DataSource = null;
+
                         //update existing video positions
                         foreach (DataRow row in _rows.Values)
                         {
@@ -784,6 +802,13 @@ namespace Youtube_Playlist_Naukar_Windows
 
                             ApplyFilterToRows();
                         }
+                        else
+                        {
+                            playlistVideosDataView.DataSource =
+                                (playlistVideosDataView.DataSource as DataTable)?.Clone();
+                        }
+
+                        AddDataGridViewConfigurations();
 
                         MessageBox.Show(@"Video successfully " +
                                         @"removed from your YouTube account.");
