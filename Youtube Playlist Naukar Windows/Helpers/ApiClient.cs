@@ -412,24 +412,21 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         /// </summary>
         public async Task<(List<PlaylistItem>, string)> 
             GetPlaylistVideos(
-            UserPlayList userPlayList,
+            string playlistId,
             CancellationToken cancellationToken,
             string pageToken = null)
         {
             if (string.IsNullOrWhiteSpace(
-                userPlayList?.Id))
+                playlistId))
             {
-                return (new List<PlaylistItem>(), 
-                    string.Empty);
+                return (new List<PlaylistItem>(), string.Empty);
             }
-
-            string playlistId = userPlayList.Id;
 
             var playListItemsRequest = 
                 _youtubeService.PlaylistItems.List(
                     GetVideoRequestPartString());
 
-            playListItemsRequest.MaxResults = 500;
+            playListItemsRequest.MaxResults = 50;
             
             playListItemsRequest.Fields =
                 GetPlaylistItemRequestFields();
@@ -454,8 +451,6 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             List<PlaylistItem> playlistItems =
                 new List<PlaylistItem>();
 
-            string eTag = playListItemsResponse.ETag;
-
             if (playListItemsResponse.Items != null &&
                 playListItemsResponse.Items.Count > 0)
             {
@@ -463,32 +458,18 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     playListItemsResponse.Items);
             }
 
-            if (!string.IsNullOrWhiteSpace(
-                playListItemsResponse.NextPageToken))
-            {
-                var nextItemsResult =
-                    await GetPlaylistVideos(
-                        userPlayList,
-                        cancellationToken,
-                        playListItemsResponse.NextPageToken);
-
-                var nextItems = nextItemsResult.Item1;
-
-                if (nextItems != null &&
-                    nextItems.Count > 0)
-                {
-                    playlistItems.AddRange(nextItems);
-                }
-            }
-
-            return (playlistItems, eTag);
+            return (playlistItems, 
+                playListItemsResponse.NextPageToken);
         }
 
+        /// <summary>
+        /// Not recommended since this does not return
+        /// deleted or private videos.
+        /// </summary>
         public async Task<List<PlaylistItem>>
             GetPlaylistVideos(
                 List<string> allVideoIds,
-                CancellationToken cancellationToken,
-                string pageToken = null)
+                CancellationToken cancellationToken)
         {
             if (allVideoIds == null ||
                 allVideoIds.Count <= 0)
@@ -521,15 +502,10 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                 _youtubeService.PlaylistItems.List(
                     GetVideoRequestPartString());
             
-            playListItemsRequest.MaxResults = 500;
+            playListItemsRequest.MaxResults = 50;
 
             playListItemsRequest.Fields =
                 GetPlaylistItemRequestFields();
-
-            if (!string.IsNullOrWhiteSpace(pageToken))
-            {
-                playListItemsRequest.PageToken = pageToken;
-            }
 
             List<PlaylistItem> playlistItems =
                 new List<PlaylistItem>();
@@ -548,60 +524,27 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     await playListItemsRequest.ExecuteAsync(
                         cancellationToken);
 
-                if (playListItemsResponse != null)
+                if (playListItemsResponse?.Items != null &&
+                    playListItemsResponse.Items.Count > 0)
                 {
-                    if (playListItemsResponse.Items != null &&
-                        playListItemsResponse.Items.Count > 0)
-                    {
-                        playlistItems.AddRange(
-                            playListItemsResponse.Items);
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(
-                        playListItemsResponse.NextPageToken))
-                    {
-                        var nextItems =
-                            await GetPlaylistVideos(
-                                videoIds,
-                                cancellationToken,
-                                playListItemsResponse.NextPageToken);
-
-                        if (nextItems != null &&
-                            nextItems.Count > 0)
-                        {
-                            playlistItems.AddRange(nextItems);
-                        }
-                    }
+                    playlistItems.AddRange(
+                        playListItemsResponse.Items);
                 }
             }
 
             return playlistItems;
         }
 
-        public async Task<(List<PlaylistItem>, string)>
-            GetPlaylistVideosPartialData(
-            UserPlayList userPlayList,
-            CancellationToken cancellationToken,
-            string pageToken = null)
+        public async Task<string>
+            GetPlaylistVideosETag(string userPlayListId,
+                CancellationToken cancellationToken)
         {
-            List<PlaylistItem> playlistItems =
-                new List<PlaylistItem>();
-
-            //part string needs to be same as in 
-            //original request to get same etags
             var playListItemsRequest =
                 _youtubeService.PlaylistItems.List(
                     GetVideoRequestPartString());
-            playListItemsRequest.MaxResults = 500;
-            playListItemsRequest.PlaylistId = 
-                userPlayList.Id;
-            playListItemsRequest.Fields =
-                "nextPageToken, etag, items(id, etag)";
-
-            if (!string.IsNullOrWhiteSpace(pageToken))
-            {
-                playListItemsRequest.PageToken = pageToken;
-            }
+            playListItemsRequest.PlaylistId =
+                userPlayListId;
+            playListItemsRequest.Fields = "etag";
 
             var playListItemsResponse =
                 await playListItemsRequest.ExecuteAsync(
@@ -612,41 +555,15 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             if (playListItemsResponse != null)
             {
                 eTag = playListItemsResponse.ETag;
-
-                if (playListItemsResponse.Items != null &&
-                    playListItemsResponse.Items.Count > 0)
-                {
-                    playlistItems.AddRange(
-                        playListItemsResponse.Items);
-                }
-
-                if (!string.IsNullOrWhiteSpace(
-                    playListItemsResponse.NextPageToken))
-                {
-                    var nextItemsResult =
-                        await GetPlaylistVideosPartialData(
-                            userPlayList,
-                            cancellationToken,
-                            playListItemsResponse.NextPageToken);
-
-                    var nextItems = nextItemsResult.Item1;
-
-                    if (nextItems != null &&
-                        nextItems.Count > 0)
-                    {
-                        playlistItems.AddRange(nextItems);
-                    }
-                }
             }
 
-            return (playlistItems, eTag);
+            return eTag;
         }
 
         public async Task<Dictionary<string, string>>
             GetVideosDuration(
             List<string> videoIds,
-            CancellationToken cancellationToken,
-            string pageToken = null)
+            CancellationToken cancellationToken)
         {
             //key = video id
             //value = video duration
@@ -696,11 +613,6 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     string.Join(",", currentVideoIds);
                 videoRequest.Fields =
                     "items(id, contentDetails(duration))";
-
-                if (!string.IsNullOrWhiteSpace(pageToken))
-                {
-                    videoRequest.PageToken = pageToken;
-                }
 
                 var videoResponse =
                     await videoRequest.ExecuteAsync(

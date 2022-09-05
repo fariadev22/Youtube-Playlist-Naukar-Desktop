@@ -34,186 +34,200 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             }
         }
 
-        public async Task LoadPlaylistVideos(
-            UserPlayList userPlaylist,
+        public async Task<(string, bool)> GetPlaylistVideosEtag(
+            string existingETag,
+            string playlistId,
             CancellationToken cancellationToken)
         {
-            if (userPlaylist == null)
-            {
-                return;
-            }
-
             try
             {
-                //no videos loaded before
-                if (string.IsNullOrWhiteSpace(
-                        userPlaylist.PlaylistVideosETag) ||
-                    userPlaylist.PlayListVideos == null ||
-                    userPlaylist.PlayListVideos.Count <= 0)
+                string newEtag = 
+                    await ApiClient.GetApiClient.GetPlaylistVideosETag(
+                        playlistId, cancellationToken);
+
+                if (!string.IsNullOrWhiteSpace(newEtag) &&
+                    existingETag == newEtag)
                 {
-                    var playlistVideosResult =
-                        await ApiClient.GetApiClient.GetPlaylistVideos(
-                            userPlaylist, cancellationToken);
-
-                    var playlistVideos = playlistVideosResult.Item1;
-
-                    var etag =
-                        playlistVideosResult.Item2;
-
-                    if (playlistVideos != null)
-                    {
-                        var playlistVideosDurationResult =
-                            await ApiClient.GetApiClient.GetVideosDuration(
-                                playlistVideos
-                                    .Select(v => 
-                                        v.Snippet?.ResourceId?.VideoId)
-                                    .ToList(),
-                                cancellationToken);
-
-                        SessionStorageManager.GetSessionManager.
-                            SavePlaylistVideosToUserSessionPlaylist(
-                                userPlaylist, playlistVideos, 
-                                playlistVideosDurationResult,
-                                etag);
-                    }
+                    return (existingETag, true);
                 }
-                else
-                {
-                    await RefreshPlaylistVideos(userPlaylist,
-                        cancellationToken);
-                }
+
+                return (newEtag, false);
             }
             catch
             {
                 //
             }
+
+            return (existingETag, false);
         }
 
-        public async Task RefreshPlaylistVideos(
-            UserPlayList userPlaylist,
-            CancellationToken cancellationToken)
+        /// <summary>
+        /// Loads/refreshes playlist videos. Videos can
+        /// become private or have their duration changed (if it
+        /// was a live video) or have their description changed,
+        /// have their position in playlist changed.
+        /// </summary>
+        public async Task<(Dictionary<string, UserPlayListVideo>, string)>
+            LoadPlaylistVideos(
+                string playlistId,
+                CancellationToken cancellationToken,
+                Dictionary<string, UserPlayListVideo> 
+                    existingUserPlayListVideos,
+                string pageToken = null,
+                long? lastVideoPosition = null)
         {
-            var alreadyLoadedVideos =
-                userPlaylist.PlayListVideos ??
-                new Dictionary<string, UserPlayListVideo>();
-
-            (List<PlaylistItem>, string) playlistVideosResult =
-                (null, null);
+            if (string.IsNullOrWhiteSpace(playlistId))
+            {
+                return (existingUserPlayListVideos, pageToken);
+            }
 
             try
             {
-                playlistVideosResult =
-                    await ApiClient.GetApiClient.
-                        GetPlaylistVideosPartialData(
-                            userPlaylist, cancellationToken);
-            }
-            catch
-            {
+                //get videos data
+                var playlistVideosResult =
+                    await ApiClient.GetApiClient.GetPlaylistVideos(
+                        playlistId, cancellationToken, pageToken);
+
+                var playlistVideos =
+                    playlistVideosResult.Item1;
+
+                var nextPageToken =
+                    playlistVideosResult.Item2;
+
+                if (playlistVideos == null)
+                {
+                    return (new Dictionary<string, UserPlayListVideo>(),
+                        nextPageToken);
+                }
+
+                //get video durations data
+
+                Dictionary<string, string> playlistVideosDurationResult;
+
+                if (existingUserPlayListVideos != null)
+                {
+                    //get durations of only new or updated videos
+                    playlistVideosDurationResult =
+                        await ApiClient.GetApiClient.GetVideosDuration(
+                            playlistVideos
+                                .Where(v => !existingUserPlayListVideos.ContainsKey(v.Id) ||
+                                            existingUserPlayListVideos[v.Id]?.ETag != v.ETag)
+                                .Select(v =>
+                                    v.Snippet?.ResourceId?.VideoId)
+                                .ToList(),
+                            cancellationToken);
+                }
+                else
+                {
+                    //get durations data for all videos
+                    playlistVideosDurationResult =
+                        await ApiClient.GetApiClient.GetVideosDuration(
+                            playlistVideos
+                                .Select(v =>
+                                    v.Snippet?.ResourceId?.VideoId)
+                                .ToList(),
+                            cancellationToken);
+                }
+
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    return;
+                    return 
+                        (new Dictionary<string, UserPlayListVideo>(), string.Empty);
                 }
-            }
-            
-            var partialVideosData =
-                playlistVideosResult.Item1;
 
-            var eTag =
-                playlistVideosResult.Item2;
+                playlistVideosDurationResult ??=
+                    new Dictionary<string, string>();
 
-            //videos do not exist anymore
-            //so need to update data
-            if (partialVideosData == null ||
-                partialVideosData.Count <= 0)
-            {
-                userPlaylist.PlayListVideos?.Clear();
-
-                SessionStorageManager.GetSessionManager.
-                    SavePlaylistVideosToUserSessionPlaylist(
-                        userPlaylist, partialVideosData, 
-                        new Dictionary<string, string>(), eTag);
-                return;
-            }
-
-            //need to compare playlists data
-            if (eTag != userPlaylist.PlaylistVideosETag &&
-                !cancellationToken.IsCancellationRequested)
-            {
-                List<string> idsOfVideosToLoad =
-                    new List<string>();
+                //process the videos data received and convert to 
+                //user playlists videos
 
                 Dictionary<string, UserPlayListVideo>
-                    newVideosData =
+                    newUserPlaylistVideos =
                         new Dictionary<string, UserPlayListVideo>();
 
-                foreach (var partialVideo in
-                    partialVideosData)
+                foreach (var playlistVideo in playlistVideos)
                 {
-                    if (alreadyLoadedVideos
-                            .ContainsKey(partialVideo.Id) &&
-                        partialVideo.ETag ==
-                            alreadyLoadedVideos[partialVideo.Id]
-                                ?.ETag)
+                    //existing video entry hasn't changed
+                    if (existingUserPlayListVideos != null &&
+                        existingUserPlayListVideos.ContainsKey(playlistVideo.Id) &&
+                        existingUserPlayListVideos[playlistVideo.Id]?.ETag ==
+                            playlistVideo.ETag)
                     {
-                        //same video item so can be 
-                        //added directly
-                        newVideosData.Add(
-                            partialVideo.Id,
-                            alreadyLoadedVideos[partialVideo.Id]);
+                        newUserPlaylistVideos.Add(
+                            playlistVideo.Id,
+                            existingUserPlayListVideos[playlistVideo.Id]);
                     }
                     else
                     {
-                        idsOfVideosToLoad.Add(partialVideo.Id);
-                        newVideosData.Add(
-                            partialVideo.Id,
-                            new UserPlayListVideo
-                            {
-                                UniqueVideoIdInPlaylist = partialVideo.Id
-                            });
-                    }
-                }
+                        var userPlaylistVideo =
+                            GetUserPlaylistVideoFromPlaylistItem(
+                                playlistVideo,
+                                playlistVideosDurationResult);
 
-                //load new videos
-                List<PlaylistItem> newVideos = null;
-                Dictionary<string, string> videoDurations = null;
+                        newUserPlaylistVideos.Add(
+                            playlistVideo.Id,
+                            userPlaylistVideo);
 
-                if (idsOfVideosToLoad.Count > 0)
-                {
-                    try
-                    {
-                        newVideos =
-                            await ApiClient.GetApiClient
-                                .GetPlaylistVideos(
-                                    idsOfVideosToLoad,
-                                    cancellationToken);
-
-                        videoDurations =
-                            await ApiClient.GetApiClient.GetVideosDuration(
-                                newVideos
-                                    .Select(v =>
-                                        v.Snippet?.ResourceId?.VideoId)
-                                    .ToList(),
-                                cancellationToken);
-                    }
-                    catch
-                    {
-                        if (cancellationToken.IsCancellationRequested)
+                        //it is null for deleted/private videos
+                        if (userPlaylistVideo.PositionInPlayList == null)
                         {
-                            return;
+                            var userPlaylistVideos =
+                                newUserPlaylistVideos.Values.ToList();
+
+                            int currentVideoIndex =
+                                userPlaylistVideos.IndexOf(userPlaylistVideo);
+
+                            if (currentVideoIndex == 0)
+                            {
+                                if (lastVideoPosition != null)
+                                {
+                                    userPlaylistVideo.PositionInPlayList =
+                                        lastVideoPosition + 1;
+                                }
+                                else
+                                {
+                                    //no video before it
+                                    userPlaylistVideo.PositionInPlayList = 0;
+                                }
+                            }
+                            else if (currentVideoIndex > 0 &&
+                                     (currentVideoIndex - 1) >= 0)
+                            {
+                                userPlaylistVideo.PositionInPlayList =
+                                    userPlaylistVideos
+                                        .ElementAt(currentVideoIndex - 1)?
+                                        .PositionInPlayList + 1;
+                            }
                         }
                     }
                 }
 
-                SessionStorageManager.GetSessionManager.
-                    SavePlaylistVideosToUserSessionPlaylist(
-                        userPlaylist, 
-                        newVideosData, 
-                        newVideos ?? new List<PlaylistItem>(), 
-                        videoDurations ?? new Dictionary<string, string>(),
-                        eTag);
+                return (newUserPlaylistVideos, nextPageToken);
             }
+            catch
+            {
+                //
+            }
+
+            return (new Dictionary<string, UserPlayListVideo>(),
+                    string.Empty);
         }
 
+        public void SavePlaylist(
+            UserPlayList userPlaylist,
+            string newEtag)
+        {
+            SessionStorageManager.GetSessionManager.SavePlaylist(
+                userPlaylist, newEtag);
+        }
+
+        /// <summary>
+        /// Depending on the sort mechanism of the playlist, a
+        /// new video can either get added at the start of
+        /// playlist or end or any random user specified position.
+        /// This can result in changes to positions of other videos.
+        /// So we need to be vary of that.
+        /// </summary>
         public async Task<(string, UserPlayListVideo)> 
             AddVideoToPlayList(
             string youTubeUrl,
@@ -385,6 +399,24 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     DownloadPlaylistVideoThumbnailsInBackgroundAndNotifyMainThread(
                         playlistId, playlistVideos);
             }
+        }
+
+        private UserPlayListVideo GetUserPlaylistVideoFromPlaylistItem(
+            PlaylistItem playListItem, 
+            Dictionary<string, string> playlistItemsVideoDuration)
+        {
+            var videoId =
+                playListItem.Snippet?.ResourceId?.VideoId;
+
+            var duration =
+                !string.IsNullOrWhiteSpace(videoId) &&
+                playlistItemsVideoDuration?.ContainsKey(videoId) == true
+                    ? playlistItemsVideoDuration[videoId]
+                    : null;
+
+            return UserPlayListVideo.
+                ConvertPlayListItemToUserPlayListVideo(
+                    playListItem, duration);
         }
 
         private static void NotifyUiForVideoThumbnailChange(

@@ -77,6 +77,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.showPrivate = new System.Windows.Forms.RadioButton();
             this.showDuplicatesButton = new System.Windows.Forms.RadioButton();
             this.descriptionToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.videoLoadProgressBar = new System.Windows.Forms.ProgressBar();
             this.searchPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.searchIcon)).BeginInit();
             this.videoPreviewThumbnail.SuspendLayout();
@@ -132,10 +133,10 @@ namespace Youtube_Playlist_Naukar_Windows
             // MessageLogger
             // 
             this.MessageLogger.AutoSize = true;
-            this.MessageLogger.BackColor = System.Drawing.Color.Brown;
-            this.MessageLogger.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.MessageLogger.ForeColor = System.Drawing.SystemColors.HighlightText;
-            this.MessageLogger.Location = new System.Drawing.Point(973, 506);
+            this.MessageLogger.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
+            this.MessageLogger.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.MessageLogger.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.MessageLogger.Location = new System.Drawing.Point(986, 506);
             this.MessageLogger.Name = "MessageLogger";
             this.MessageLogger.Size = new System.Drawing.Size(19, 25);
             this.MessageLogger.TabIndex = 8;
@@ -453,7 +454,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.playlistNameLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.playlistNameLabel.AutoSize = true;
             this.playlistNameLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.playlistNameLabel.Location = new System.Drawing.Point(973, 417);
+            this.playlistNameLabel.Location = new System.Drawing.Point(979, 405);
             this.playlistNameLabel.Name = "playlistNameLabel";
             this.playlistNameLabel.Size = new System.Drawing.Size(133, 25);
             this.playlistNameLabel.TabIndex = 11;
@@ -464,7 +465,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.totalVideosLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.totalVideosLabel.AutoSize = true;
             this.totalVideosLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.totalVideosLabel.Location = new System.Drawing.Point(966, 341);
+            this.totalVideosLabel.Location = new System.Drawing.Point(979, 341);
             this.totalVideosLabel.Name = "totalVideosLabel";
             this.totalVideosLabel.Size = new System.Drawing.Size(121, 25);
             this.totalVideosLabel.TabIndex = 12;
@@ -492,7 +493,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             this.totalVideosValue.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.totalVideosValue.AutoSize = true;
-            this.totalVideosValue.Location = new System.Drawing.Point(973, 377);
+            this.totalVideosValue.Location = new System.Drawing.Point(979, 366);
             this.totalVideosValue.Name = "totalVideosValue";
             this.totalVideosValue.Size = new System.Drawing.Size(19, 25);
             this.totalVideosValue.TabIndex = 39;
@@ -502,7 +503,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             this.playlistNameValue.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.playlistNameValue.AutoSize = true;
-            this.playlistNameValue.Location = new System.Drawing.Point(975, 452);
+            this.playlistNameValue.Location = new System.Drawing.Point(979, 430);
             this.playlistNameValue.Name = "playlistNameValue";
             this.playlistNameValue.Size = new System.Drawing.Size(19, 25);
             this.playlistNameValue.TabIndex = 40;
@@ -571,11 +572,20 @@ namespace Youtube_Playlist_Naukar_Windows
             this.showDuplicatesButton.UseVisualStyleBackColor = true;
             this.showDuplicatesButton.CheckedChanged += new System.EventHandler(this.ShowDuplicatesButton_CheckedChanged);
             // 
+            // videoLoadProgressBar
+            // 
+            this.videoLoadProgressBar.Location = new System.Drawing.Point(980, 458);
+            this.videoLoadProgressBar.Name = "videoLoadProgressBar";
+            this.videoLoadProgressBar.Size = new System.Drawing.Size(150, 34);
+            this.videoLoadProgressBar.TabIndex = 45;
+            // 
             // PlaylistHomePageForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1159, 794);
+            this.Controls.Add(this.MessageLogger);
+            this.Controls.Add(this.videoLoadProgressBar);
             this.Controls.Add(this.filterBox);
             this.Controls.Add(this.returnHomeButton);
             this.Controls.Add(this.playlistNameValue);
@@ -584,7 +594,6 @@ namespace Youtube_Playlist_Naukar_Windows
             this.Controls.Add(this.totalVideosLabel);
             this.Controls.Add(this.playlistNameLabel);
             this.Controls.Add(this.videoPreviewThumbnail);
-            this.Controls.Add(this.MessageLogger);
             this.Controls.Add(this.addVideosButton);
             this.Controls.Add(this.refreshVideosButton);
             this.Controls.Add(this.searchBar);
@@ -650,5 +659,6 @@ namespace Youtube_Playlist_Naukar_Windows
         private System.Windows.Forms.RadioButton showPrivate;
         private System.Windows.Forms.RadioButton showDuplicatesButton;
         private System.Windows.Forms.ToolTip descriptionToolTip;
+        private ProgressBar videoLoadProgressBar;
     }
 }

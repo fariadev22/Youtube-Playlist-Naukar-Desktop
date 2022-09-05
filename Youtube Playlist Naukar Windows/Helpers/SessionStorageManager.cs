@@ -370,58 +370,21 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
         #region Playlist Videos
 
-        public void SavePlaylistVideosToUserSessionPlaylist(
-            UserPlayList userPlayList,
-            List<PlaylistItem> playlistItems,
-            Dictionary<string, string> playlistItemsVideoDuration,
-            string eTag)
-        {
-            if (userPlayList == null ||
-                playlistItems == null ||
-                playlistItems.Count <= 0)
-            {
-                return;
-            }
-
-            foreach (var playListItem in playlistItems)
-            {
-                SavePlaylistVideoToUserSessionPlaylist(userPlayList,
-                    playListItem, playlistItemsVideoDuration);
-            }
-
-            userPlayList.PlaylistVideosETag = eTag;
-
-            SaveSession();
-        }
-
-        public void SavePlaylistVideosToUserSessionPlaylist(
+        public void SavePlaylist(
             UserPlayList userPlaylist,
-            Dictionary<string, UserPlayListVideo> alreadyLoadedVideos,
-            List<PlaylistItem> newPlaylistItems,
-            Dictionary<string, string> newPlaylistItemsVideoDuration,
-            string etag)
+            string playlistVideosETag)
         {
-            alreadyLoadedVideos ??=
-                new Dictionary<string, UserPlayListVideo>();
-
-            userPlaylist.PlayListVideos = alreadyLoadedVideos;
-            userPlaylist.PlaylistVideosETag = etag;
-
-            if (newPlaylistItems != null &&
-                newPlaylistItems.Count > 0)
-            {
-                foreach (var playListItem in newPlaylistItems)
-                {
-                    SavePlaylistVideoToUserSessionPlaylist(
-                        userPlaylist,
-                        playListItem,
-                        newPlaylistItemsVideoDuration);
-                }
-            }
-
+            userPlaylist.PlaylistVideosETag = playlistVideosETag;
             SaveSession();
         }
 
+        /// <summary>
+        /// Depending on the sort mechanism of the playlist, a
+        /// new video can either get added at the start of
+        /// playlist or end or any random user specified position.
+        /// This can result in changes to positions of other videos.
+        /// So we need to be vary of that.
+        /// </summary>
         public void AddNewVideoToUserSessionPlaylist(
             UserPlayList userPlayList,
             PlaylistItem playListItem,

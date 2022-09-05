@@ -37,6 +37,8 @@ namespace Youtube_Playlist_Naukar_Windows
 
         private DataTable _dataTable;
 
+        private bool _dataTableLoaded;
+
         private VideoFilter _activeVideoFilter =
             VideoFilter.None;
 
@@ -53,6 +55,7 @@ namespace Youtube_Playlist_Naukar_Windows
             _defaultImage =
                 new Bitmap(Image.FromFile("default_image.png"),
                     VideoThumbnailWidth, VideoThumbnailHeight);
+            _dataTable = InitializeVideoTable();
 
             PlaylistVideosHelper.VideoThumbnailReady +=
                 UpdatePlaylistVideoThumbnail;
@@ -96,24 +99,122 @@ namespace Youtube_Playlist_Naukar_Windows
 
         private async Task LoadPlaylistVideos()
         {
-            MessageLogger.Text = @"Loading videos...";
+            MessageLogger.Text = @"Loading...";
 
+            //disable user controls
             addVideosButton.Enabled = false;
             refreshVideosButton.Enabled = false;
             deleteVideoButton.Enabled = false;
             filterBox.Enabled = false;
             searchBar.Enabled = false;
 
-            await PlaylistVideosHelper.GetPlaylistVideosHelper
-                .LoadPlaylistVideos(_playlist, 
-                    _cancellationTokenSource.Token);
+           var playlistETagResult =
+                await PlaylistVideosHelper.GetPlaylistVideosHelper.
+                    GetPlaylistVideosEtag(
+                        _playlist.PlaylistVideosETag, _playlist.Id,
+                        _cancellationTokenSource.Token);
 
-            if (!_cancellationTokenSource.
-                IsCancellationRequested)
+            //if etag is not equal or does not exist we need to 
+            //reload from scratch
+            var reloadPlaylists = !playlistETagResult.Item2;
+
+            if (reloadPlaylists)
             {
+                _dataTable.Clear();
+                _rows.Clear();
+
+                // Display the ProgressBar control.
+                videoLoadProgressBar.Visible = true;
+                videoLoadProgressBar.Minimum = 1;
+                // Set Maximum to the total number of videos to load
+                videoLoadProgressBar.Maximum =
+                    int.Parse(_playlist.TotalVideosInPlaylist.ToString());
+                // Set the initial value of the ProgressBar.
+                videoLoadProgressBar.Value = 1;
+                // Set the Step property to a value of 50 to represent
+                // each chunk of videos being loaded
+                videoLoadProgressBar.Step = 50;
+
+                var existingVideoData =
+                    _playlist.PlayListVideos;
+
+                string newEtag = playlistETagResult.Item1;
+
+                _playlist.PlayListVideos = 
+                    new Dictionary<string, UserPlayListVideo>();
+
+                long? lastVideoPosition = null;
+                string nextPageToken = null;
+
+                do
+                {
+                    var userPlaylistsVideosResult =
+                        await PlaylistVideosHelper.GetPlaylistVideosHelper
+                            .LoadPlaylistVideos(_playlist.Id,
+                                _cancellationTokenSource.Token,
+                                existingVideoData,
+                                nextPageToken,
+                                lastVideoPosition);
+
+                    Dictionary<string, UserPlayListVideo> 
+                        userPlaylistVideos =
+                            userPlaylistsVideosResult.Item1;
+
+                    nextPageToken =
+                        userPlaylistsVideosResult.Item2;
+
+                    if (userPlaylistVideos != null &&
+                        userPlaylistVideos.Count > 0)
+                    {
+                        foreach (var userPlaylistVideo in userPlaylistVideos)
+                        {
+                            _playlist.PlayListVideos.Add(
+                                userPlaylistVideo.Key,
+                                userPlaylistVideo.Value);
+
+                            lastVideoPosition =
+                                userPlaylistVideo.Value.PositionInPlayList;
+                        }
+
+                        if (!_cancellationTokenSource.
+                            IsCancellationRequested)
+                        {
+                            LoadPlaylistVideosUi(
+                                userPlaylistVideos.Values.ToList());
+                            UpdateTotalVideosCount();
+                        }
+                    }
+
+                    videoLoadProgressBar.PerformStep();
+
+                } while (!string.IsNullOrWhiteSpace(nextPageToken));
+
+                videoLoadProgressBar.Visible = false;
+
+                if(!_cancellationTokenSource.IsCancellationRequested)
+                {
+                    PlaylistVideosHelper.GetPlaylistVideosHelper.
+                        SavePlaylist(_playlist, newEtag);
+                }
+            }
+            else if(!_dataTableLoaded && 
+                    !_cancellationTokenSource.
+                        IsCancellationRequested)
+            {
+                _dataTable.Clear();
+                _rows.Clear();
+                videoLoadProgressBar.Visible = false;
                 LoadPlaylistVideosUi(
                     _playlist.PlayListVideos.Values.ToList());
                 UpdateTotalVideosCount();
+            }
+
+            if (!_cancellationTokenSource.IsCancellationRequested)
+            {
+                PlaylistVideosHelper.GetPlaylistVideosHelper
+                    .DownloadPlaylistVideoThumbnails(
+                        _playlist.Id,
+                        _playlist.PlayListVideos.Values.ToList());
             }
 
             addVideosButton.Enabled = true;
@@ -122,11 +223,59 @@ namespace Youtube_Playlist_Naukar_Windows
             filterBox.Enabled = true;
             searchBar.Enabled = true;
 
-            MessageLogger.Text = "";
+            MessageLogger.Text = @"";
+            _dataTableLoaded = true;
         }
-        
+
         private void LoadPlaylistVideosUi(
             List<UserPlayListVideo> playlistVideos)
+        {
+            List<DataRow> newRows = new List<DataRow>();
+
+            if (playlistVideos != null &&
+                playlistVideos.Count > 0)
+            {
+                foreach (var playlistVideo in
+                    playlistVideos)
+                {
+                    var newRow = _dataTable.NewRow();
+                    newRow.ItemArray = 
+                        GetRowFromRowValues(playlistVideo);
+
+                    newRows.Add(newRow);
+
+                    _dataTable.Rows.Add(newRow);
+                }
+            }
+
+            playlistVideosDataView.DataSource = _dataTable;
+            playlistVideosDataView.Columns[0].Visible = false;
+            playlistVideosDataView.Columns[1].AutoSizeMode =
+                DataGridViewAutoSizeColumnMode.AllCells;
+            playlistVideosDataView.Columns[2].AutoSizeMode =
+                DataGridViewAutoSizeColumnMode.AllCells;
+            playlistVideosDataView.Columns[3].AutoSizeMode =
+                DataGridViewAutoSizeColumnMode.Fill;
+            playlistVideosDataView.Columns[4].AutoSizeMode =
+                DataGridViewAutoSizeColumnMode.AllCells;
+            playlistVideosDataView.Columns[5].AutoSizeMode =
+                DataGridViewAutoSizeColumnMode.AllCells;
+
+            if (newRows.Count > 0)
+            {
+                foreach (var newTableRow in newRows)
+                {
+                    if (newTableRow?["Position"] != null &&
+                        long.TryParse(newTableRow["Position"].ToString(),
+                            out var position))
+                    {
+                        _rows.Add(position, newTableRow);
+                    }
+                }
+            }
+        }
+
+        private static DataTable InitializeVideoTable()
         {
             DataTable table = new DataTable();
 
@@ -142,52 +291,7 @@ namespace Youtube_Playlist_Naukar_Windows
                 new DataColumn("Duration", typeof(string)));
             table.Columns.Add(
                 new DataColumn("Owner Name", typeof(string)));
-
-            _dataTable = table;
-
-            if (playlistVideos != null &&
-                playlistVideos.Count > 0)
-            {
-                foreach (var playlistVideo in
-                    playlistVideos)
-                {
-                    table.Rows.Add(
-                        GetRowFromRowValues(playlistVideo));
-                }
-            }
-
-            playlistVideosDataView.DataSource = table;
-            playlistVideosDataView.Columns[0].Visible = false;
-            playlistVideosDataView.Columns[1].AutoSizeMode =
-                DataGridViewAutoSizeColumnMode.AllCells;
-            playlistVideosDataView.Columns[2].AutoSizeMode =
-                DataGridViewAutoSizeColumnMode.AllCells;
-            playlistVideosDataView.Columns[3].AutoSizeMode =
-                DataGridViewAutoSizeColumnMode.Fill;
-            playlistVideosDataView.Columns[4].AutoSizeMode =
-                DataGridViewAutoSizeColumnMode.AllCells;
-            playlistVideosDataView.Columns[5].AutoSizeMode =
-                DataGridViewAutoSizeColumnMode.AllCells;
-
-            _rows.Clear();
-
-            if (table.Rows.Count > 0)
-            {
-                foreach (var tableRow in 
-                    table.Rows.Cast<DataRow>())
-                {
-                    if (tableRow?["Position"] != null &&
-                        long.TryParse(tableRow["Position"].ToString(),
-                            out var position))
-                    {
-                        _rows.Add(position, tableRow);
-                    }
-                }
-            }
-
-            PlaylistVideosHelper.GetPlaylistVideosHelper
-                .DownloadPlaylistVideoThumbnails(
-                    _playlist.Id, playlistVideos);
+            return table;
         }
 
         private object[] GetRowFromRowValues(
@@ -573,8 +677,18 @@ namespace Youtube_Playlist_Naukar_Windows
         private async void RefreshVideos_Click(
             object sender, EventArgs e)
         {
+            if (_playlist == null ||
+                _cancellationTokenSource.IsCancellationRequested)
+            {
+                return;
+            }
+
+            PlaylistBackgroundWorker.GetPlaylistBackgroundWorker.
+                CancelBackgroundWorkerForPlaylistId(
+                    _playlist.Id);
             await LoadPlaylistVideos();
             ApplyFilterToRows();
+            MessageBox.Show(@"Playlist videos have been refreshed.");
         }
         
         private async void DeleteVideo_Click(
@@ -600,7 +714,8 @@ namespace Youtube_Playlist_Naukar_Windows
 
                     if (result == DialogResult.Yes)
                     {
-                        MessageLogger.Text = @"Deleting video...";
+                        MessageLogger.Text = @"Deleting...";
+                        videoLoadProgressBar.Visible = false;
 
                         var videoToRemove =
                             _playlist.PlayListVideos[videoPlaylistId];
