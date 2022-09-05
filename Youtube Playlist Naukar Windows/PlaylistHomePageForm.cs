@@ -878,6 +878,9 @@ namespace Youtube_Playlist_Naukar_Windows
                     r => r["VideoId"].ToString() == 
                         eventArgs.VideoId);
 
+            //helps improve performance
+            playlistVideosDataView.SuspendLayout();
+
             if (dataTableRow != null)
             {
                 //this alone won't update the Datagridview
@@ -897,6 +900,8 @@ namespace Youtube_Playlist_Naukar_Windows
             {
                 dataGridViewRow.SetValues(dataTableRow.ItemArray);
             }
+
+            playlistVideosDataView.ResumeLayout();
         }
 
         private void NoFilterButton_CheckedChanged(
