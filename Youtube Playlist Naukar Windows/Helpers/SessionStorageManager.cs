@@ -564,13 +564,13 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                         directoryPath + "/" + 
                         userPlaylist.Thumbnail.LocalPathFromUserDirectory))
                 {
-                    CommonUtilities.DownloadImageToUserDirectory(
+                    if (CommonUtilities.DownloadImageToUserDirectory(
                         directoryPath,
-                        userPlaylist.Thumbnail);
-
-                    userPlaylist.Thumbnail.IsDownloaded = true;
-
-                    SaveSession();
+                        userPlaylist.Thumbnail))
+                    {
+                        userPlaylist.Thumbnail.IsDownloaded = true;
+                        SaveSession();
+                    }
                 }
                 
                 if (PlaylistThumbnailUpdated != null)
@@ -629,13 +629,14 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                         directoryPath + "/" +
                         userPlaylistVideo.Thumbnail.LocalPathFromUserDirectory))
                 {
-                    CommonUtilities.DownloadImageToUserDirectory(
+                    if (CommonUtilities.DownloadImageToUserDirectory(
                         directoryPath,
-                        userPlaylistVideo.Thumbnail);
+                        userPlaylistVideo.Thumbnail))
+                    {
+                        userPlaylistVideo.Thumbnail.IsDownloaded = true;
 
-                    userPlaylistVideo.Thumbnail.IsDownloaded = true;
-
-                    SaveSession();
+                        SaveSession();
+                    }
                 }
 
                 try

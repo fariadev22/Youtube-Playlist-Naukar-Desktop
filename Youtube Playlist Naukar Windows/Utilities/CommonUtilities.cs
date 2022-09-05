@@ -29,7 +29,7 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
             }
         }
 
-        public static void DownloadImageToUserDirectory(
+        public static bool DownloadImageToUserDirectory(
             string userDirectoryPath,
             Thumbnail thumbnail)
         {
@@ -43,13 +43,15 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
                         thumbnail.Url,
                         userDirectoryPath + "/" +
                         thumbnail.LocalPathFromUserDirectory);
-                    break;
+                    return true;
                 }
                 catch
                 {
                     retries--;
                 }
             }
+
+            return false;
         }
 
         public static void ConvertLocalImageToBitmapAndStoreInImageList(
