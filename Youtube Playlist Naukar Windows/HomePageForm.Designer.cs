@@ -272,8 +272,8 @@ namespace Youtube_Playlist_Naukar_Windows
             // LoggerLabel
             // 
             this.LoggerLabel.AutoSize = true;
-            this.LoggerLabel.BackColor = System.Drawing.Color.Brown;
-            this.LoggerLabel.ForeColor = System.Drawing.SystemColors.HighlightText;
+            this.LoggerLabel.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
+            this.LoggerLabel.ForeColor = System.Drawing.Color.Black;
             this.LoggerLabel.Location = new System.Drawing.Point(516, 115);
             this.LoggerLabel.Name = "LoggerLabel";
             this.LoggerLabel.Size = new System.Drawing.Size(0, 25);

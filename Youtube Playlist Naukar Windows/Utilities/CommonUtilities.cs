@@ -33,11 +33,23 @@ namespace Youtube_Playlist_Naukar_Windows.Utilities
             string userDirectoryPath,
             Thumbnail thumbnail)
         {
-            WebClient webClient = new WebClient();
-            webClient.DownloadFile(
-                thumbnail.Url, 
-                userDirectoryPath + "/" + 
-                    thumbnail.LocalPathFromUserDirectory);
+            int retries = 3;
+            while (retries > 0)
+            {
+                try
+                {
+                    WebClient webClient = new WebClient();
+                    webClient.DownloadFile(
+                        thumbnail.Url,
+                        userDirectoryPath + "/" +
+                        thumbnail.LocalPathFromUserDirectory);
+                    break;
+                }
+                catch
+                {
+                    retries--;
+                }
+            }
         }
 
         public static void ConvertLocalImageToBitmapAndStoreInImageList(

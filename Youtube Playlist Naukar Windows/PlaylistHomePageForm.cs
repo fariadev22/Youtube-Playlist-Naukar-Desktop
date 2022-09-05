@@ -90,8 +90,6 @@ namespace Youtube_Playlist_Naukar_Windows
             base.OnFormClosing(e);
             PlaylistBackgroundWorker.GetPlaylistBackgroundWorker.
                 CancelBackgroundWorkerForPlaylistId(_playlist.Id);
-            _playlist = null;
-            _activeUserSession = null;
             _cancellationTokenSource.Cancel();
         }
 
@@ -116,9 +114,9 @@ namespace Youtube_Playlist_Naukar_Windows
 
             //if etag is not equal or does not exist we need to 
             //reload from scratch
-            var reloadPlaylists = !playlistETagResult.Item2;
+            var reloadPlaylist = !playlistETagResult.Item2;
 
-            if (reloadPlaylists)
+            if (reloadPlaylist)
             {
                 _dataTable.Clear();
                 _rows.Clear();
