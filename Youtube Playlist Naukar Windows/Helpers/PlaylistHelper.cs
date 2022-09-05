@@ -39,167 +39,107 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
         #region User Owned Playlists
 
-        public async Task LoadUserOwnedPlaylists(
+        public async Task<(string, bool, int?)> GetPlaylistsMetadata(
+            string existingETag,
             string channelId,
-            Dictionary<string, UserPlayList> alreadyLoadedPlaylists,
-            string alreadyLoadedPlaylistsEtag,
             CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(channelId))
-            {
-                return;
-            }
-
             try
             {
-                //playlists not loaded already
-                if(alreadyLoadedPlaylists == null ||
-                    alreadyLoadedPlaylists.Count <= 0 ||
-                    string.IsNullOrWhiteSpace(
-                        alreadyLoadedPlaylistsEtag))
-                {
-                    var playlistsResult =
-                        await ApiClient.GetApiClient.GetPlayListsData(
+                (int?, string) countAndEtag =
+                    await ApiClient.GetApiClient.
+                        GetUserOwnedPlayListsCountAndEtag(
                             cancellationToken,
                             channelId);
 
-                    var playlists =
-                        playlistsResult.Item1;
+                int? playlistsCount = countAndEtag.Item1;
+                string newEtag = countAndEtag.Item2;
 
-                    string eTag = playlistsResult.Item2;
-
-                    if (playlists == null ||
-                        playlists.Count <= 0)
-                    {
-                        return;
-                    }
-
-                    SessionStorageManager.GetSessionManager.
-                        SaveUserOwnedPlaylistsToUserSession(
-                            playlists, eTag);
-                }
-                else //playlists data already exists
+                if (!string.IsNullOrWhiteSpace(newEtag) &&
+                    existingETag == newEtag)
                 {
-                    await RefreshUserOwnedPlaylists(channelId,
-                        alreadyLoadedPlaylists, 
-                        alreadyLoadedPlaylistsEtag,
-                        cancellationToken);
-                }                
+                    return (existingETag, true, playlistsCount);
+                }
+
+                return (newEtag, false, playlistsCount);
             }
             catch
             {
                 //
             }
+
+            return (existingETag, false, null);
         }
 
-        public async Task RefreshUserOwnedPlaylists(
-            string channelId, 
+        public async Task<(Dictionary<string, UserPlayList>, string)> 
+            LoadUserOwnedPlaylists(
+            string channelId,
             Dictionary<string, UserPlayList> alreadyLoadedPlaylists,
-            string alreadyLoadedPlaylistsEtag,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            string pageToken = null)
         {
-            alreadyLoadedPlaylists ??= 
-                new Dictionary<string, UserPlayList>();
-
-            (List<Playlist>, string) playlistsResult = (null, null);
+            if (string.IsNullOrWhiteSpace(channelId))
+            {
+                return (alreadyLoadedPlaylists, pageToken);
+            }
 
             try
             {
-                playlistsResult =
-                    await ApiClient.GetApiClient
-                        .GetPlayListsPartialData(channelId,
-                            cancellationToken);
-            }
-            catch
-            {
-                if (cancellationToken.IsCancellationRequested)
+                var playlistsResult =
+                    await ApiClient.GetApiClient.GetPlayListsData(
+                        cancellationToken,
+                        channelId,
+                        pageToken);
+
+                var playlists =
+                    playlistsResult.Item1;
+
+                var nextPageToken =
+                    playlistsResult.Item2;
+
+                if (playlists == null ||
+                    cancellationToken.IsCancellationRequested)
                 {
-                    return;
+                    return (new Dictionary<string, UserPlayList>(),
+                        nextPageToken);
                 }
-            }
-
-            var partialPlaylistsData =
-                playlistsResult.Item1;
-
-            string eTag = playlistsResult.Item2;
-
-            //playlists do not exist anymore
-            //so need to update data
-            if (partialPlaylistsData == null ||
-                partialPlaylistsData.Count <= 0)
-            {
-                alreadyLoadedPlaylists.Clear();
-                SessionStorageManager.GetSessionManager.
-                    SaveUserOwnedPlaylistsToUserSession(
-                        partialPlaylistsData, eTag);
-                return;
-            }
-
-            //need to compare playlists data
-            if (eTag != alreadyLoadedPlaylistsEtag) 
-            {
-                List<string> idsOfplaylistsToLoad =
-                    new List<string>();
 
                 Dictionary<string, UserPlayList>
-                    newPlaylistsData =
+                    newUserPlaylists =
                         new Dictionary<string, UserPlayList>();
 
-                foreach (var partialPlaylist in
-                    partialPlaylistsData)
+                foreach (var playlist in playlists)
                 {
-                    if (alreadyLoadedPlaylists
-                            .ContainsKey(partialPlaylist.Id) &&
-                        partialPlaylist.ETag ==
-                        alreadyLoadedPlaylists[
-                                partialPlaylist.Id]
-                            ?.PlaylistETag)
+                    //existing playlist entry hasn't changed
+                    if (alreadyLoadedPlaylists != null &&
+                        alreadyLoadedPlaylists.ContainsKey(playlist.Id) &&
+                        alreadyLoadedPlaylists[playlist.Id]?.PlaylistETag ==
+                            playlist.ETag)
                     {
-                        //same playlist item so can be 
-                        //added directly
-                        newPlaylistsData.Add(partialPlaylist.Id,
-                            alreadyLoadedPlaylists[partialPlaylist.Id]);
+                        newUserPlaylists.Add(
+                            playlist.Id,
+                            alreadyLoadedPlaylists[playlist.Id]);
                     }
                     else
                     {
-                        idsOfplaylistsToLoad.Add(partialPlaylist.Id);
-                        newPlaylistsData.Add(
-                            partialPlaylist.Id,
-                            new UserPlayList
-                            {
-                                Id = partialPlaylist.Id
-                            });
+                        var userPlaylist =
+                            UserPlayList.ConvertYoutubePlaylistToUserPlaylist(
+                                playlist);
+
+                        newUserPlaylists.Add(playlist.Id,
+                            userPlaylist);
                     }
                 }
 
-                //load new playlists
-                List<Playlist> newPlaylists = null;
-
-                if (idsOfplaylistsToLoad.Count > 0)
-                {
-                    try
-                    {
-                        newPlaylists =
-                            await ApiClient.GetApiClient
-                                .GetPlayListsData(
-                                    cancellationToken,
-                                    idsOfplaylistsToLoad);
-                    }
-                    catch
-                    {
-                        if(cancellationToken.IsCancellationRequested)
-                        {
-                            return;
-                        }
-                    }
-                }
-
-                SessionStorageManager.GetSessionManager.
-                    SaveUserOwnedPlaylistsToUserSession(
-                        newPlaylistsData, 
-                        newPlaylists ?? new List<Playlist>(),
-                        eTag);
+                return (newUserPlaylists, nextPageToken);
             }
+            catch
+            {
+                //
+            }
+
+            return (new Dictionary<string, UserPlayList>(),
+                string.Empty);
         }
 
         public void DownloadUserOwnedPlaylistsThumbnails(
@@ -211,6 +151,16 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
                     DownloadPlaylistThumbnailsInBackgroundAndNotifyMainThread(
                         userOwnedPlaylists.Values.ToList(), true);
             }
+        }
+
+        public void SaveUserOwnedPlaylists(
+            Dictionary<string, UserPlayList> userOwnedPlaylists,
+            string eTag)
+        {
+            SessionStorageManager.GetSessionManager.
+                SaveUserOwnedPlaylistsToUserSession(
+                    userOwnedPlaylists,
+                    eTag);
         }
 
         public Dictionary<string, UserPlayList>

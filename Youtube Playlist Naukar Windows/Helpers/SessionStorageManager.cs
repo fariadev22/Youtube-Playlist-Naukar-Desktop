@@ -186,34 +186,14 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         #region Playlists
 
         public void SaveUserOwnedPlaylistsToUserSession(
-            List<Playlist> playLists,
+            Dictionary<string, UserPlayList> playLists,
             string etag)
         {
-            _activeUserSession.UserData.UserOwnedPlayLists
-                ??= new Dictionary<string, UserPlayList>();
+            _activeUserSession.UserData.UserOwnedPlayLists =
+                playLists;
 
             _activeUserSession.UserData.UserOwnedPlaylistsETag =
                 etag;
-
-            if (playLists != null &&
-                playLists.Count > 0)
-            {
-                foreach (var playList in playLists)
-                {
-                    if (!_activeUserSession.UserData.UserOwnedPlayLists.
-                        ContainsKey(playList.Id))
-                    {
-                        _activeUserSession.UserData.UserOwnedPlayLists.Add(
-                            playList.Id,
-                            UserPlayList.ConvertYoutubePlaylistToUserPlaylist(playList)
-                        );
-                    }
-                    else
-                    {
-                        Console.WriteLine(@"Playlist already added.");
-                    }
-                }
-            }
 
             SaveSession();
         }

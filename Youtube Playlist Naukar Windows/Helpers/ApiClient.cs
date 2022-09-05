@@ -85,6 +85,42 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
         #region Playlists
 
+        public async Task<(int?, string)> 
+            GetUserOwnedPlayListsCountAndEtag(
+            CancellationToken cancellationToken,
+            string channelId)
+        {
+            if (string.IsNullOrWhiteSpace(channelId))
+            {
+                return (null, null);
+            }
+
+            var playListsRequest =
+                _youtubeService.Playlists.List(
+                    GetPlaylistsRequestPartString());
+
+            playListsRequest.ChannelId = channelId;
+
+            //don't change this.
+            //It is important for getting same eTag
+            playListsRequest.MaxResults = 50;
+
+            playListsRequest.Fields =
+                "etag, pageInfo/totalResults";
+
+            var playListsResponse =
+                await playListsRequest.ExecuteAsync(
+                    cancellationToken);
+
+            if (playListsResponse == null)
+            {
+                return (null, null);
+            }
+
+            return (playListsResponse.PageInfo?.TotalResults, 
+                playListsResponse.ETag);
+        }
+
         /// <summary>
         /// Returns playlists associated with a channel
         /// </summary>
@@ -123,33 +159,15 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
 
             if (playListsResponse == null)
             {
-                return ((new List<Playlist>(), ""));
+                return (new List<Playlist>(), null);
             }
-
-            string eTag = playListsResponse.ETag;
 
             var playLists =
                 playListsResponse.Items?.ToList()
                 ?? new List<Playlist>();
 
-            if (!string.IsNullOrWhiteSpace(
-                playListsResponse.NextPageToken))
-            {
-                var nextPlayLists =
-                    (await GetPlayListsData(
-                        cancellationToken,
-                        channelId,
-                        playListsResponse.NextPageToken))
-                    .Item1;
-
-                if (nextPlayLists != null &&
-                    nextPlayLists.Count > 0)
-                {
-                    playLists.AddRange(nextPlayLists);
-                }
-            }
-
-            return (playLists, eTag);
+            return (playLists,
+                playListsResponse.NextPageToken);
         }
         
         /// <summary>
@@ -247,62 +265,6 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
             }
 
             return finalPlaylists;
-        }
-
-        public async Task<(List<Playlist>, string)> 
-            GetPlayListsPartialData(
-                string channelId,
-                CancellationToken cancellationToken,
-                string pageToken = null)
-        {
-            //part string needs to be same as original
-            //request in order to get same etags
-            var playListsRequest =
-                _youtubeService.Playlists.List(
-                    GetPlaylistsRequestPartString());
-            playListsRequest.ChannelId = channelId;
-            playListsRequest.MaxResults = 50;
-            playListsRequest.Fields =
-                "nextPageToken, etag, items(id, etag)";
-
-            if (!string.IsNullOrWhiteSpace(pageToken))
-            {
-                playListsRequest.PageToken = pageToken;
-            }
-
-            var playListsResponse = 
-                await playListsRequest.ExecuteAsync(
-                    cancellationToken);
-
-            if (playListsResponse == null)
-            {
-                return ((new List<Playlist>(), ""));
-            }
-
-            string eTag = 
-                playListsResponse.ETag;
-
-            var playLists = 
-                playListsResponse.Items?.ToList()
-                    ?? new List<Playlist>();
-
-            if (!string.IsNullOrWhiteSpace(
-                playListsResponse.NextPageToken))
-            {
-                var nextPlayLists =
-                    (await GetPlayListsPartialData(
-                        channelId,
-                        cancellationToken,
-                        playListsResponse.NextPageToken)).Item1;
-
-                if (nextPlayLists != null &&
-                   nextPlayLists.Count > 0)
-                {
-                    playLists.AddRange(nextPlayLists);
-                }
-            }
-
-            return (playLists, eTag);
         }
 
         public async Task<List<Playlist>>
@@ -694,7 +656,6 @@ namespace Youtube_Playlist_Naukar_Windows.Helpers
         {
             return
                 "nextPageToken," +
-                "etag," +
                 "items" +
                 "(" +
                     "id," +

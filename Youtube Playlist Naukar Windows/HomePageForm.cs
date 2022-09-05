@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -87,121 +88,191 @@ namespace Youtube_Playlist_Naukar_Windows
         {
             LoggerLabel.Text = @"Loading playlists....";
 
-            //load user owned playlists data from api
-            await PlaylistHelper.GetPlaylistHelper
-                .LoadUserOwnedPlaylists(
-                    _youtubeChannelId,
-                    _userOwnedPlaylists,
-                    _activeUserSession.UserData?.
-                        UserOwnedPlaylistsETag,
-                    _cancellationTokenSource.Token);
+            await LoadUserOwnedPlaylists();
 
-            //fetch data loaded from api and saved into session
+            await LoadUserContributorPlaylists();
+
+            LoggerLabel.Text = "";
+        }
+
+        private async Task LoadUserOwnedPlaylists()
+        {
             _userOwnedPlaylists =
                 PlaylistHelper.GetPlaylistHelper.
-                    GetStoredUserOwnedPlaylists() ??
+                    GetStoredUserOwnedPlaylists() ?? 
                 new Dictionary<string, UserPlayList>();
 
+            var playlistsETagResult =
+                await PlaylistHelper.GetPlaylistHelper.GetPlaylistsMetadata(
+                    _activeUserSession.UserData?.UserOwnedPlaylistsETag,
+                    _youtubeChannelId,
+                    _cancellationTokenSource.Token);
+
+            int? playlistsCount =
+                playlistsETagResult.Item3;
+
+            //if etag is not equal or does not exist we need to 
+            //reload from scratch
+            var reloadPlaylists = !playlistsETagResult.Item2;
+
+            string newEtag = playlistsETagResult.Item1;
+
+            if (reloadPlaylists)
+            {
+                ownerPlaylistsList.Items.Clear();
+                ownerPlaylistsList.LargeImageList =
+                    new ImageList
+                    {
+                        ImageSize = new Size(320, 180),
+                        Images =
+                        {
+                            {"default", _defaultThumbnail}
+                        }
+                    };
+
+                // Display the ProgressBar control.
+                playlistsProgressBar.Visible = true;
+                playlistsProgressBar.Minimum = 1;
+                // Set Maximum to the total number of videos to load
+                playlistsProgressBar.Maximum =
+                    playlistsCount ?? 1;
+                // Set the initial value of the ProgressBar.
+                playlistsProgressBar.Value = 1;
+                // Set the Step property to a value of 50 to represent
+                // each chunk of videos being loaded
+                playlistsProgressBar.Step = 1;
+
+                var existingPlaylistsData = _userOwnedPlaylists;
+
+                _userOwnedPlaylists =
+                    new Dictionary<string, UserPlayList>();
+
+                string nextPageToken = null;
+
+                do
+                {
+                    var userPlaylistsVideosResult =
+                        await PlaylistHelper.GetPlaylistHelper
+                            .LoadUserOwnedPlaylists(_youtubeChannelId,
+                                existingPlaylistsData,
+                                _cancellationTokenSource.Token,
+                                nextPageToken);
+
+                    Dictionary<string, UserPlayList>
+                        userPlaylists =
+                            userPlaylistsVideosResult.Item1;
+
+                    nextPageToken =
+                        userPlaylistsVideosResult.Item2;
+
+                    if (userPlaylists != null &&
+                        userPlaylists.Count > 0)
+                    {
+                        foreach (var userPlaylist in userPlaylists)
+                        {
+                            _userOwnedPlaylists.Add(
+                                userPlaylist.Key,
+                                userPlaylist.Value);
+                        }
+
+                        if (!_cancellationTokenSource.IsCancellationRequested)
+                        {
+                            LoadOwnerPlaylistsUi(
+                                userPlaylists.Values.ToList());
+                        }
+                    }
+
+                    playlistsProgressBar.PerformStep();
+                } while (!string.IsNullOrWhiteSpace(nextPageToken));
+
+                playlistsProgressBar.Visible = false;
+
+                if (!_cancellationTokenSource.IsCancellationRequested)
+                {
+                    PlaylistHelper.GetPlaylistHelper.SaveUserOwnedPlaylists(
+                        _userOwnedPlaylists, newEtag);
+                }
+            }
+            else if (!_cancellationTokenSource.IsCancellationRequested)
+            {
+                ownerPlaylistsList.Items.Clear();
+                ownerPlaylistsList.LargeImageList =
+                    new ImageList
+                    {
+                        ImageSize = new Size(320, 180),
+                        Images =
+                        {
+                            {"default", _defaultThumbnail}
+                        }
+                    };
+                
+                playlistsProgressBar.Visible = false;
+                LoadOwnerPlaylistsUi(
+                    _userOwnedPlaylists.Values.ToList());
+            }
+
+            if (!_cancellationTokenSource.IsCancellationRequested)
+            {
+                PlaylistHelper.GetPlaylistHelper
+                    .DownloadUserOwnedPlaylistsThumbnails(
+                        _userOwnedPlaylists);
+            }
+        }
+
+        private async Task LoadUserContributorPlaylists()
+        {
+            //fetch data loaded from api and saved into session
+
             _userContributorPlaylists =
-                PlaylistHelper.GetPlaylistHelper.
-                    GetStoredUserContributorPlaylists() ??
+                PlaylistHelper.GetPlaylistHelper.GetStoredUserContributorPlaylists() ??
                 new Dictionary<string, UserPlayList>();
 
             if (_userContributorPlaylists.Count > 0)
             {
                 //load latest data for contributor playlists too
 
-                await PlaylistHelper.GetPlaylistHelper.
-                    RefreshUserContributorPlaylists(
-                        _userContributorPlaylists,
-                        _cancellationTokenSource.Token);
+                await PlaylistHelper.GetPlaylistHelper.RefreshUserContributorPlaylists(
+                    _userContributorPlaylists,
+                    _cancellationTokenSource.Token);
 
                 _userContributorPlaylists =
-                    PlaylistHelper.GetPlaylistHelper.
-                        GetStoredUserContributorPlaylists();
+                    PlaylistHelper.GetPlaylistHelper.GetStoredUserContributorPlaylists();
             }
 
-            if (_cancellationTokenSource.
-                IsCancellationRequested)
+            if (_cancellationTokenSource.IsCancellationRequested)
             {
                 return;
             }
 
-            LoadOwnerPlaylistsUi();
-
             LoadContributorPlaylistsUi();
-
-            LoggerLabel.Text = "";
         }
 
         private async Task RefreshPlaylists()
         {
             LoggerLabel.Text = @"Refreshing....";
-            
-            await PlaylistHelper.GetPlaylistHelper
-                .RefreshUserOwnedPlaylists(
-                    _youtubeChannelId,
-                    _userOwnedPlaylists,
-                    _activeUserSession.UserData?.
-                        UserOwnedPlaylistsETag,
-                    _cancellationTokenSource.Token);
 
-            await PlaylistHelper.GetPlaylistHelper.
-                RefreshUserContributorPlaylists(
-                    _userContributorPlaylists,
-                    _cancellationTokenSource.Token);
-
-            _userOwnedPlaylists =
-                PlaylistHelper.GetPlaylistHelper.
-                    GetStoredUserOwnedPlaylists();
-
-            _userContributorPlaylists =
-                PlaylistHelper.GetPlaylistHelper.
-                    GetStoredUserContributorPlaylists();
-
-            if (_cancellationTokenSource.
-                IsCancellationRequested)
-            {
-                return;
-            }
-
-            LoadOwnerPlaylistsUi();
-
-            LoadContributorPlaylistsUi();
+            await LoadUserPlaylists();
 
             LoggerLabel.Text = "";
 
             MessageBox.Show(@"Playlists data has been refreshed.");
         }
 
-        private void LoadOwnerPlaylistsUi()
+        private void LoadOwnerPlaylistsUi(
+            List<UserPlayList> currentUserOwnedPlaylists)
         {
-            ownerPlaylistsList.Items.Clear();
-
-            ownerPlaylistsList.LargeImageList =
-                new ImageList
-                {
-                    ImageSize = new Size(320, 180)
-                };
-
-            if (_userOwnedPlaylists != null)
+            if (currentUserOwnedPlaylists == null)
             {
-                ownerPlaylistsList.LargeImageList.Images
-                    .Add("default",
-                        _defaultThumbnail);
+                return;
+            }
 
-                foreach (var userOwnedPlaylist in
-                    _userOwnedPlaylists)
-                {
-                   ownerPlaylistsList.Items.Add(
-                        userOwnedPlaylist.Value.Id,
-                        userOwnedPlaylist.Value.Title,
-                        "default");
-                }
-
-                PlaylistHelper.GetPlaylistHelper
-                    .DownloadUserOwnedPlaylistsThumbnails(
-                        _userOwnedPlaylists);
+            foreach (var userOwnedPlaylist in
+                currentUserOwnedPlaylists)
+            {
+                ownerPlaylistsList.Items.Add(
+                    userOwnedPlaylist.Id,
+                    userOwnedPlaylist.Title,
+                    "default");
             }
         }
 

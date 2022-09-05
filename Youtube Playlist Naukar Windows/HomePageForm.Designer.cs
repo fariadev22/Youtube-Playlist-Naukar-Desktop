@@ -70,6 +70,7 @@ namespace Youtube_Playlist_Naukar_Windows
             this.ownerValue = new System.Windows.Forms.LinkLabel();
             this.urlValue = new System.Windows.Forms.LinkLabel();
             this.descriptionToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.playlistsProgressBar = new System.Windows.Forms.ProgressBar();
             this.playlistsTabs.SuspendLayout();
             this.ownerTab.SuspendLayout();
             this.contributorTab.SuspendLayout();
@@ -95,7 +96,7 @@ namespace Youtube_Playlist_Naukar_Windows
             | System.Windows.Forms.AnchorStyles.Right)));
             this.playlistsTabs.Controls.Add(this.ownerTab);
             this.playlistsTabs.Controls.Add(this.contributorTab);
-            this.playlistsTabs.Location = new System.Drawing.Point(16, 115);
+            this.playlistsTabs.Location = new System.Drawing.Point(16, 108);
             this.playlistsTabs.Name = "playlistsTabs";
             this.playlistsTabs.SelectedIndex = 0;
             this.playlistsTabs.Size = new System.Drawing.Size(1040, 459);
@@ -447,11 +448,19 @@ namespace Youtube_Playlist_Naukar_Windows
             this.urlValue.Text = "-";
             this.urlValue.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.UrlValue_LinkClicked);
             // 
+            // playlistsProgressBar
+            // 
+            this.playlistsProgressBar.Location = new System.Drawing.Point(334, 109);
+            this.playlistsProgressBar.Name = "playlistsProgressBar";
+            this.playlistsProgressBar.Size = new System.Drawing.Size(150, 34);
+            this.playlistsProgressBar.TabIndex = 21;
+            // 
             // HomePageForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1068, 794);
+            this.Controls.Add(this.playlistsProgressBar);
             this.Controls.Add(this.LoggerLabel);
             this.Controls.Add(this.totalVideosLabel);
             this.Controls.Add(this.urlLabel);
@@ -520,5 +529,6 @@ namespace Youtube_Playlist_Naukar_Windows
         private ListView ownerPlaylistsList;
         private TabPage ownerTab;
         private ToolTip descriptionToolTip;
+        private ProgressBar playlistsProgressBar;
     }
 }
