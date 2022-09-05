@@ -574,7 +574,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // videoLoadProgressBar
             // 
-            this.videoLoadProgressBar.Location = new System.Drawing.Point(980, 458);
+            this.videoLoadProgressBar.Location = new System.Drawing.Point(986, 458);
             this.videoLoadProgressBar.Name = "videoLoadProgressBar";
             this.videoLoadProgressBar.Size = new System.Drawing.Size(150, 34);
             this.videoLoadProgressBar.TabIndex = 45;
