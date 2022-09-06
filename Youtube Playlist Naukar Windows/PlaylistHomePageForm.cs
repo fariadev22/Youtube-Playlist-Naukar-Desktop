@@ -127,6 +127,13 @@ namespace Youtube_Playlist_Naukar_Windows
                 // Set Maximum to the total number of videos to load
                 videoLoadProgressBar.Maximum =
                     int.Parse(_playlist.TotalVideosInPlaylist.ToString());
+
+                if (videoLoadProgressBar.Maximum == 0)
+                {
+                    //maximum can't be less than minimum
+                    videoLoadProgressBar.Maximum = 1;
+                }
+
                 // Set the initial value of the ProgressBar.
                 videoLoadProgressBar.Value = 1;
                 // Set the Step property to a value of 50 to represent
@@ -265,17 +272,20 @@ namespace Youtube_Playlist_Naukar_Windows
 
         private void AddDataGridViewConfigurations()
         {
-            playlistVideosDataView.Columns[0].Visible = false;
-            playlistVideosDataView.Columns[1].AutoSizeMode =
-                DataGridViewAutoSizeColumnMode.AllCells;
-            playlistVideosDataView.Columns[2].AutoSizeMode =
-                DataGridViewAutoSizeColumnMode.AllCells;
-            playlistVideosDataView.Columns[3].AutoSizeMode =
-                DataGridViewAutoSizeColumnMode.Fill;
-            playlistVideosDataView.Columns[4].AutoSizeMode =
-                DataGridViewAutoSizeColumnMode.AllCells;
-            playlistVideosDataView.Columns[5].AutoSizeMode =
-                DataGridViewAutoSizeColumnMode.AllCells;
+            if(playlistVideosDataView.Columns.Count == 6)
+            {
+                playlistVideosDataView.Columns[0].Visible = false;
+                playlistVideosDataView.Columns[1].AutoSizeMode =
+                    DataGridViewAutoSizeColumnMode.AllCells;
+                playlistVideosDataView.Columns[2].AutoSizeMode =
+                    DataGridViewAutoSizeColumnMode.AllCells;
+                playlistVideosDataView.Columns[3].AutoSizeMode =
+                    DataGridViewAutoSizeColumnMode.Fill;
+                playlistVideosDataView.Columns[4].AutoSizeMode =
+                    DataGridViewAutoSizeColumnMode.AllCells;
+                playlistVideosDataView.Columns[5].AutoSizeMode =
+                    DataGridViewAutoSizeColumnMode.AllCells;
+            }
         }
 
         private static DataTable InitializeVideoTable()

@@ -41,6 +41,9 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             this.logTable.AllowUserToAddRows = false;
             this.logTable.AllowUserToDeleteRows = false;
+            this.logTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.logTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.logTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Id,
@@ -89,7 +92,6 @@ namespace Youtube_Playlist_Naukar_Windows
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.logTable);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MaximumSize = new System.Drawing.Size(822, 506);
             this.MinimumSize = new System.Drawing.Size(822, 506);
             this.Name = "LogsForm";
             this.Text = "Video Insertion Progress";
