@@ -1,5 +1,5 @@
 # Youtube Playlist Naukar
-This repository contains source coude for a Windows Form desktop application for managing YouTube playlists. 
+This repository contains source coude for a Windows Form desktop application for managing YouTube playlists.
 
 ## Features
 The application has the following features:
@@ -32,8 +32,15 @@ The application has the following features:
 * Ability to preview details about a playlist video e.g. title, description, thumbnail, duration, URL, owner, privacy status, date it was added to playlist on, position in playlist, details of who added the video to playlist, etc.
 
 ## How to Use
-* Create a client Id and client secret by registering the application on Google Cloud. See [link](https://support.google.com/cloud/answer/6158849?hl=en) for more details. 
-* Download the JSON file and rename it to "client_secrets.json". Place it in the `Youtube Playlist Naukar Windows` directory and set its Build action to "Content".
-* Get the application verified from Google.
-* Build the application.
-* Run the application by opening the generated .exe file.
+* Create a client Id and client secret by registering your application on Google Cloud. See [link](https://support.google.com/cloud/answer/6158849?hl=en) for more details. 
+* Download the JSON file from Google Cloud console containing the id and secret and rename it to `client_secrets.json`.
+* Get the application verified from Google for full access to all its abilities.
+* Next, clone the project source code files provided in this repository.
+* Build the project locally.
+* Place the `client_secrets.json` file in the Debug folder generated when you build your project.
+* Run the project by opening the generated .exe file.
+
+Note: When creating your application it is recommended to secure the `client_secrets.json` file to prevent misuse.
+
+## Feedback/Queries/Report an Issue
+To report an issue, provide any feedback or get queries answered please create an issue here: https://github.com/fariadev22/Youtube-Playlist-Naukar-Desktop/issues .
