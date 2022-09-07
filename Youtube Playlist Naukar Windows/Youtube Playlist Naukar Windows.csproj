@@ -11,20 +11,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="client_secrets.json" />
     <None Remove="default_image.png" />
     <None Remove="search.png" />
     <None Remove="YoutubePlaylistNaukar.ico" />
     <None Remove="YoutubePlaylistNaukar.png" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="client_secrets.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
+	<ItemGroup>
     <PackageReference Include="FuzzySharp" Version="2.0.2" />
     <PackageReference Include="Google.Apis.Gmail.v1" Version="1.57.0.2650" />
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.57.0.2756" />
