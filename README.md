@@ -37,7 +37,7 @@ The application has the following features:
 * Get the application verified from Google for full access to all its abilities.
 * Next, clone the project source code files provided in this repository.
 * Build the project locally.
-* Place the `client_secrets.json` file in the Debug folder generated when you build your project.
+* Place the `client_secrets.json` file in the Debug/<platform-name> folder generated when you build your project.
 * Run the project by opening the generated .exe file.
 
 Note: When creating your application it is recommended to secure the `client_secrets.json` file to prevent misuse.
