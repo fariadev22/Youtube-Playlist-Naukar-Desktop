@@ -32,7 +32,7 @@ The application has the following features:
 * Ability to preview details about a playlist video e.g. title, description, thumbnail, duration, URL, owner, privacy status, date it was added to playlist on, position in playlist, details of who added the video to playlist, etc.
 
 ## How to Use
-* Create a client Id and client secret by registering your application on Google Cloud. See [link](https://support.google.com/cloud/answer/6158849?hl=en) for more details. 
+* Create a client Id and client secret by registering your application on Google Cloud. See [link](https://support.google.com/cloud/answer/6158849?hl=en) for more details. Make sure that you have the YouTube Data V3 API and Gmail API enabled for your application.
 * Download the JSON file from Google Cloud console containing the id and secret and rename it to `client_secrets.json`.
 * Get the application verified from Google for full access to all its abilities.
 * Next, clone the project source code files provided in this repository.
