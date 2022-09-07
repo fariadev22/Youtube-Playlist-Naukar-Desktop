@@ -132,6 +132,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // MessageLogger
             // 
+            this.MessageLogger.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.MessageLogger.AutoSize = true;
             this.MessageLogger.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
             this.MessageLogger.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -574,6 +575,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // videoLoadProgressBar
             // 
+            this.videoLoadProgressBar.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.videoLoadProgressBar.Location = new System.Drawing.Point(986, 458);
             this.videoLoadProgressBar.Name = "videoLoadProgressBar";
             this.videoLoadProgressBar.Size = new System.Drawing.Size(150, 34);

@@ -450,7 +450,7 @@ namespace Youtube_Playlist_Naukar_Windows
             // 
             // playlistsProgressBar
             // 
-            this.playlistsProgressBar.Location = new System.Drawing.Point(334, 109);
+            this.playlistsProgressBar.Location = new System.Drawing.Point(334, 105);
             this.playlistsProgressBar.Name = "playlistsProgressBar";
             this.playlistsProgressBar.Size = new System.Drawing.Size(150, 34);
             this.playlistsProgressBar.TabIndex = 21;
