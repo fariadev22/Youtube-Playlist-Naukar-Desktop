@@ -397,12 +397,17 @@ namespace Youtube_Playlist_Naukar_Windows
 
             var description =
                 selectedVideo?.Description ?? "-";
+
+            var sanitizedDescription =
+                Regex.Replace(description,
+                    @"\t|\n|\r", "");
+
             descriptionValue.Text =
-                description.Length > 100
-                    ? Regex.Replace(description,
-                          @"\t|\n|\r", "").Substring(0, 100) +
+                sanitizedDescription.Length > 100
+                    ? sanitizedDescription.Substring(0, 100) +
                       "..."
-                    : description;
+                    : sanitizedDescription;
+
             if (!string.IsNullOrWhiteSpace(description))
             {
                 descriptionToolTip.SetToolTip(
@@ -891,24 +896,9 @@ namespace Youtube_Playlist_Naukar_Windows
 
             if (dataTableRow != null)
             {
-                //this alone won't update the Datagridview
                 dataTableRow["Preview"] = bitmap;
             }
             
-            DataGridViewRow dataGridViewRow = 
-                playlistVideosDataView.Rows
-                    .Cast<DataGridViewRow>()
-                    .FirstOrDefault(r => 
-                        r.Cells["VideoId"].Value.ToString() ==
-                            eventArgs.VideoId);
-
-            //this helps trigger the datagridview that a row has changed
-            if (dataGridViewRow != null &&
-                dataTableRow != null)
-            {
-                dataGridViewRow.SetValues(dataTableRow.ItemArray);
-            }
-
             playlistVideosDataView.ResumeLayout();
         }
 

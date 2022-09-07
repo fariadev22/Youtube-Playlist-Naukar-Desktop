@@ -361,12 +361,16 @@ namespace Youtube_Playlist_Naukar_Windows
 
             var description =
                 selectedPlaylist?.Description ?? "-";
+
+            var sanitizedDescription =
+                Regex.Replace(description,
+                    @"\t|\n|\r", "");
+
             descriptionValue.Text =
-                description.Length > 100
-                    ? Regex.Replace(description, 
-                        @"\t|\n|\r", "").Substring(0, 100) + 
+                sanitizedDescription.Length > 100
+                    ? sanitizedDescription.Substring(0, 100) +
                       "..."
-                    : description;
+                    : sanitizedDescription;
             if (!string.IsNullOrWhiteSpace(description))
             {
                 descriptionToolTip.SetToolTip(
